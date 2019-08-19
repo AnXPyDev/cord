@@ -23,3 +23,20 @@ do
   cord.log("log test", {x = 5, y = {2, x = {y = 5, 1, 2, 3}}})
   
 end
+
+do
+  print("Testing fuzzy char distance")
+
+  cord.log(cord.string.fuzzy.character("test", "test"))
+  cord.log(cord.string.fuzzy.character("tess", "test"))
+  cord.log(cord.string.fuzzy.character("nigg", "test"))
+
+end
+
+do
+  print("Testing fuzzy word distance")
+
+  cord.log(cord.string.fuzzy.word("test", "test"))
+  cord.log(cord.string.fuzzy.word("tess", "test"))
+
+end
