@@ -16,6 +16,7 @@ default_style = {
 
 class Style extends Object
   new: (args) =>
+    super!
     crush(self, default_style)
     crush(self, args or {})
   
@@ -24,5 +25,7 @@ class StyleSheet extends Object
     super!
     @styles_class = {}
     @styles_id = {}
-
-    
+  apply: (identifiers, style) =>
+    for k, val in pairs identifiers.class
+      @styles_class[val] = class
+    for k, val

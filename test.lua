@@ -22,7 +22,7 @@ end
 do
   print("**Testing log\n")
 
-  cord.log("log test", {x = 5, y = {2, x = {y = 5, 1, 2, 3}}})
+  cord.log("log test", "testing", "testing", "attention", "please", {x = 5, y = {2, x = {y = 5, 1, 2, 3}}})
 
   print("\n**End of log test\n")
 end
@@ -73,6 +73,26 @@ do
 
   obj:emit_signal("test")
 
-  print("\n\n**End of object test\n")
+  print("\n**End of object test\n")
   
+end
+
+do
+  print("\n**Testing table")
+  local log = cord.log
+  local example = {
+    x = {1,2,3}
+  }
+  
+  local example_copy = cord.table.deep_copy(example)
+
+  log(example)
+  example.x[1] = "69 lol"
+  log(example)
+  log(example_copy)
+  cord.table.deep_crush(example_copy, example)
+  log(example_copy)
+  
+  
+  print("\n**End of table test")
 end

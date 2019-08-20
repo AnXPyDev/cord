@@ -11,10 +11,22 @@ log_table = (tbl, depth = 0, max_depth = 5) ->
       print "#{prefix} #{key_name}: #{value}"
 
 log = (...) ->
-  for index, value in pairs {...}
-    if type(value) == "table"
-      log_table(value)
+  log_pairs = {}
+  last_table = false
+  for val in *({...})
+    if type(val) != "table"
+      if not last_table and #log_pairs > 0
+        table.insert(log_pairs[#log_pairs], val)
+      else
+        last_table = false
+        table.insert(log_pairs, {val})
     else
-      print "#{value}"
-
+      last_table = true
+      table.insert(log_pairs, {val})
+  for pair in *log_pairs
+    if type(pair[1]) == "table"
+      log_table(pair[1])
+    else
+      print(unpack(pair))
+  
 return log
