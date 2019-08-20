@@ -96,3 +96,9 @@ do
   
   print("\n**End of table test")
 end
+
+do
+  local clr = cord.color("#FF0000")
+  clr:set("R", 0)
+  cord.log(clr)
+end
