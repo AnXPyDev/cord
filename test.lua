@@ -99,6 +99,7 @@ end
 
 do
   local clr = cord.color("#FF0000")
-  clr:set("R", 0)
+  clr:set("R", 0.5)
+  clr:set("H", 360 / 3)
   cord.log(clr)
 end
