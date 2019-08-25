@@ -57,6 +57,12 @@ concat = (tbl) ->
     result += tostring(v)
   return result
 
+equal = (tbl1, tbl2) ->
+  for k, v in pairs tbl1
+    if ! tbl2[k] then return false
+    if type(v) == type(tbl2[k])
+      if type(v) == "table" and ! equal(v, tbl2[k]) or ! v == tbl2[k] then return false
+
 return {
   deep_crush: deep_crush,
   deep_copy: deep_copy,
@@ -64,5 +70,6 @@ return {
   set_key: set_key,
   get_key: get_key,
   sum: sum,
-  concat: concat
+  concat: concat,
+  equal: equal
 }
