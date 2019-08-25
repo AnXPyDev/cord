@@ -20,10 +20,49 @@ deep_copy_crush = (tbl1 = {}, tbl2 = {}) ->
   result = deep_copy(tbl1)
   deep_crush(result, tbl2)
   return result
-  
+
+set_key = (tbl, keys, value) ->
+  if type(key) != "table"
+    tbl[key] = value
+  else
+    lastAccess = tbl
+    for i, key in ipairs keys
+      if i == #tbl
+        lastAccess[key] = value
+      else
+        lastAccess[key] = lastAccess[key] or {}
+        lastAccess = lastAccess[key]
+
+get_key = (tbl, key) ->
+  if type(key) != "table"
+    return tbl[key] or nil
+  else
+    lastAccess = tbl
+    for i, key in ipairs keys
+      if i == #tbl
+        return lastAccess[key] or nil
+      else
+        if not lastAccess[key] then return nil
+        lastAccess = lastAccess[key]
+
+sum = (tbl) ->
+  result = 0
+  for v in pairs tbl
+    result += v
+  return result
+
+concat = (tbl) ->
+  result = ""
+  for v in pairs tbl
+    result += tostring(v)
+  return result
 
 return {
   deep_crush: deep_crush,
   deep_copy: deep_copy,
-  deep_copy_crush: deep_copy_crush
+  deep_copy_crush: deep_copy_crush,
+  set_key: set_key,
+  get_key: get_key,
+  sum: sum,
+  concat: concat
 }
