@@ -25,8 +25,10 @@ class StyleSheet extends Object
     super!
     @styles_class = {}
     @styles_id = {}
-  apply: (identifiers, style) =>
+  add: (identifiers, style) =>
     for k, val in pairs identifiers.class or {}
       @styles_class[val] = deep_crush(@styles_class[val], style)
     for k, val in pairs identifiers.id or {}
       @styles_id[val] = deep_crush(@styles_id[val], style)
+  apply: (node) =>
+    

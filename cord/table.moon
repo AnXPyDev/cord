@@ -59,9 +59,10 @@ concat = (tbl) ->
 
 equal = (tbl1, tbl2) ->
   for k, v in pairs tbl1
-    if ! tbl2[k] then return false
+    if not tbl2[k] then return false
     if type(v) == type(tbl2[k])
-      if type(v) == "table" and ! equal(v, tbl2[k]) or ! v == tbl2[k] then return false
+      if type(v) == "table" and not equal(v, tbl2[k]) or not v == tbl2[k] or v != tbl2[k] then return false
+  return true
 
 return {
   deep_crush: deep_crush,

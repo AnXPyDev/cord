@@ -6,8 +6,8 @@ cord = { table: require "cord.table" }
 container_order = {
   "place",
   "padding",
-  {"background", "overlay"},
-  "margin",
+  "background",
+  "margin"
 }
 
 class Node extends Object
@@ -17,6 +17,13 @@ class Node extends Object
     @label = label
     @style = stylesheet\get_style(@category, @label)
     @children = children
+
+    if type(children) == "table"
+      for child in *@children
+        if child.__name == "Node"
+          child.parent = self
+      
+    @parent = nil
     @content = nil
     @containers = {}
     @last_container = nil
@@ -26,8 +33,16 @@ class Node extends Object
     last_required = nil
     for i, val in ipairs container_order
       if @containers[val]
+        container = @containers[val]
+        if val == "background" and @containers.overlay
+          container = wibox.widget({
+            @containers[val],
+            @containers.overlay,
+            layout: wibox.layout.stack
+          })
         if not last_required then
-          @widget = @containers[val]
+          @widget = container
+          last_required = @containers[val]
         else
           last_required.widget = @containers[val]
         last_required = @containers[val]
@@ -44,7 +59,7 @@ class Node extends Object
     if cord.table.sum(@style.margin or {}) != 0 and not @containers.margin
       @containers.margin = wibox.container.margin()
     if (@style.overlay_color or @style.overlay_shape) and not @containers.overlay
-      @containers.overlay = wibox.container.background()
+      @containers.overlay = wibox.container.background(wibox.widget.textbox())
 
   stylyze_containers: =>
     if @containers.place
