@@ -1,4 +1,5 @@
-Object = require "cord.object"
+Object = require "cord.util.object"
+
 cord = { table: require "cord.table" }
 
 class Style extends Object

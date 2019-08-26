@@ -1,4 +1,4 @@
-Object = require "cord.object"
+Object = require "cord.util.object"
 Style = require "cord.wim.style"
 
 class StyleSheet extends Object

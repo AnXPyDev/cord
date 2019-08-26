@@ -49,7 +49,7 @@ end
 do
   print("**Testing object\n")
 
-  local obj = cord.object()
+  local obj = cord.util.object()
   local log = cord.log
 
   local sig1 = function() log("signal 1") end
@@ -100,7 +100,7 @@ end
 do
   print("**Testing color\n")
 
-  local clr = cord.color("#FF0000")
+  local clr = cord.util.color("#FF0000")
   clr:set("R", 0.5)
   clr:set("H", 360 / 3)
   cord.log(clr)
@@ -119,4 +119,8 @@ do
   cord.log(style3:get("fg"))
 
   print("\n**End of style test\n")
+end
+
+do
+  local gears = { color = require "gears.color" }
 end

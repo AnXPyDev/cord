@@ -1,4 +1,4 @@
-Object = require "cord.object"
+Object = require "cord.util.object"
 
 class Node extends Object
   new: (args) =>

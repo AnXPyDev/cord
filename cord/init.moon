@@ -4,8 +4,6 @@ return {
   string: require "cord.string",
   sort: require "cord.sort",
   log: require "cord.log",
-  object: require "cord.object",
-  color: require "cord.color",
   util: require "cord.util",
   wim: require "cord.wim"
 }
