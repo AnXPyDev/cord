@@ -78,7 +78,7 @@ do
 end
 
 do
-  print("\n**Testing table")
+  print("**Testing table\n")
   local log = cord.log
   local example = {
     x = {1,2,3}
@@ -94,12 +94,29 @@ do
   log(example_copy)
   
   
-  print("\n**End of table test")
+  print("\n**End of table test\n")
 end
 
 do
+  print("**Testing color\n")
+
   local clr = cord.color("#FF0000")
   clr:set("R", 0.5)
   clr:set("H", 360 / 3)
   cord.log(clr)
+
+  print("\n**End of color test\n")
+end
+
+do
+  print("**Testing style\n")
+
+  local style1 = cord.wim.style({bg = "#FF0000"})
+  local style2 = cord.wim.style({fg = "#00FF00"}, style1)
+  local style3 = cord.wim.style({bg = "#0000FF"}, style2)
+  cord.log(style3)
+  cord.log(style3:get("bg"))
+  cord.log(style3:get("fg"))
+
+  print("\n**End of style test\n")
 end

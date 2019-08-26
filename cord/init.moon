@@ -6,5 +6,6 @@ return {
   log: require "cord.log",
   object: require "cord.object",
   color: require "cord.color",
-  util: require "cord.util"
+  util: require "cord.util",
+  wim: require "cord.wim"
 }

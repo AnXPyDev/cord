@@ -1,4 +1,5 @@
-wibox = require "wibox"
+wibox = awesome and require "wibox" or {}
+gears = { table: require "gears.table" }
 
 Object = require "cord.object"
 cord = { table: require "cord.table" }
@@ -11,7 +12,7 @@ container_order = {
 }
 
 class Node extends Object
-  new: (category = "__empty_node_category__", label = "__empty_node_label__", stylesheet, children = {}) =>
+  new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}) =>
     super!
     @category = category
     @label = label
@@ -19,7 +20,7 @@ class Node extends Object
     @children = children
 
     if type(children) == "table"
-      for child in *@children
+      for k, child in pairs @children
         if child.__name == "Node"
           child.parent = self
       
@@ -62,16 +63,26 @@ class Node extends Object
       @containers.overlay = wibox.container.background(wibox.widget.textbox())
 
   stylyze_containers: =>
-    if @containers.place
-      @containers.place.halign = 
   
   create_content: =>
     if type(@children) == "table"
       @content = wibox.widget({
-        layout = @style.layout or wibox.layout.fixed.horizontal,
+        layout: @style.layout or wibox.layout.fixed.horizontal,
         unpack(@children)
       })
     else
       @content = @children
+
+  search_node: (category, label) =>
+    results = {}
+    if (not category and true or @category == category) or (not label and true or @label == label)
+      results = gears.table.join(results, {self})
+    if type(@children) == "table"
+      for k, child in pairs @children
+        if child.__name and child.__name == "Node"
+          gears.table.join(results, child\search_node(category, label))
+    else if @children.__name or @children.__name == "Node"
+      gears.table.join(results, @children\search_node(category, label))
+    return results
 
 return Node
