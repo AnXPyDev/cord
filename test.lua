@@ -104,6 +104,7 @@ do
   clr:set("R", 0.5)
   clr:set("H", 360 / 3)
   cord.log(clr)
+  cord.log(clr:to_rgba_string())
 
   print("\n**End of color test\n")
 end
@@ -111,16 +112,17 @@ end
 do
   print("**Testing style\n")
 
-  local style1 = cord.wim.style({bg = "#FF0000"})
-  local style2 = cord.wim.style({fg = "#00FF00"}, style1)
-  local style3 = cord.wim.style({bg = "#0000FF"}, style2)
-  cord.log(style3)
-  cord.log(style3:get("bg"))
-  cord.log(style3:get("fg"))
+  local ss = cord.wim.stylesheet()
+  ss:add_style(nil, "test", cord.wim.style({
+    padding = cord.util.margin(10)
+  }))
+
+  local t = {}
+  local s = ss:get_style(nil, "test")
+
+  cord.log(s)
+  s.values.padding:apply(t)
+  cord.log(t)
 
   print("\n**End of style test\n")
-end
-
-do
-  local gears = { color = require "gears.color" }
 end

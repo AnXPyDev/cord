@@ -56,7 +56,8 @@ hex_string_to_array = (hex_string) ->
 array_to_hex_string = (array) ->
   result = "#"
   for val in *array
-    result = result .. string.format("%02x", math.floor(v*255 + 0.5))
+    result = result .. string.format("%02x", math.floor(val*255 + 0.5))
+  return result
 
 edit_translations = {
   R: "rgb",
@@ -70,6 +71,7 @@ edit_translations = {
 
 class Color
   new: (rgba_string) =>
+    @__name = "cord.util.color"
     @R, @G, @B, @A = unpack(hex_string_to_array(rgba_string))
     @H, @S, @L, @A = unpack(rgba_to_hsla({@R, @G, @B, @A}))
   refresh_hsl: =>

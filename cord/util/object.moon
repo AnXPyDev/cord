@@ -15,6 +15,7 @@ disconnect_signal = (tbl, name, callback) ->
     
 class Object
   new: =>
+    @__name = "cord.util.object"
     @_signals = {}
     @_weak_signals = {}
   connect_signal: (name, callback, tbl) =>

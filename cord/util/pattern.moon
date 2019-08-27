@@ -7,6 +7,7 @@ Vector = require "cord.math.vector"
   
 class Pattern
   new: (beggining = Vector(), ending = Vector(100,0), stops) =>
+    @__name = "cord.util.pattern"
     @stops = stops
     @beggining = beginning
     @ending = ending

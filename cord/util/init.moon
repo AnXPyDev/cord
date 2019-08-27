@@ -1,15 +1,16 @@
 gears = { color: require "gears.color" }
-
-normalize_as_pattern_or_color = (x = 69) ->
+log = require "cord.log"
+  
+normalize_as_pattern_or_color = (x = nil) ->
+  log(x)
   if type(x) == "string"
     return x
   elseif type(x) == "table"
-    if x.__name and x.__name == "Pattern"
+    if x.__name and x.__name == "cord.util.pattern"
       return x\create_pattern!
-    elseif x.__name and x.__name == "Color"
+    elseif x.__name and x.__name == "cord.util.color"
       return x\to_rgba_string!
-  else
-    return gears.color.transparent
+  return gears.color.transparent
 
 return {
   margin: require "cord.util.margin",

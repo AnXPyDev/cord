@@ -1,10 +1,12 @@
 Object = require "cord.util.object"
 
+gears = { table: require "gears.table" }
 cord = { table: require "cord.table" }
 
 class Style extends Object
   new: (values, parent) =>
     super!
+    @__name = "cord.wim.style"
     @values = values or {}
     @parent = parent or nil
   set: (key, value) =>
@@ -13,6 +15,6 @@ class Style extends Object
   get: (key) =>
     return cord.table.get_key(@values, key) or @parent and @parent\get(key)
   join: (other_style) =>
-    cord.table.deep_crush(@values, other_style.values)
+    gears.table.crush(@values, other_style.values)
       
 return Style
