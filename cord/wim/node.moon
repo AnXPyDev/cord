@@ -11,7 +11,9 @@ Vector = require "cord.math.vector"
   
 cord = {
   table: require "cord.table",
-  util: require "cord.util"
+  util: require "cord.util",
+  wim: { layout: require "cord.wim.layout" },
+  log: require "cord.log"
 }
   
 container_order = {
@@ -34,22 +36,29 @@ class Node extends Object
     @containers = {}
     @last_container = nil
     @widget = nil
+    @layout = wibox.layout ({
+      layout: wibox.layout.manual
+    })
+
+    for k, child in pairs @children
+      if child.__name and child.__name == "cord.wim.node"
+        child.parent = self
 
     @\create_content!
 
     @\connect_signal("style_changed", ((...) ->
       @\ensure_containers!
       @\reorder_containers!
+      @pattern_template = {@\get_pattern_template!}
       @\stylize_containers!
+      @\reload_layout!
     ))
 
     @\emit_signal("style_changed")
 
-    if type(children) == "table"
-      for k, child in pairs @children
-        if child.__name and child.__name == "cord.wim.node"
-          child.parent = self
-          child\emit_signal("style_changed")
+    for k, child in pairs @children
+      if child.__name and child.__name == "cord.wim.node"
+        child\emit_signal("style_changed")
 
   reorder_containers: =>
     last_required = nil
@@ -57,17 +66,14 @@ class Node extends Object
       if @containers[val]
         container = @containers[val]
         if val == "background" and @containers.overlay
-          print("background and overlay")
           container = wibox.widget({
             @containers[val],
             @containers.overlay,
             layout: wibox.layout.stack
           })
         if not last_required then
-          print("make " .. val .. " first required")
           @widget = container
         else
-          print("linked container " .. val .. " to last")
           last_required.widget = container
         last_required = container
     last_required.widget = @content
@@ -102,8 +108,8 @@ class Node extends Object
     if @containers.background
       @containers.background.forced_width = inside_size.x
       @containers.background.forced_width = inside_size.y
-      @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style.values.background_color or nil) or gears.color.transparent
-      @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style.values.color or nil) or "#FFFFFF"
+      @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style.values.background_color or nil, unpack(@pattern_template)) or gears.color.transparent
+      @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style.values.color or nil, unpack(@pattern_template)) or "#FFFFFF"
       @containers.background.shape = @style.values.background_shape or gears.shape.rectangle
     if @containers.place
       @containers.place.forced_width = size.x
@@ -113,19 +119,22 @@ class Node extends Object
     if @containers.overlay
       @containers.overlay.forced_width = inside_size.x
       @containers.overlay.forced_width = inside_size.y
-      @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style.values.overlay_color or nil) or gears.color.transparent
+      @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style.values.overlay_color or nil, unpack(@pattern_template)) or gears.color.transparent
       @containers.overlay.shape = @style.values.overlay_shape or gears.shape.rectangle
 
   create_content: =>
     @content = wibox.widget({
-      layout: @style.values.layout or wibox.layout.grid,
+      layout: @layout,
       unpack(
         gears.table.map(
           ((child) ->
+            local ret
             if child.__name and child.__name == "cord.wim.node"
-              return child.widget
+              ret = child.widget
             else
-              return child),
+              ret = child
+            ret.point = {x:0, y:0}
+            return ret),
           @children
         )
       )
@@ -140,6 +149,12 @@ class Node extends Object
         gears.table.join(results, child\search_node(category, label))
     return results
 
+  reload_layout: =>
+    if @style.values.layout
+      @style.values.layout(self)
+    else
+      cord.wim.layout.manual(self)
+      
   get_content_size: =>
     result = Vector(0,0,"pixel")
     if not @style.values.size
@@ -149,7 +164,7 @@ class Node extends Object
       result.x = @style.values.size.x
       result.y = @style.values.size.y
     else
-      result = @parent\get_content_size!
+      result = @parent and @parent\get_content_size! or Vector(100,100)
       result.x *= @style.values.size.x
       result.y *= @style.values.size.y
     if @style.values.padding
@@ -179,5 +194,34 @@ class Node extends Object
       result.x -= (@style.values.padding.left + @style.values.padding.right)
       result.y -= (@style.values.padding.top + @style.values.padding.bottom)
     return result
+
+  get_pos: =>
+    local result
+    if @style.values.pos
+      if @style.values.pos.metric == "percentage"
+        parent_content_size = @parent and @parent\get_content_size! or Vector(100,100)
+        result = Vector(
+          parent_content_size.x * @style.values.pos.x
+          parent_content_size.y * @style.values.pos.y
+        )
+      else
+        result = @style.values.pos
+    else
+      result = Vector()
+    return result
+
+  get_pattern_template: =>
+    pattern_beginning = @style.values.pattern_beginning or Vector(0, 0, "percentage")
+    pattern_ending = @style.values.pattern_ending or Vector(1, 0, "percentage")
+
+    local size
+    if pattern_beginning.metric == "percentage"
+      size = size or @\get_inside_size!
+      pattern_beginning = Vector(pattern_beginning.x * size.x, pattern_beginning.y * size.y)
+    if pattern_ending.metric == "percentage"
+      size = size or @\get_inside_size!
+      pattern_ending = Vector(pattern_ending.x * size.x, pattern_ending.y * size.y)
+    cord.log(@category, @label, "pattern_template", pattern_beginning, pattern_ending)
+    return pattern_beginning, pattern_ending
 
 return Node

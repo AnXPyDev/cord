@@ -3,22 +3,24 @@ gears = {
   color: require "gears.color"
 }
 
+cord = { log: require "cord.log" }
+  
 Vector = require "cord.math.vector"
   
 class Pattern
-  new: (beggining = Vector(), ending = Vector(100,0), stops) =>
+  new: (stops, beginning = Vector(), ending = Vector(100, 0)) =>
     @__name = "cord.util.pattern"
     @stops = stops
-    @beggining = beginning
+    @beginning = beginning
     @ending = ending
-  create_pattern: () =>
+  create_pattern: (beginning = @beginning, ending = @ending) =>
     stops = {}
     for i, stop in ipairs @stops
-      stops.insert({stop[2] or (i - 1) / (#@stops - 1), stop[1]\to_rgba_string!})
+      table.insert(stops, {stop[2] or ((i - 1) / (#@stops - 1)), stop[1]\to_rgba_string!})
     return gears.color.create_linear_pattern(
       {
-        from: {@beggining.x, @beggining.y},
-        to: {@ending.x, @ending.y},
+        from: {beginning.x, beginning.y},
+        to: {ending.x, ending.y},
         stops: stops
       }
     )

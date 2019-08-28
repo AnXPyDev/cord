@@ -28,5 +28,9 @@ log = (...) ->
       log_table(pair[1])
     else
       print(unpack(pair))
+
+module = {
+  table: log_table
+}
   
-return log
+return setmetatable(module, { __call: (...) => log(...) })

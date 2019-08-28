@@ -14,6 +14,7 @@ class StyleSheet extends Object
     if label and label != "__empty_node_label__"
       @by_label[label] = @by_label[label] or Style()
       @by_label[label]\join(style)
+    return style
   get_style: (category, label) =>
     if label and label != "__empty_node_label__" and @by_label[label]
       return @by_label[label]

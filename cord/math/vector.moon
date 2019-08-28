@@ -4,5 +4,10 @@ class Vector
     @x = x
     @y = y
     @metric = metric
+  to_primitive: =>
+    return {
+      x: @x,
+      y: @y
+    }
 
 return Vector
