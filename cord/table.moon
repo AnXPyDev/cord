@@ -22,8 +22,8 @@ deep_copy_crush = (tbl1 = {}, tbl2 = {}) ->
   return result
 
 set_key = (tbl, keys, value) ->
-  if type(key) != "table"
-    tbl[key] = value
+  if type(keys) != "table"
+    tbl[keys] = value
   else
     lastAccess = tbl
     for i, key in ipairs keys
@@ -33,9 +33,9 @@ set_key = (tbl, keys, value) ->
         lastAccess[key] = lastAccess[key] or {}
         lastAccess = lastAccess[key]
 
-get_key = (tbl, key) ->
-  if type(key) != "table"
-    return tbl[key] or nil
+get_key = (tbl, keys) ->
+  if type(keys) != "table"
+    return tbl[keys] or nil
   else
     lastAccess = tbl
     for i, key in ipairs keys
@@ -47,13 +47,13 @@ get_key = (tbl, key) ->
 
 sum = (tbl) ->
   result = 0
-  for v in pairs tbl
+  for k, v in pairs tbl
     result += v
   return result
 
 concat = (tbl) ->
   result = ""
-  for v in pairs tbl
+  for k, v in pairs tbl
     result += tostring(v)
   return result
 

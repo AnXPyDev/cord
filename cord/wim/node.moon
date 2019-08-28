@@ -29,12 +29,6 @@ class Node extends Object
     @label = label
     @style = stylesheet\get_style(@category, @label)
     @children = children
-
-    if type(children) == "table"
-      for k, child in pairs @children
-        if child.__name and child.__name == "cord.wim.node"
-          child.parent = self
-      
     @parent = nil
     @content = nil
     @containers = {}
@@ -42,9 +36,20 @@ class Node extends Object
     @widget = nil
 
     @\create_content!
-    @\ensure_containers!
-    @\reorder_containers!
-    @\stylize_containers!
+
+    @\connect_signal("style_changed", ((...) ->
+      @\ensure_containers!
+      @\reorder_containers!
+      @\stylize_containers!
+    ))
+
+    @\emit_signal("style_changed")
+
+    if type(children) == "table"
+      for k, child in pairs @children
+        if child.__name and child.__name == "cord.wim.node"
+          child.parent = self
+          child\emit_signal("style_changed")
 
   reorder_containers: =>
     last_required = nil
@@ -113,8 +118,17 @@ class Node extends Object
 
   create_content: =>
     @content = wibox.widget({
-      layout: @style.values.layout or wibox.layout.fixed.horizontal,
-      unpack(@children)
+      layout: @style.values.layout or wibox.layout.grid,
+      unpack(
+        gears.table.map(
+          ((child) ->
+            if child.__name and child.__name == "cord.wim.node"
+              return child.widget
+            else
+              return child),
+          @children
+        )
+      )
     })
 
   search_node: (category, label) =>

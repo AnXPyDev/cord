@@ -1,8 +1,6 @@
 gears = { color: require "gears.color" }
-log = require "cord.log"
   
 normalize_as_pattern_or_color = (x = nil) ->
-  log(x)
   if type(x) == "string"
     return x
   elseif type(x) == "table"

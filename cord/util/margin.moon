@@ -1,5 +1,5 @@
 class Margin
-  new: (left = 0, right = left, top = 0, bottom = top) =>
+  new: (left = 0, right = left, top = right, bottom = top) =>
     @left = left
     @right = right
     @top = top
