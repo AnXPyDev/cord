@@ -15,5 +15,6 @@ return {
   color: require "cord.util.color",
   pattern: require "cord.util.pattern",
   object: require "cord.util.object",
+  shape: require "cord.util.shape",
   normalize_as_pattern_or_color: normalize_as_pattern_or_color
 }
