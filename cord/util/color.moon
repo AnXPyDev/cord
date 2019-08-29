@@ -1,4 +1,5 @@
-log = require "cord.log"
+cord = { math: require "cord.math" }
+
 
 hsla_to_rgba = (hsla_array) ->
    h, s, l, a = unpack(hsla_array)
@@ -88,5 +89,19 @@ class Color
     return array_to_hex_string({@R, @G, @B, @A})
   to_hsla_string: =>
     return array_to_hex_string({@H, @S, @L, @A})
+  copy: =>
+    return Color(@\to_rgba_string!)
+  approach: (color, ammount) =>
+    @R = cord.math.approach(@R, color.R, ammount)
+    @G = cord.math.approach(@G, color.G, ammount)
+    @B = cord.math.approach(@B, color.B, ammount)
+    @A = cord.math.approach(@A, color.A, ammount)
+    @\refresh_hsl!
+  lerp: (color, ammount, treshold = 0.05) =>
+    @R = cord.math.lerp(@R, color.R, ammount, treshold)
+    @G = cord.math.lerp(@G, color.G, ammount, treshold)
+    @B = cord.math.lerp(@B, color.B, ammount, treshold)
+    @A = cord.math.lerp(@A, color.A, ammount, treshold)
+    @\refresh_hsl!
 
 return Color

@@ -34,8 +34,11 @@ class Animator extends Object
         return @queue[i]\update!
       )
       if (not is_not_error) or (is_not_error and (ret == true)) or @queue[i].done
+        pcall(@queue[i].callback)
         table.remove(@queue, i)
         i -= 1
       i += 1
     if #@queue == 0
       @timer\stop!
+
+return Animator

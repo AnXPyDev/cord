@@ -12,8 +12,8 @@ class Style extends Object
   set: (key, value) =>
     cord.table.set_key(@values, key, value)
     @\emit_signal("value_changed", key)
-  get: (key) =>
-    return cord.table.get_key(@values, key) or @parent and @parent\get(key)
+  get: (key, shallow) =>
+    return cord.table.get_key(@values, key) or (not shallow) and @parent and @parent\get(key) or nil
   join: (other_style) =>
     gears.table.crush(@values, other_style.values)
       

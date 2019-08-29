@@ -82,45 +82,46 @@ class Node extends Object
   ensure_containers: =>
     if not @containers.padding
       @containers.padding = wibox.container.margin()
-    if @style.values.align_horizontal or @style.values.align_vertical and not @containers.place
+    if @style\get("align_horizontal") or @style\get("align_vertical") and not @containers.place
       @containers.place = wibox.container.place()
-    if (@style.values.background_color or @style.values.color or @style.values.background_shape) and not @containers.background
+    if (@style\get("background_color") or @style\get("color") or @style\get("background_shape")) and not @containers.background
       @containers.background = wibox.container.background()
-    if cord.table.sum(@style.values.margin or {}) != 0 and not @containers.margin
+    if cord.table.sum(@style\get("margin") or {}) != 0 and not @containers.margin
       @containers.margin = wibox.container.margin()
-    if (@style.values.overlay_color or @style.values.overlay_shape) and not @containers.overlay
+    if (@style\get("overlay_color") or @style\get("overlay_shape")) and not @containers.overlay
       @containers.overlay = wibox.container.background(wibox.widget.textbox())
 
   stylize_containers: =>
-    @style.values.size = @style.values.size or Vector(1, 1, "percentage")
     size = @\get_size!
     inside_size = @\get_inside_size!
+    padding = @style\get("padding")
+    margin = @style\get("padding")
     if @containers.padding
       @containers.padding.forced_width = size.x
       @containers.padding.forced_height = size.y
-      if @style.values.padding
-        @style.values.padding\apply(@containers.padding)
+      if padding
+        padding\apply(@containers.padding)
     if @containers.margin
       @containers.margin.forced_width = inside_size.x
       @containers.margin.forced_height = inside_size.y
-      if @style.values.margin
-        @style.values.margin\apply(@containers.margin)
+      if margin
+        margin\apply(@containers.margin)
     if @containers.background
       @containers.background.forced_width = inside_size.x
       @containers.background.forced_width = inside_size.y
-      @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style.values.background_color or nil, unpack(@pattern_template)) or gears.color.transparent
-      @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style.values.color or nil, unpack(@pattern_template)) or "#FFFFFF"
-      @containers.background.shape = @style.values.background_shape or gears.shape.rectangle
+      @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style\get("background_color"), unpack(@pattern_template)) or gears.color.transparent
+      @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style\get("color") or nil, unpack(@pattern_template)) or "#FFFFFF"
+      @containers.background.shape = @style\get("background_shape") or gears.shape.rectangle
     if @containers.place
       @containers.place.forced_width = size.x
       @containers.place.forced_height = size.y
-      @containers.place.halign = @style.values.align_horizontal or "center"
-      @containers.place.valign = @style.values.align_vertical or "center"
+      @containers.place.halign = @style\get("align_horizontal") or "center"
+      @containers.place.valign = @style\get("align_vertical") or "center"
     if @containers.overlay
       @containers.overlay.forced_width = inside_size.x
       @containers.overlay.forced_width = inside_size.y
-      @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style.values.overlay_color or nil, unpack(@pattern_template)) or gears.color.transparent
-      @containers.overlay.shape = @style.values.overlay_shape or gears.shape.rectangle
+      @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style\get("overlay_color") or nil, unpack(@pattern_template)) or gears.color.transparent
+      @containers.overlay.shape = @style\get("overlay_shape") or gears.shape.rectangle
 
   create_content: =>
     @content = wibox.widget({
@@ -150,69 +151,76 @@ class Node extends Object
     return results
 
   reload_layout: =>
-    if @style.values.layout
-      @style.values.layout(self)
+    if @style\get("layout")
+      @style\get("layout")(self)
     else
       cord.wim.layout.manual(self)
       
   get_content_size: =>
     result = Vector(0,0,"pixel")
-    if not @style.values.size
-      @style.values.size = Vector(1,1)
+    if not @style\get("size")
+      @style\set("size", Vector(1,1))
       @style.values.size.metric = "percentage"
-    if @style.values.size.metric != "percentage"
-      result.x = @style.values.size.x
-      result.y = @style.values.size.y
+    size = @style\get("size")
+    if size.metric != "percentage"
+      result.x = size.x
+      result.y = size.y
     else
       result = @parent and @parent\get_content_size! or Vector(100,100)
-      result.x *= @style.values.size.x
-      result.y *= @style.values.size.y
-    if @style.values.padding
-      result.x -= (@style.values.padding.left + @style.values.padding.right)
-      result.y -= (@style.values.padding.top + @style.values.padding.bottom)
-    if @style.values.margin
-      result.x -= (@style.values.margin.left + @style.values.margin.right)
-      result.y -= (@style.values.margin.top + @style.values.margin.bottom)
+      result.x *= size.x
+      result.y *= size.y
+    padding = @style\get("padding")
+    if padding
+      result.x -= (padding.left + padding.right)
+      result.y -= (padding.top + padding.bottom)
+    margin = @style\get("margin")
+    if margin
+      result.x -= (margin.left + margin.right)
+      result.y -= (margin.top + margin.bottom)
     return result
 
   get_size: =>
     result = Vector(0, 0, "pixel")
-    if not @style.values.size
-      @style.values.size = Vector(1, 1, "percentage")
-    if @style.values.size.metric != "percentage"
-      result.x = @style.values.size.x
-      result.y = @style.values.size.y
+    size = @style\get("size")
+    if not size
+      @style\set("size", Vector(1, 1, "percentage"))
+    size = @style\get("size")
+    if size.metric != "percentage"
+      result.x = size.x
+      result.y = size.y
     else
       result = @parent and @parent\get_content_size! or Vector(100,100)
-      result.x *= @style.values.size.x
-      result.y *= @style.values.size.y
+      result.x *= size.x
+      result.y *= size.y
     return result
 
   get_inside_size: =>
     result = @\get_size!
-    if @style.values.padding
-      result.x -= (@style.values.padding.left + @style.values.padding.right)
-      result.y -= (@style.values.padding.top + @style.values.padding.bottom)
+    padding = @style\get("padding")
+    if padding
+      result.x -= (padding.left + padding.right)
+      result.y -= (padding.top + padding.bottom)
     return result
 
   get_pos: =>
     local result
-    if @style.values.pos
-      if @style.values.pos.metric == "percentage"
+    pos = @style\get("pos")
+    if pos
+      if pos.metric == "percentage"
         parent_content_size = @parent and @parent\get_content_size! or Vector(100,100)
         result = Vector(
-          parent_content_size.x * @style.values.pos.x
-          parent_content_size.y * @style.values.pos.y
+          parent_content_size.x * pos.x
+          parent_content_size.y * pos.y
         )
       else
-        result = @style.values.pos
+        result = pos
     else
       result = Vector()
     return result
 
   get_pattern_template: =>
-    pattern_beginning = @style.values.pattern_beginning or Vector(0, 0, "percentage")
-    pattern_ending = @style.values.pattern_ending or Vector(1, 0, "percentage")
+    pattern_beginning = @style\get("pattern_beginning") or Vector(0, 0, "percentage")
+    pattern_ending = @style\get("pattern_ending") or Vector(1, 0, "percentage")
 
     local size
     if pattern_beginning.metric == "percentage"
