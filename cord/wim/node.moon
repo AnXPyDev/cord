@@ -52,6 +52,7 @@ class Node extends Object
       @pattern_template = {@\get_pattern_template!}
       @\stylize_containers!
       @\reload_layout!
+      cord.log(@category, @label, "size", @\get_size!, "inside_size", @\get_inside_size!, "content_size", @\get_content_size!)
     ))
 
     @\emit_signal("style_changed")
@@ -95,7 +96,7 @@ class Node extends Object
     size = @\get_size!
     inside_size = @\get_inside_size!
     padding = @style\get("padding")
-    margin = @style\get("padding")
+    margin = @style\get("margin")
     if @containers.padding
       @containers.padding.forced_width = size.x
       @containers.padding.forced_height = size.y
@@ -122,6 +123,10 @@ class Node extends Object
       @containers.overlay.forced_width = inside_size.y
       @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style\get("overlay_color") or nil, unpack(@pattern_template)) or gears.color.transparent
       @containers.overlay.shape = @style\get("overlay_shape") or gears.shape.rectangle
+    if @content
+      content_size = @\get_content_size!
+      @content.forced_width = content_size.x
+      @content.forced_height = content_size.y
 
   create_content: =>
     @content = wibox.widget({
@@ -157,18 +162,11 @@ class Node extends Object
       cord.wim.layout.manual(self)
       
   get_content_size: =>
-    result = Vector(0,0,"pixel")
     if not @style\get("size")
       @style\set("size", Vector(1,1))
       @style.values.size.metric = "percentage"
     size = @style\get("size")
-    if size.metric != "percentage"
-      result.x = size.x
-      result.y = size.y
-    else
-      result = @parent and @parent\get_content_size! or Vector(100,100)
-      result.x *= size.x
-      result.y *= size.y
+    result = cord.util.normalize_vector_in_context(size, @parent and @parent\get_content_size! or Vector(100,100))
     padding = @style\get("padding")
     if padding
       result.x -= (padding.left + padding.right)
@@ -185,13 +183,7 @@ class Node extends Object
     if not size
       @style\set("size", Vector(1, 1, "percentage"))
     size = @style\get("size")
-    if size.metric != "percentage"
-      result.x = size.x
-      result.y = size.y
-    else
-      result = @parent and @parent\get_content_size! or Vector(100,100)
-      result.x *= size.x
-      result.y *= size.y
+    result = cord.util.normalize_vector_in_context(size, @parent and @parent\get_content_size! or Vector(100,100))
     return result
 
   get_inside_size: =>
@@ -203,33 +195,14 @@ class Node extends Object
     return result
 
   get_pos: =>
-    local result
     pos = @style\get("pos")
-    if pos
-      if pos.metric == "percentage"
-        parent_content_size = @parent and @parent\get_content_size! or Vector(100,100)
-        result = Vector(
-          parent_content_size.x * pos.x
-          parent_content_size.y * pos.y
-        )
-      else
-        result = pos
-    else
-      result = Vector()
+    result = cord.util.normalize_vector_in_context(pos, @parent and @parent\get_content_size! or Vector(100,100))
     return result
 
   get_pattern_template: =>
-    pattern_beginning = @style\get("pattern_beginning") or Vector(0, 0, "percentage")
-    pattern_ending = @style\get("pattern_ending") or Vector(1, 0, "percentage")
-
-    local size
-    if pattern_beginning.metric == "percentage"
-      size = size or @\get_inside_size!
-      pattern_beginning = Vector(pattern_beginning.x * size.x, pattern_beginning.y * size.y)
-    if pattern_ending.metric == "percentage"
-      size = size or @\get_inside_size!
-      pattern_ending = Vector(pattern_ending.x * size.x, pattern_ending.y * size.y)
-    cord.log(@category, @label, "pattern_template", pattern_beginning, pattern_ending)
+    size = @\get_inside_size!
+    pattern_beginning = cord.util.normalize_vector_in_context(@style\get("pattern_beginning") or Vector(0, 0, "percentage"), size)
+    pattern_ending = cord.util.normalize_vector_in_context(@style\get("pattern_ending") or Vector(1, 0, "percentage"), size)
     return pattern_beginning, pattern_ending
 
 return Node

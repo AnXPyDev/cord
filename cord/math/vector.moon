@@ -1,5 +1,5 @@
 class Vector
-  new: (x = 0, y = x, metric = "pixel") =>
+  new: (x = 0, y = x, metric = "undefined") =>
     @__name = "cord.math.vector"
     @x = x
     @y = y
