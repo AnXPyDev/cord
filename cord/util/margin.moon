@@ -9,5 +9,12 @@ class Margin
     tbl.right = @right
     tbl.top = @top
     tbl.bottom = @bottom
+  join: (margin) =>
+    @left += margin.left
+    @right += margin.right
+    @top += margin.top
+    @bottom += margin.bottom
+  copy: =>
+    return Margin(@left, @right, @top, @bottom)
       
 return Margin

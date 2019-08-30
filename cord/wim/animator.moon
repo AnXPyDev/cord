@@ -7,17 +7,18 @@ class Animator extends Object
     @queue = {}
     @tps = tps
     @timer = gears.timer({
-      timeout: 1000 / @tps,
+      timeout: 1 / @tps,
       call_now: false,
       autostart: false,
+      single_shot: false,
       callback: () ->
         @\update!
     })
   add: (animation) =>
     table.insert(@queue, animation)
     if #@queue > 0
-      @timer\start!
-  remove: (animation)
+      @timer\again!
+  remove: (animation) =>
     for i, v in ipairs @queue
       if v == animation
         table.remove(@queue, i)
@@ -26,14 +27,21 @@ class Animator extends Object
       @timer\stop!
   set_tps: (tps = @tps) =>
     @tps = tps
-    @timer.timeout = 1000 / @tps
+    @timer.timeout = 1 / @tps
   update: =>
     i = 1
     while i <= #@queue
-      is_not_error, ret = pcall(() ->
-        return @queue[i]\update!
-      )
-      if (not is_not_error) or (is_not_error and (ret == true)) or @queue[i].done
+      local is_not_error, ret
+      do_remove = false
+      if @queue[i].done == false
+        is_not_error, ret = pcall(() ->  return @queue[i]\update!)
+      else
+        print("animation finished")
+        do_remove = true
+      if is_not_error == false
+        print("animation error", ret)
+        do_remove = true
+      if do_remove
         pcall(@queue[i].callback)
         table.remove(@queue, i)
         i -= 1

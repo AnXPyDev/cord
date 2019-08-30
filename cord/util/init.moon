@@ -38,14 +38,13 @@ normalize_vector_in_context = (vec = cord.math.vector(), context = cord.math.vec
 
   return result
 
-set_node_or_widget_pos = (node_or_widget, pos = cord.math.vector()) ->
-  if node_or_widget.__name and node_or_widget.__name == "cord.wim.node"
-    node_or_widget.widget.point.x = pos.x
-    node_or_widget.widget.point.y = pos.y
+get_object_class = (obj)
+  if type(obj) == "table"
+    return obj.__name or "table"
   else
-    node_or_widget.point.x = pos.x
-    node_or_widget.point.y = pos.y
-
+    return type(obj)
+    
+    
 return {
   margin: require "cord.util.margin",
   color: require "cord.util.color",
@@ -54,5 +53,6 @@ return {
   shape: require "cord.util.shape",
   normalize_as_pattern_or_color: normalize_as_pattern_or_color,
   normalize_vector_in_context: normalize_vector_in_context
-  set_node_or_widget_pos: set_node_or_widget_pos
+  set_node_pos: set_node_pos,
+  get_object_class: get_object_class
 }

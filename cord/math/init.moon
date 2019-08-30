@@ -8,7 +8,7 @@ clamp = (x, min, max) ->
 
 lerp = (x, target, perc, treshold = 0) ->
   ret = x + (target - x) * perc
-  if math.abs(target - perc) < treshold
+  if math.abs(target - ret) < treshold
     return target
   return ret
 

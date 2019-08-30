@@ -9,5 +9,7 @@ class Vector
       x: @x,
       y: @y
     }
+  copy: =>
+    return Vector(@x, @y, @metric)
 
 return Vector
