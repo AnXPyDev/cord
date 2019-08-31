@@ -16,6 +16,7 @@ class Animator extends Object
     })
   add: (animation) =>
     table.insert(@queue, animation)
+    print("animation added", #@queue)
     if #@queue > 0
       @timer\again!
   remove: (animation) =>

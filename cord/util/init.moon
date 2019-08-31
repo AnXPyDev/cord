@@ -38,7 +38,7 @@ normalize_vector_in_context = (vec = cord.math.vector(), context = cord.math.vec
 
   return result
 
-get_object_class = (obj)
+get_object_class = (obj) ->
   if type(obj) == "table"
     return obj.__name or "table"
   else

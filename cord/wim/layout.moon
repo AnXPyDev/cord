@@ -19,28 +19,8 @@ class Layout extends Object
 
   apply_layout: (node) =>
 
-fit = (node) ->
-  content_size = node\get_content_size!
-  max = Vector()
-  current = Vector()
-  for k, child in pairs node.children
-    if child.__name and child.__name == "cord.wim.node"
-      if child.visible == false
-        continue
-      child_size = child\get_size!
-      if (current.x + child_size.x) > content_size.x
-        current.x = 0
-        current.y = max.y
-
-      anim = child.style\get("layout_appear_animation")
-      if anim
-        anim(child, Vector(current.x + 500, current.y), current\copy!)
-      else
-        cord.util.set_node_pos(child, current)
-
-      if max.y < (current.y + child_size.y)
-        max.y = current.y + child_size.y
-
-      current.x += child_size.x
+  inherit: (layout) =>
+    if not layout then return
+    @node_visibility = layout.node_visibility
 
 return Layout

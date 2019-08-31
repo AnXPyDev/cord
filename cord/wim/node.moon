@@ -13,7 +13,7 @@ Margin = require "cord.util.margin"
 cord = {
   table: require "cord.table",
   util: require "cord.util",
-  wim: { layout: require "cord.wim.layout" },
+  wim: { layout: require "cord.wim.layouts" },
   log: require "cord.log",
   math: require "cord.math"
 }
@@ -29,6 +29,7 @@ class Node extends Object
     @category = category
     @label = label
     @style = stylesheet\get_style(@category, @label)
+    @style_data = {}
     @children = children
     @parent = nil
     @content = nil
@@ -38,55 +39,64 @@ class Node extends Object
     @widget = nil
     @visible = false
     @pos = cord.math.vector()
-    @layout = wibox.layout ({
-      layout: wibox.layout.manual
-    })
 
-    for k, child in pairs @children
-      if child.__name and child.__name == "cord.wim.node"
-        child.parent = self
-
+    @\for_each_node_child(((child) -> child.parent = self))
+    
+    @\create_signals!
+    @\create_containers!
     @\create_content!
+    @\create_stylizers!
 
-    @\connect_signal("style_changed", ((...) ->
-      @\ensure_containers!
-      @\reorder_containers!
-      @pattern_template = {@\get_pattern_template!}
+    @\connect_signal("request_load_style", () ->
+      @\load_style_data!
       @\stylize_containers!
-      @\set_visible!
-    ))
+      @\for_each_node_child(((child) -> child\emit_signal("request_load_style")))
+    )
 
-    @\connect_signal("layout_changed", ((...) ->
-      @\reload_layout!
-    ))
+    @\emit_signal("request_load_style")
 
-    @\emit_signal("style_changed")
-
+  for_each_node_child: (fn) =>
     for k, child in pairs @children
       if child.__name and child.__name == "cord.wim.node"
-        child\emit_signal("style_changed")
+        fn(child)
 
+  create_signals: =>
+    @\connect_signal("request_stylize", (container_name) ->
+      if container_name and @stylizers[container_name]
+        @stylizers[container_name]()
+      else
+        for k, fn in pairs @stylizers
+          fn!
+    )
+
+
+    @\connect_signal("layout_changed", () ->
+      @style_data.layout\apply_layout(self)
+      @parent and @parent\emit_signal("layout_changed")
+    )
+        
   load_style_data: =>
     @style_data = {
+      background_padding: @style\get("background_padding") or @style\get("padding") or Margin(0),
+      content_padding: @style\get("content_padding") or @style\get("padding") or Margin(0),
+      content_margin: @style\get("content_margin") or @style\get("margin") or Margin(0),
+      overlay_padding: @style\get("overlay_padding") or @style\get("padding") or Margin(0),
 
-      background_padding = @style\get("background_padding") or @style\get("padding") or Margin(0),
-      content_padding = @style\get("content_padding") or @style\get("padding") or Margin(0),
-      content_margin = @style\get("content_margin") or @style\get("margin") or Margin(0),
-      overlay_padding = @style\get("overlay_padding") or @style\get("padding") or Margin(0),
+      background_shape: @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle,
+      overlay_shape: @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle,
 
-      background_shape = @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle,
-      overlay_shape = @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle,
+      background_color: @style\get("background_color") or gears.color.transparent,
+      overlay_color: @style\get("overlay_color") or gears.color.transparent,
+      color: @style\get("color") or "#FFFFFF",
 
-      background_color = @style\get("background_color") or gears.color.transparent,
-      overlay_color = @style\get("background_color") or gears.color.transparent,
-      color = @style\get("color") or "#FFFFFF",
+      background_pattern_beginning: @style\get("background_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage"),
+      background_pattern_ending: @style\get("background_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage"),
+      overlay_pattern_beginning: @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage"),
+      overlay_pattern_ending: @style\get("overlay_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage"),
 
-      background_pattern_beginning = @style\get("background_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage")
-      background_pattern_ending = @style\get("background_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage")
-      overlay_pattern_beginning = @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage")
-      overlay_pattern_ending = @style\get("overlay_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage")
+      layout: @style\get("layout") or cord.wim.layout.manual(),
+      size: @style\get("size") or Vector(100)
 
-      size = @style\get("size") or Vector(100)
     }
 
   create_containers: =>
@@ -94,10 +104,12 @@ class Node extends Object
     @containers.content_padding = wibox.container.margin()
     @containers.content_margin = wibox.container.margin()
     @containers.overlay_padding = wibox.container.margin()
-    @containers.background = wibox.container.background()
-    @containers.overlay = wibox.container.background()
+    @containers.background = wibox.container.background(wibox.widget.textbox())
+    @containers.overlay = wibox.container.background(wibox.widget.textbox())
     @containers.content_padding.widget = @containers.content_margin
     @containers.content_margin.widget = @content
+    @containers.background_padding.widget = @containers.background
+    @containers.overlay_padding.widget = @containers.overlay
     @content_container = @containers.content_margin
     @widget = wibox.widget({
       layout: wibox.layout.stack,
@@ -118,14 +130,14 @@ class Node extends Object
       size = @\get_size!
       @containers.content_padding.forced_width = size.x
       @containers.content_padding.forced_height = size.y
-      @style_data.content_padding\copy!\join(@style_data.content_margin)\apply(@containers.content_padding)
+      @style_data.content_padding\apply(@containers.content_padding)
       @containers.content_padding\emit_signal("widget::redraw_needed")
 
     @stylizers.content_margin = () ->
       size = @\get_inside_size!
       @containers.content_margin.forced_width = size.x
       @containers.content_margin.forced_height = size.y
-      @style_data.content_margin\apply(@containers.content_padding)
+      @style_data.content_margin\apply(@containers.content_margin)
       @containers.content_margin\emit_signal("widget::redraw_needed")
 
     @stylizers.overlay_padding = () ->
@@ -138,23 +150,42 @@ class Node extends Object
     @stylizers.background = () ->
       size = @\get_background_size!
       if cord.util.get_object_class(@style_data.background_color) == "cord.util.pattern"
-        @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style_data.background_color, @\get_background_pattern_template)
+        @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style_data.background_color, @\get_background_pattern_template!)
       else
         @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style_data.background_color)
       @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style_data.color)
+      @containers.background.forced_width = size.x
+      @containers.background.forced_height = size.y
+      @containers.background.shape = @style_data.background_shape
+      @containers.background\emit_signal("widget::redraw_needed")
 
     @stylizers.overlay = () ->
       size = @\get_overlay_size!
       if cord.util.get_object_class(@style_data.overlay_color) == "cord.util.pattern"
-        @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style_data.overlay_color, @\get_overlay_pattern_template)
+        @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style_data.overlay_color, @\get_overlay_pattern_template!)
       else
         @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style_data.overlay_color)
       @containers.overlay.fg = gears.color.transparent
+      @containers.overlay.forced_width = size.x
+      @containers.overlay.forced_height = size.y
+      @containers.overlay.shape = @style_data.overlay_shape
+      @containers.overlay\emit_signal("widget::redraw_needed")
+
+    @stylizers.layout = () ->
+      old_layout = @style_data.layout
+      @style_data.layout = @style\get("layout") or @style_data.layout
+      if old_layout
+        @style_data.layout\inherit(old_layout)
+
+    @stylizers.content = () ->
+      size = @\get_content_size!
+      @content.forced_width = size.x
+      @content.forced_width = size.y
 
   stylize_containers: =>
-    
-
-
+    for k, fn in pairs @stylizers
+      fn()
+        
   create_content: =>
     @content = wibox.layout({
       layout: wibox.layout.manual
@@ -165,6 +196,9 @@ class Node extends Object
       else
         @content\add_at(child, {x:0,y:0})
 
+    @content_container = @content
+  
+
   search_node: (category, label) =>
     results = {}
     if (not category and true or @category == category) or (not label and true or @label == label)
@@ -174,19 +208,8 @@ class Node extends Object
         gears.table.join(results, child\search_node(category, label))
     return results
 
-  reload_layout: =>
-    if not @style\get("layout")
-      @style\set("layout", cord.wim.layout())
-    @style\get("layout")\apply_layout(self)
-
   get_size: =>
-    result = Vector(0, 0, "pixel")
-    size = @style\get("size")
-    if not size
-      @style\set("size", Vector(1, 1, "percentage"))
-    size = @style\get("size")
-    result = cord.util.normalize_vector_in_context(size, @parent and @parent\get_content_size! or Vector(100,100))
-    return result
+    return cord.util.normalize_vector_in_context(@style_data.size, @parent and @parent\get_content_size! or Vector(100,100))
 
   get_inside_size: =>
     result = @\get_size!
@@ -237,11 +260,9 @@ class Node extends Object
     return pattern_beginning, pattern_ending
 
   set_visible: (visible = @visible) =>
-    orig = @visible
-    @visible = visible
-    @widget.visible = @visible
-    if visible == true and orig == false
-      @parent and @parent\emit_signal("layout_changed")
+    @widget.visible = visible
+    if visible != @visible
       @\emit_signal("layout_changed")
+    @visible = visible
 
 return Node

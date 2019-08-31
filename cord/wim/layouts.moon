@@ -73,6 +73,7 @@ class Fit_Vertical extends Layout
 
         current.y += child_size.y
 return {
+  manual: Layout,
   fit: {
     horizontal: Fit_Horizontal,
     vertical: Fit_Vertical
