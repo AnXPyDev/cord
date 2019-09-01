@@ -13,7 +13,7 @@ Margin = require "cord.util.margin"
 cord = {
   table: require "cord.table",
   util: require "cord.util",
-  wim: { layout: require "cord.wim.layouts" },
+  wim: { layouts: require "cord.wim.layouts" },
   log: require "cord.log",
   math: require "cord.math"
 }
@@ -39,6 +39,7 @@ class Node extends Object
     @widget = nil
     @visible = true
     @pos = cord.math.vector()
+    @data = {}
 
     cord.table.deep_crush(self, data)
 
@@ -102,7 +103,9 @@ class Node extends Object
       overlay_pattern_beginning: @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage"),
       overlay_pattern_ending: @style\get("overlay_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage"),
 
-      layout: @style\get("layout") or cord.wim.layout.manual(),
+      content_clip_shape: @style\get("content_clip_shape") or gears.shape.rectangle
+      
+      layout: @style\get("layout") or cord.wim.layouts.manual(),
       size: @style\get("size") or Vector(100)
 
     }
@@ -111,10 +114,12 @@ class Node extends Object
     @containers.background_padding = wibox.container.margin()
     @containers.content_padding = wibox.container.margin()
     @containers.content_margin = wibox.container.margin()
+    @containers.content_clip = wibox.container.background()
     @containers.overlay_padding = wibox.container.margin()
     @containers.background = wibox.container.background(wibox.widget.textbox())
     @containers.overlay = wibox.container.background(wibox.widget.textbox())
-    @containers.content_padding.widget = @containers.content_margin
+    @containers.content_padding.widget = @containers.content_clip
+    @containers.content_clip.widget = @containers.content_margin
     @containers.background_padding.widget = @containers.background
     @containers.overlay_padding.widget = @containers.overlay
     @content_container = @containers.content_margin
@@ -184,6 +189,14 @@ class Node extends Object
       @style_data.layout = @style\get("layout") or @style_data.layout
       if old_layout
         @style_data.layout\inherit(old_layout)
+
+    @stylizers.content_clip = () ->
+      size = @\get_inside_size!
+      @containers.content_clip.forced_width = size.x
+      @containers.content_clip.forced_height = size.y
+      @containers.content_clip.shape_clip = true
+      @containers.content_clip.shape = @style_data.content_clip_shape
+      @containers.content_clip\emit_signal("widget::redraw_needed")
 
     @stylizers.content = () ->
       size = @\get_content_size!

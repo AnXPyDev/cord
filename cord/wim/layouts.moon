@@ -25,12 +25,12 @@ class Fit_Horizontal extends Layout
 
         if last_time == false
           if appear_anim
-            appear_anim(child, Vector(current.x + 500, current.y), current\copy!)
+            appear_anim(child, child.pos\copy!, current\copy!, content_size)
           else
             child\set_pos(current)
         else
           if move_anim
-            move_anim(child, child.pos\copy!, current\copy!)
+            move_anim(child, child.pos\copy!, current\copy!, content_size)
           else
             child\set_pos(current)
 
