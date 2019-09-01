@@ -21,7 +21,7 @@ cord = {
 unique_id_counter = 0
   
 class Node extends Object
-  new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}) =>
+  new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}, data = {}) =>
     super!
     @__name = "cord.wim.node"
     unique_id_counter += 1
@@ -37,8 +37,10 @@ class Node extends Object
     @stylizers = {}
     @content_container = nil
     @widget = nil
-    @visible = false
+    @visible = true
     @pos = cord.math.vector()
+
+    cord.table.deep_crush(self, data)
 
     @\for_each_node_child(((child) -> child.parent = self))
     
@@ -55,6 +57,9 @@ class Node extends Object
 
     @\emit_signal("request_load_style")
 
+    if @visible
+      @\emit_signal("geometry_changed")
+
   for_each_node_child: (fn) =>
     for k, child in pairs @children
       if child.__name and child.__name == "cord.wim.node"
@@ -69,9 +74,12 @@ class Node extends Object
           fn!
     )
 
-
     @\connect_signal("layout_changed", () ->
       @style_data.layout\apply_layout(self)
+    )
+
+    @\connect_signal("geometry_changed", () ->
+      @\emit_signal("layout_changed")
       @parent and @parent\emit_signal("layout_changed")
     )
         
@@ -107,7 +115,6 @@ class Node extends Object
     @containers.background = wibox.container.background(wibox.widget.textbox())
     @containers.overlay = wibox.container.background(wibox.widget.textbox())
     @containers.content_padding.widget = @containers.content_margin
-    @containers.content_margin.widget = @content
     @containers.background_padding.widget = @containers.background
     @containers.overlay_padding.widget = @containers.overlay
     @content_container = @containers.content_margin
@@ -117,6 +124,7 @@ class Node extends Object
       @containers.content_padding,
       @containers.overlay_padding
     })
+    @widget.visible = @visible
 
   create_stylizers: =>
     @stylizers.background_padding = () ->
@@ -196,7 +204,7 @@ class Node extends Object
       else
         @content\add_at(child, {x:0,y:0})
 
-    @content_container = @content
+    @content_container.widget = @content
   
 
   search_node: (category, label) =>
@@ -260,9 +268,10 @@ class Node extends Object
     return pattern_beginning, pattern_ending
 
   set_visible: (visible = @visible) =>
+    og = @visible
     @widget.visible = visible
-    if visible != @visible
-      @\emit_signal("layout_changed")
     @visible = visible
+    if visible != og
+      @\emit_signal("geometry_changed")
 
 return Node

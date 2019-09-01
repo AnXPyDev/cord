@@ -4,6 +4,7 @@ Vector = require "cord.math.vector"
 class Fit_Horizontal extends Layout
   new: =>
     super!
+    @__name = "cord.wim.layouts.fit.horizontal"
   apply_layout: (node) =>
     content_size = node\get_content_size!
     max = Vector()
@@ -20,6 +21,7 @@ class Fit_Horizontal extends Layout
         appear_anim = child.style\get("layout_appear_animation")
         move_anim = child.style\get("layout_move_animation")
         last_time = @\node_visible_last_time(child)
+
 
         if last_time == false
           if appear_anim
@@ -40,6 +42,7 @@ class Fit_Horizontal extends Layout
 class Fit_Vertical extends Layout
   new: =>
     super!
+    @__name = "cord.wim.layouts.fit.vertical"
   apply_layout: (node) =>
     content_size = node\get_content_size!
     max = Vector()
@@ -56,6 +59,7 @@ class Fit_Vertical extends Layout
         appear_anim = child.style\get("layout_appear_animation")
         move_anim = child.style\get("layout_move_animation")
         last_time = @\node_visible_last_time(child)
+
 
         if last_time == false
           if appear_anim
