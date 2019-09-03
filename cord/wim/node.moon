@@ -306,11 +306,13 @@ class Node extends Object
     og = @visible
     if force == true
       @widget.visible = visible
+      @widget\emit_signal("widget::redraw_needed")
     @visible = visible
     if visible != og
       @\emit_signal("geometry_changed")
 
   set_opacity: (opacity = 1) =>
     @widget.opacity = opacity
+    @widget\emit_signal("widget::redraw_needed")
 
 return Node

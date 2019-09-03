@@ -137,7 +137,7 @@ class Opacity_Lerp extends Opacity
     super(node, start, target, layout_size)
     @speed = node.style\get("opacity_lerp_animation_speed") or @speed
   tick: () =>
-    @current = cord.math.lerp(current, target, @speed, 0.005)
+    @current = cord.math.lerp(@current, @target, @speed, 0.005)
     @node\set_opacity(@current)
     if @current == @target
       @done = true
@@ -156,5 +156,6 @@ return {
   }
   opacity: {
     jump: Opacity_Jump,
+    lerp: Opacity_Lerp
   }
 }
