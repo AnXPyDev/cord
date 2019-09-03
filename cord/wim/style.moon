@@ -16,8 +16,8 @@ class Style extends Object
     ret = cord.table.get_key(@values, key)
     if shallow == false and not ret
       for k, v in pairs @parents
-        ret = v\get_key(key)
-        if ret return ret
+        ret = v\get(key)
+        if ret then break
     return ret
       
   join: (other_style) =>

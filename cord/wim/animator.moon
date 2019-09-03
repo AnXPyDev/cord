@@ -16,7 +16,6 @@ class Animator extends Object
     })
   add: (animation) =>
     table.insert(@queue, animation)
-    print("animation added", #@queue)
     if #@queue > 0
       @timer\again!
   remove: (animation) =>
@@ -37,13 +36,14 @@ class Animator extends Object
       if @queue[i].done == false
         is_not_error, ret = pcall(() ->  return @queue[i]\update!)
       else
-        print("animation finished")
         do_remove = true
       if is_not_error == false
         print("animation error", ret)
         do_remove = true
       if do_remove
-        pcall(@queue[i].callback)
+        for k, v in pairs @queue[i].callbacks
+          pcall(v)
+
         table.remove(@queue, i)
         i -= 1
       i += 1

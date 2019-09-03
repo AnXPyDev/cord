@@ -13,7 +13,10 @@ Margin = require "cord.util.margin"
 cord = {
   table: require "cord.table",
   util: require "cord.util",
-  wim: { layouts: require "cord.wim.layouts" },
+  wim: {
+    layouts: require "cord.wim.layouts",
+    animations: require "cord.wim.animations"
+  },
   log: require "cord.log",
   math: require "cord.math"
 }
@@ -85,28 +88,47 @@ class Node extends Object
     )
         
   load_style_data: =>
+    background_padding = @style\get("background_padding") or @style\get("padding")
+    content_padding = @style\get("content_padding") or @style\get("padding")
+    content_margin = @style\get("content_padding") or @style\get("padding")
+    overlay_padding = @style\get("content_padding") or @style\get("padding")
+    size = @style\get("size") or Vector(100)
+    background_pattern_beginning = @style\get("background_pattern_beginning") or @style\get("pattern_beginning")
+    background_pattern_ending = @style\get("background_pattern_ending") or @style\get("pattern_ending")
+    overlay_pattern_beginning = @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning")
+    overlay_pattern_ending = @style\get("overlay_pattern_ending") or @style\get("pattern_ending")
+    background_color = @style\get("background_color")
+    overlay_color = @style\get("overlay_color")
+    color = @style\get("color")
+
     @style_data = {
-      background_padding: @style\get("background_padding") or @style\get("padding") or Margin(0),
-      content_padding: @style\get("content_padding") or @style\get("padding") or Margin(0),
-      content_margin: @style\get("content_margin") or @style\get("margin") or Margin(0),
-      overlay_padding: @style\get("overlay_padding") or @style\get("padding") or Margin(0),
+      background_padding: background_padding and background_padding\copy! or Margin(0),
+      content_padding: content_padding and content_padding\copy! or Margin(0),
+      content_margin: content_margin and content_margin\copy! or Margin(0),
+      overlay_padding: overlay_padding and overlay_padding\copy! or Margin(0),
 
       background_shape: @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle,
       overlay_shape: @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle,
 
-      background_color: @style\get("background_color") or gears.color.transparent,
-      overlay_color: @style\get("overlay_color") or gears.color.transparent,
-      color: @style\get("color") or "#FFFFFF",
+      background_color: type(background_color) == "string" and background_color or background_color and background_color\copy! or gears.color.transparent,
+      overlay_color: type(overlay_color) == "string" and overlay_color or overlay_color and overlay_color\copy! or gears.color.transparent,
+      color: type(color) == "string" and color or color and color\copy! or "#FFFFFF",
 
-      background_pattern_beginning: @style\get("background_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage"),
-      background_pattern_ending: @style\get("background_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage"),
-      overlay_pattern_beginning: @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning") or Vector(0, 0, "percentage"),
-      overlay_pattern_ending: @style\get("overlay_pattern_ending") or @style\get("pattern_ending") or Vector(1, 0, "percentage"),
+      background_pattern_beginning: background_pattern_beginning and background_pattern_beginning\copy! or Vector(0, 0, "percentage"),
+      background_pattern_ending: background_pattern_ending and background_pattern_ending\copy! Vector(1, 0, "percentage"),
+      overlay_pattern_beginning: overlay_pattern_beginning and overlay_pattern_beginning\copy! or Vector(0, 0, "percentage"),
+      overlay_pattern_ending: overlay_pattern_ending and overlay_pattern_ending\copy!pppp or Vector(1, 0, "percentage"),
 
-      content_clip_shape: @style\get("content_clip_shape") or gears.shape.rectangle
-      
+      content_clip_shape: @style\get("content_clip_shape") or gears.shape.rectangle,
+
+      layout_hide_animation: @style\get("layout_hide_animation") or cord.wim.animations.position.jump,
+      layout_show_animation: @style\get("layout_show_animation") or cord.wim.animations.position.jump,
+      layout_move_animation: @style\get("layout_move_animation") or cord.wim.animations.position.jump,
+      opacity_show_animation: @style\get("opacity_show_animation") or cord.wim.animations.opacity.jump,
+      opacity_hide_animation: @style\get("opacity_hide_animation") or cord.wim.animations.opacity.jump,
+
       layout: @style\get("layout") or cord.wim.layouts.manual(),
-      size: @style\get("size") or Vector(100)
+      size: size or Vector(100)
 
     }
 
@@ -280,11 +302,15 @@ class Node extends Object
     pattern_ending = cord.util.normalize_vector_in_context(@style_data.overlay_pattern_ending, size)
     return pattern_beginning, pattern_ending
 
-  set_visible: (visible = @visible) =>
+  set_visible: (visible = not @visible, force = false) =>
     og = @visible
-    @widget.visible = visible
+    if force == true
+      @widget.visible = visible
     @visible = visible
     if visible != og
       @\emit_signal("geometry_changed")
+
+  set_opacity: (opacity = 1) =>
+    @widget.opacity = opacity
 
 return Node

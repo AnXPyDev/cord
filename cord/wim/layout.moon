@@ -10,10 +10,8 @@ class Layout extends Object
 
   node_visible_last_time: (node) =>
     ret = false
-    if @node_visibility[node.unique_id]
+    if @node_visibility[node.unique_id] == true
       ret = @node_visibility[node.unique_id]
-    else
-      ret = false
     @node_visibility[node.unique_id] = node.visible
     return ret
 

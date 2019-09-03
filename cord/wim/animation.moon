@@ -6,7 +6,7 @@ class Animation extends Object
     @__name = "cord.wim.animation"
     @done = false
     @tick_function = ( -> )
-    @callback = ( -> )
+    @callbacks = {}
   update: =>
     @done = @\tick!
     @done = @tick_function! or @done
