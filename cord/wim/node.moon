@@ -59,6 +59,9 @@ class Node extends Object
       @\for_each_node_child(((child) -> child\emit_signal("request_load_style")))
     )
 
+    @containers.background\connect_signal("mouse::enter", (...) -> @\emit_signal("mouse_enter", ...))
+    @containers.background\connect_signal("mouse::leave", (...) -> @\emit_signal("mouse_leave", ...))
+
     @\emit_signal("request_load_style")
 
     if @visible

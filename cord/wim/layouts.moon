@@ -3,8 +3,7 @@ Vector = require "cord.math.vector"
 
 animate_layout_change = (layout, node, pos, layout_size) ->
   last_time = layout\node_visible_last_time(node)
-  print(node.category, node.label, last_time, node.visible)
-  
+
   local layout_anim, opacity_anim
   if last_time
     if not node.visible
