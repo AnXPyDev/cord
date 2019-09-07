@@ -19,8 +19,10 @@ class Style extends Object
         ret = v\get(key)
         if ret then break
     return ret
-      
   join: (other_style) =>
     gears.table.crush(@values, other_style.values)
+  add_parent: (style) =>
+    table.insert(@parents, style)
+  
       
 return Style

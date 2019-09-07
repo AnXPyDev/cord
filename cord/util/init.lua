@@ -78,5 +78,6 @@ return {
   normalize_as_pattern_or_color = normalize_as_pattern_or_color,
   normalize_vector_in_context = normalize_vector_in_context,
   set_node_pos = set_node_pos,
-  get_object_class = get_object_class
+  get_object_class = get_object_class,
+  image = require("cord.util.image")
 }

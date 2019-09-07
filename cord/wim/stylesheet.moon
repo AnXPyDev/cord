@@ -16,7 +16,7 @@ class StyleSheet extends Object
       @by_label[label]\join(style)
     style = @\get_style(category, label)
     for k, v in pairs parents
-      table.insert(style.parents, @\get_style(v[1], v[2]))
+      style\add_parent(@\get_style(v[1], v[2]))
     return style
   get_style: (category, label) =>
     if label and label != "__empty_node_label__" and @by_label[label]

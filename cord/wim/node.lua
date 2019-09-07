@@ -51,7 +51,7 @@ do
     load_style_data = function(self)
       local background_padding = self.style:get("background_padding") or self.style:get("padding")
       local content_padding = self.style:get("content_padding") or self.style:get("padding")
-      local content_margin = self.style:get("content_padding") or self.style:get("padding")
+      local content_margin = self.style:get("content_margin") or self.style:get("margin")
       local overlay_padding = self.style:get("content_padding") or self.style:get("padding")
       local size = self.style:get("size") or Vector(100)
       local background_pattern_beginning = self.style:get("background_pattern_beginning") or self.style:get("pattern_beginning")
@@ -82,7 +82,9 @@ do
         opacity_show_animation = self.style:get("opacity_show_animation") or cord.wim.animations.opacity.jump,
         opacity_hide_animation = self.style:get("opacity_hide_animation") or cord.wim.animations.opacity.jump,
         layout = self.style:get("layout") or cord.wim.layouts.manual(),
-        size = size or Vector(100)
+        size = size or Vector(100),
+        align_horizontal = self.style:get("align_horizontal") or "center",
+        align_vertical = self.style:get("align_vertical") or "center"
       }
     end,
     create_containers = function(self)
@@ -319,6 +321,7 @@ do
       self.unique_id = unique_id_counter
       self.category = category
       self.label = label
+      self.identification = tostring(self.category) .. " " .. tostring(self.label) .. " " .. tostring(self.unique_id)
       self.style = stylesheet:get_style(self.category, self.label)
       self.style_data = { }
       self.children = children

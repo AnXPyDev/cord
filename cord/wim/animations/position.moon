@@ -42,8 +42,10 @@ class Position extends Animation
     @node = node
     if @node.data.position_animation
       @node.data.position_animation.done = true
+      @current = @node.data.position_animation.current
+    else
+      @current = start\copy!
     @node.data.position_animation = self
-    @current = start\copy!
     @target = target
     @speed = node.style\get("position_animation_speed") or 1
     node\set_pos(@current)
@@ -63,8 +65,8 @@ class Position_Lerp extends Position
     super(node, start, target, layout_size)
     @speed = node.style\get("position_lerp_animation_speed") or @speed
   tick: =>
-    @current.x = cord.math.lerp(@current.x, @target.x, @speed, 0.4)
-    @current.y = cord.math.lerp(@current.y, @target.y, @speed, 0.4)
+    @current.x = cord.math.lerp(@current.x, @target.x, @speed, @speed)
+    @current.y = cord.math.lerp(@current.y, @target.y, @speed, @speed)
     @node\set_pos(@current)
     if @current.x == @target.x and @current.y == @target.y
       @done = true

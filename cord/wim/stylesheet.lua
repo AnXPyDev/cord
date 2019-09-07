@@ -19,7 +19,7 @@ do
       end
       style = self:get_style(category, label)
       for k, v in pairs(parents) do
-        table.insert(style.parents, self:get_style(v[1], v[2]))
+        style:add_parent(self:get_style(v[1], v[2]))
       end
       return style
     end,

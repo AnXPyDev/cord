@@ -31,6 +31,7 @@ class Node extends Object
     @unique_id = unique_id_counter
     @category = category
     @label = label
+    @identification = "#{@category} #{@label} #{@unique_id}"
     @style = stylesheet\get_style(@category, @label)
     @style_data = {}
     @children = children
@@ -90,7 +91,7 @@ class Node extends Object
   load_style_data: =>
     background_padding = @style\get("background_padding") or @style\get("padding")
     content_padding = @style\get("content_padding") or @style\get("padding")
-    content_margin = @style\get("content_padding") or @style\get("padding")
+    content_margin = @style\get("content_margin") or @style\get("margin")
     overlay_padding = @style\get("content_padding") or @style\get("padding")
     size = @style\get("size") or Vector(100)
     background_pattern_beginning = @style\get("background_pattern_beginning") or @style\get("pattern_beginning")
@@ -128,8 +129,9 @@ class Node extends Object
       opacity_hide_animation: @style\get("opacity_hide_animation") or cord.wim.animations.opacity.jump,
 
       layout: @style\get("layout") or cord.wim.layouts.manual(),
-      size: size or Vector(100)
-
+      size: size or Vector(100),
+      align_horizontal: @style\get("align_horizontal") or "center",
+      align_vertical: @style\get("align_vertical") or "center"
     }
 
   create_containers: =>

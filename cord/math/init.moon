@@ -6,7 +6,7 @@ clamp = (x, min, max) ->
     return max
   return x
 
-lerp = (x, target, perc, treshold = 0) ->
+lerp = (x, target, perc = 0.5, treshold = 0) ->
   ret = x + (target - x) * perc
   if math.abs(target - ret) < treshold
     return target

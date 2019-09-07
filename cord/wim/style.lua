@@ -31,6 +31,9 @@ do
     end,
     join = function(self, other_style)
       return gears.table.crush(self.values, other_style.values)
+    end,
+    add_parent = function(self, style)
+      return table.insert(self.parents, style)
     end
   }
   _base_0.__index = _base_0

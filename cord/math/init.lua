@@ -10,6 +10,9 @@ clamp = function(x, min, max)
 end
 local lerp
 lerp = function(x, target, perc, treshold)
+  if perc == nil then
+    perc = 0.5
+  end
   if treshold == nil then
     treshold = 0
   end

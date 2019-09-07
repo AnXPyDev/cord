@@ -17,9 +17,11 @@ do
       self.node = node
       if self.node.data.opacity_animation then
         self.node.data.opacity_animation.done = true
+        self.current = self.node.data.opacity_animation.current
+      else
+        self.current = start
       end
       self.node.data.opacity_animation = self
-      self.current = start
       self.target = target
       self.speed = node.style:get("opacity_animation_speed") or 1
       node:set_opacity(self.current)

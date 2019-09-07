@@ -43,8 +43,7 @@ get_object_class = (obj) ->
     return obj.__name or "table"
   else
     return type(obj)
-    
-    
+
 return {
   margin: require "cord.util.margin",
   color: require "cord.util.color",
@@ -54,5 +53,6 @@ return {
   normalize_as_pattern_or_color: normalize_as_pattern_or_color,
   normalize_vector_in_context: normalize_vector_in_context
   set_node_pos: set_node_pos,
-  get_object_class: get_object_class
+  get_object_class: get_object_class,
+  image: require "cord.util.image"
 }

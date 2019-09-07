@@ -13,8 +13,10 @@ class Opacity extends Animation
     @node = node
     if @node.data.opacity_animation
       @node.data.opacity_animation.done = true
+      @current = @node.data.opacity_animation.current
+    else
+      @current = start
     @node.data.opacity_animation = self
-    @current = start
     @target = target
     @speed = node.style\get("opacity_animation_speed") or 1
     node\set_opacity(@current)

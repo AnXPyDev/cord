@@ -48,9 +48,11 @@ do
       self.node = node
       if self.node.data.position_animation then
         self.node.data.position_animation.done = true
+        self.current = self.node.data.position_animation.current
+      else
+        self.current = start:copy()
       end
       self.node.data.position_animation = self
-      self.current = start:copy()
       self.target = target
       self.speed = node.style:get("position_animation_speed") or 1
       node:set_pos(self.current)
@@ -132,8 +134,8 @@ do
   local _parent_0 = Position
   local _base_0 = {
     tick = function(self)
-      self.current.x = cord.math.lerp(self.current.x, self.target.x, self.speed, 0.4)
-      self.current.y = cord.math.lerp(self.current.y, self.target.y, self.speed, 0.4)
+      self.current.x = cord.math.lerp(self.current.x, self.target.x, self.speed, self.speed)
+      self.current.y = cord.math.lerp(self.current.y, self.target.y, self.speed, self.speed)
       self.node:set_pos(self.current)
       if self.current.x == self.target.x and self.current.y == self.target.y then
         self.done = true
