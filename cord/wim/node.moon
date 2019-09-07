@@ -59,9 +59,6 @@ class Node extends Object
       @\for_each_node_child(((child) -> child\emit_signal("request_load_style")))
     )
 
-    @containers.background\connect_signal("mouse::enter", (...) -> @\emit_signal("mouse_enter", ...))
-    @containers.background\connect_signal("mouse::leave", (...) -> @\emit_signal("mouse_leave", ...))
-
     @\emit_signal("request_load_style")
 
     if @visible
@@ -69,7 +66,7 @@ class Node extends Object
 
   for_each_node_child: (fn) =>
     for k, child in pairs @children
-      if child.__name and child.__name == "cord.wim.node"
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
         fn(child)
 
   create_signals: =>
@@ -237,7 +234,7 @@ class Node extends Object
       layout: wibox.layout.manual
     })
     for i, child in ipairs @children
-      if child.__name and child.__name == "cord.wim.node"
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
         @content\add_at(child.widget, {x:0,y:0})
       else
         @content\add_at(child, {x:0,y:0})
@@ -250,7 +247,7 @@ class Node extends Object
     if (not category and true or @category == category) or (not label and true or @label == label)
       results = gears.table.join(results, {self})
     for k, child in pairs @children
-      if child.__name and child.__name == "cord.wim.node"
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
         gears.table.join(results, child\search_node(category, label))
     return results
 
