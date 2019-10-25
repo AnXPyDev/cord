@@ -1,5 +1,5 @@
 wibox = require "wibox"
-
+  
 cord = {
   wim: {
     animations: require "cord.wim.animations"
@@ -17,9 +17,15 @@ class Image extends Node
     @__name = "cord.wim.text"
 
   load_style_data: =>
+    color = @style\get("color")
+    adaptive_color_on_light = @style\get("adaptive_color_on_light")
+    adaptive_color_on_dark = @style\get("adaptive_color_on_dark")
     @style_data = {
       size: @style\get("size") or Vector(100),
-      color: @style\get("color") or nil,
+      color: color and type(color) == "string" and cord.util.color(color) or type(color) == "table" and color\copy! or nil,
+      adaptive_color_on_light: adaptive_color_on_light and type(adaptive_color_on_light) == "string" and cord.util.color(adaptive_color_on_light) or type(adaptive_color_on_light) == "table" and adaptive_color_on_light\copy! or nil,
+      adaptive_color_on_dark: adaptive_color_on_dark and type(adaptive_color_on_dark) == "string" and cord.util.color(adaptive_color_on_dark) or type(adaptive_color_on_dark) == "table" and adaptive_color_on_dark\copy! or nil,
+      adaptive_color: @style\get("adaptive_color") or nil
       align_horizontal: @style\get("align_horizontal") or "center",
       align_vertical: @style\get("align_vertical") or "center",
       layout_hide_animation: @style\get("layout_hide_animation") or cord.wim.animations.position.jump,
@@ -43,6 +49,10 @@ class Image extends Node
       @imagebox.resize = true
       @imagebox\emit_signal("widget::redraw_needed")
 
+    @stylizers.reset_image = () ->
+      @imagebox.image = @image\get(@style_data.color)
+      @imagebox\emit_signal("widget::redraw_needed")
+
   create_content: =>
 
   create_signals: =>
@@ -56,6 +66,15 @@ class Image extends Node
 
     @\connect_signal("geometry_changed", () ->
       @parent and @parent\emit_signal("layout_changed")
+    )
+
+    @\connect_signal("background_color_changed", (color) ->
+      if @style_data.adaptive_color
+        if color\is_light!
+          @style_data.color = @style_data.adaptive_color_on_light
+        else
+          @style_data.color = @style_data.adaptive_color_on_dark
+        @stylizers.reset_image!
     )
 
   set_image: (image = @image) =>

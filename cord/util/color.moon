@@ -103,5 +103,7 @@ class Color
     @B = cord.math.lerp(@B, color.B, ammount, treshold)
     @A = cord.math.lerp(@A, color.A, ammount, treshold)
     @\refresh_hsl!
+  is_light: () =>
+    return @L > 0.5
 
 return Color

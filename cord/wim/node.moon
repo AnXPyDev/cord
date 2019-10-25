@@ -87,6 +87,12 @@ class Node extends Object
       @\emit_signal("layout_changed")
       @parent and @parent\emit_signal("layout_changed")
     )
+
+    @\connect_signal("background_color_changed", (color) ->
+      if @style_data.background_color == gears.color.transparent
+        for k, child in pairs @children
+          child\emit_signal("background_color_changed", color)
+    )
         
   load_style_data: =>
     background_padding = @style\get("background_padding") or @style\get("padding")
@@ -111,12 +117,12 @@ class Node extends Object
       background_shape: @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle,
       overlay_shape: @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle,
 
-      background_color: type(background_color) == "string" and background_color or background_color and background_color\copy! or gears.color.transparent,
-      overlay_color: type(overlay_color) == "string" and overlay_color or overlay_color and overlay_color\copy! or gears.color.transparent,
-      color: type(color) == "string" and color or color and color\copy! or "#FFFFFF",
+      background_color: type(background_color) == "string" and cord.util.color(background_color) or type(background_color) == "table" and background_color\copy! or gears.color.transparent,
+      overlay_color: type(overlay_color) == "string" and cord.util.color(overlay_color) or type(overlay_color) == "table" and overlay_color\copy! or gears.color.transparent,
+      color: type(color) == "string" and cord.util.color(color) or color and color\copy! or "#FFFFFF",
 
       background_pattern_beginning: background_pattern_beginning and background_pattern_beginning\copy! or Vector(0, 0, "percentage"),
-      background_pattern_ending: background_pattern_ending and background_pattern_ending\copy! Vector(1, 0, "percentage"),
+      background_pattern_ending: background_pattern_ending and background_pattern_ending\copy! or Vector(1, 0, "percentage"),
       overlay_pattern_beginning: overlay_pattern_beginning and overlay_pattern_beginning\copy! or Vector(0, 0, "percentage"),
       overlay_pattern_ending: overlay_pattern_ending and overlay_pattern_ending\copy!pppp or Vector(1, 0, "percentage"),
 

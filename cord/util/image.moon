@@ -9,10 +9,12 @@ class Image extends Object
     @color_cache = {}
   get: (color) =>
     local string_color
-    if type(color) == "table" and color.__name == "cord.util.color"
-      string_color = color\to_rgba_string!
-    elseif type(color) != "string"
+    if not color
       return @base_surface
+    elseif type(color) == "table" and color.__name == "cord.util.color"
+      string_color = color\to_rgba_string!
+    elseif type(color) == "string"
+      string_color = color
     if not @color_cache[string_color]
       @color_cache[string_color] = gears.color.recolor_image(gears.surface.duplicate_surface(@base_surface), string_color)
     return @color_cache[string_color]
