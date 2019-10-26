@@ -315,6 +315,7 @@ class Node extends Object
     if force == true
       @widget.visible = visible
       @widget\emit_signal("widget::redraw_needed")
+      @\emit_signal("visibility_changed", @visible)
     @visible = visible
     if visible != og
       @\emit_signal("geometry_changed")

@@ -64,6 +64,12 @@ equal = (tbl1, tbl2) ->
       if type(v) == "table" and not equal(v, tbl2[k]) or not v == tbl2[k] or v != tbl2[k] then return false
   return true
 
+map = (tbl, fn) ->
+  result = {}
+  for i, v in pairs tbl
+    result[i] = fn(v)
+  return result
+    
 return {
   deep_crush: deep_crush,
   deep_copy: deep_copy,
@@ -72,5 +78,6 @@ return {
   get_key: get_key,
   sum: sum,
   concat: concat,
-  equal: equal
+  equal: equal,
+  map: map
 }

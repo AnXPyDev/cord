@@ -3,20 +3,27 @@ gears = {
   color: require "gears.color"
 }
 
-cord = { log: require "cord.log" }
+cord = {
+  log: require "cord.log"
+  table: require "cord.table"
+}
+
+Color = require "cord.util.color"
   
 Vector = require "cord.math.vector"
   
 class Pattern
   new: (stops, beginning = Vector(), ending = Vector(100, 0)) =>
     @__name = "cord.util.pattern"
-    @stops = stops
+    @stops = cord.table.map(stops, (stop) ->
+      return {type(stop[1]) == "table" and stop[1] or type(stop[1] == "string") and Color(stop[1]), stop[2]}
+    )
     @beginning = beginning
     @ending = ending
   create_pattern: (beginning = @beginning, ending = @ending) =>
     stops = {}
     for i, stop in ipairs @stops
-      table.insert(stops, {stop[2] or ((i - 1) / (#@stops - 1)), type(stop[1]) == "string" and stop[1] or stop[1]\to_rgba_string!})
+      table.insert(stops, {stop[2] or ((i - 1) / (#@stops - 1)), stop[1]\to_rgba_string!})
     return gears.color.create_linear_pattern(
       {
         from: {beginning.x, beginning.y},
@@ -24,6 +31,13 @@ class Pattern
         stops: stops
       }
     )
+
+  get_average_lightness: () =>
+    total = 0
+    for i, stop in ipairs @stops
+      total += stop[1].L
+    return total / #@stops
+      
   copy: =>
     return Pattern(@stops, @beginning, @ending)
 

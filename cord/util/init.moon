@@ -38,6 +38,14 @@ normalize_vector_in_context = (vec = cord.math.vector(), context = cord.math.vec
 
   return result
 
+get_color_or_pattern_lightness = (color_or_pattern) ->
+  if type(color_or_pattern) == "table" and color_or_pattern.__name
+    if color_or_pattern.__name == "cord.util.color"
+      return color_or_pattern.L
+    elseif color_or_pattern.__name == "cord.util.pattern"
+      return color_or_pattern\get_average_lightness!
+  return 0
+    
 get_object_class = (obj) ->
   if type(obj) == "table"
     return obj.__name or "table"
@@ -54,5 +62,6 @@ return {
   normalize_vector_in_context: normalize_vector_in_context
   set_node_pos: set_node_pos,
   get_object_class: get_object_class,
+  get_color_or_pattern_lightness: get_color_or_pattern_lightness,
   image: require "cord.util.image"
 }

@@ -18,14 +18,10 @@ class Image extends Node
 
   load_style_data: =>
     color = @style\get("color")
-    adaptive_color_on_light = @style\get("adaptive_color_on_light")
-    adaptive_color_on_dark = @style\get("adaptive_color_on_dark")
     @style_data = {
       size: @style\get("size") or Vector(100),
       color: color and type(color) == "string" and cord.util.color(color) or type(color) == "table" and color\copy! or nil,
-      adaptive_color_on_light: adaptive_color_on_light and type(adaptive_color_on_light) == "string" and cord.util.color(adaptive_color_on_light) or type(adaptive_color_on_light) == "table" and adaptive_color_on_light\copy! or nil,
-      adaptive_color_on_dark: adaptive_color_on_dark and type(adaptive_color_on_dark) == "string" and cord.util.color(adaptive_color_on_dark) or type(adaptive_color_on_dark) == "table" and adaptive_color_on_dark\copy! or nil,
-      adaptive_color: @style\get("adaptive_color") or nil
+      adaptive_colors: @style\get("adaptive_colors") or nil
       align_horizontal: @style\get("align_horizontal") or "center",
       align_vertical: @style\get("align_vertical") or "center",
       layout_hide_animation: @style\get("layout_hide_animation") or cord.wim.animations.position.jump,
@@ -69,12 +65,14 @@ class Image extends Node
     )
 
     @\connect_signal("background_color_changed", (color) ->
-      if @style_data.adaptive_color
-        if color\is_light!
-          @style_data.color = @style_data.adaptive_color_on_light
-        else
-          @style_data.color = @style_data.adaptive_color_on_dark
-        @stylizers.reset_image!
+      if @style_data.adaptive_colors
+        lightness = cord.util.get_color_or_pattern_lightness(color)
+        for i, range_and_color in pairs @style_data.adaptive_colors
+          range = range_and_color[1]
+          if lightness >= range[1] and lightness <= range[2]
+            @style_data.color = range_and_color[2]
+            @stylizers.reset_image!
+            return
     )
 
   set_image: (image = @image) =>
