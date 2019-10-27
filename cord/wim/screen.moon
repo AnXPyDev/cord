@@ -20,20 +20,33 @@ class Screen extends Object
     @style = stylesheet\get_style(@category, @label)
     @style_data = {}
     @\load_style_data!
+    @\create_signals!
 
-    for i, child in @children
+    for i, child in pairs @children
       child.parent = self
+
+
+  create_signals: () =>
+    @\connect_signal("layout_changed", () ->
+      print("layout screen")
+      @style_data.layout\apply_layout(self)
+    )
 
   load_style_data: () =>
     @style_data = {
       layout: @style\get("layout")
     }
+
   get_geometry: () =>
     @pos.x = @screen.geometry.x
     @pos.y = @screen.geometry.y
     @size.x = @screen.geometry.width
     @size.y = @screen.geometry.height
+
   get_content_size: () =>
     return @size\copy!
+
   get_size: () =>
     return @size\copy!
+
+return Screen

@@ -28,7 +28,7 @@ class Fit_Horizontal extends Layout
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox")
         if child.visible == true
           child_size = child\get_size!
           if (current.x + child_size.x) > content_size.x
@@ -50,7 +50,7 @@ class Fit_Vertical extends Layout
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox")
         if child.visible == false
           continue
         child_size = child\get_size!

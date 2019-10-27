@@ -3,6 +3,7 @@ return {
   stylesheet: require "cord.wim.stylesheet",
   node: require "cord.wim.node",
   nodebox: require "cord.wim.nodebox",
+  screen: require "cord.wim.screen",
   text: require "cord.wim.text",
   image: require "cord.wim.image",
   layout: require "cord.wim.layout",

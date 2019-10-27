@@ -1,4 +1,5 @@
 wibox = awesome and require "wibox" or {}
+gears = { color: require "gears.color" }
 
 cord = { log: require "cord.log" }
   
@@ -9,6 +10,7 @@ class Nodebox extends Node
     super(...)
     @__name = "cord.wim.nodebox"
     @wibox = nil
+    @visible = false
     @\create_wibox!
     @\add_style_data!
     @\add_stylizers!
@@ -21,7 +23,6 @@ class Nodebox extends Node
     )
 
     @\connect_signal("visibility_changed", () ->
-      cord.log("visible", @visible)
       if @visible
         @wibox.visible = true
       else
@@ -40,19 +41,22 @@ class Nodebox extends Node
       @wibox.x = @pos.x
       @wibox.y = @pos.y
       @wibox\emit_signal("widget::redraw_needed")
-      cord.log(size)
 
     @stylizers.wibox_pos = () ->
-      @wibox.x = @pos.x
-      @wibox.y = @pos.y
+      @wibox.x = @pos.x + (@parent and @parent.pos.x or 0)
+      @wibox.y = @pos.y + (@parent and @parent.pos.y or 0)
       @wibox\emit_signal("widget::redraw_needed")
 
   create_wibox: () =>
     @wibox = wibox({
       visible: false,
-      widget: @widget
+      widget: @widget,
+      bg: gears.color.transparent
     })
 
   set_pos: (pos) =>
     @pos.x = pos.x
     @pos.y = pos.y
+    @stylizers.wibox_pos!
+
+return Nodebox
