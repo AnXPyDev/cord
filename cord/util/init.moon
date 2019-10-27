@@ -17,7 +17,7 @@ normalize_vector_in_context = (vec = cord.math.vector(), context = cord.math.vec
   if type(vec.x) == "table"
     if vec.x.__name and vec.x.__name == "cord.math.value"
       if vec.x.metric == "percentage"
-        result.x = vec.x.value * context.x + vec.x.offset
+        result.x = vec.x.value * context[vec.x.base or "x"] + vec.x.offset
       else
         result.x = vec.x.value + vec.x.offset
   else if vec.metric == "percentage"
@@ -28,7 +28,7 @@ normalize_vector_in_context = (vec = cord.math.vector(), context = cord.math.vec
   if type(vec.y) == "table"
     if vec.y.__name and vec.y.__name == "cord.math.value"
       if vec.y.metric == "percentage"
-        result.y = vec.y.value * context.y + vec.y.offset
+        result.y = vec.y.value * context[vec.y.base or "y"] + vec.y.offset
       else
         result.y = vec.y.value + vec.y.offset
   else if vec.metric == "percentage"
