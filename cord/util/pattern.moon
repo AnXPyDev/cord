@@ -6,6 +6,7 @@ gears = {
 cord = {
   log: require "cord.log"
   table: require "cord.table"
+  util: require "cord.util.base"
 }
 
 Color = require "cord.util.color"
@@ -13,14 +14,16 @@ Color = require "cord.util.color"
 Vector = require "cord.math.vector"
   
 class Pattern
-  new: (stops, beginning = Vector(), ending = Vector(100, 0)) =>
+  new: (stops, beginning = Vector(0, 0, "percentage"), ending = Vector(1, 0, "percentage")) =>
     @__name = "cord.util.pattern"
     @stops = cord.table.map(stops, (stop) ->
       return {type(stop[1]) == "table" and stop[1] or type(stop[1] == "string") and Color(stop[1]), stop[2]}
     )
     @beginning = beginning
     @ending = ending
-  create_pattern: (beginning = @beginning, ending = @ending) =>
+  create_pattern: (beginning = @beginning, ending = @ending, context = Vector(100)) =>
+    beginning = cord.util.normalize_vector_in_context(beginning, context)
+    ending = cord.util.normalize_vector_in_context(ending, context)
     stops = {}
     for i, stop in ipairs @stops
       table.insert(stops, {stop[2] or ((i - 1) / (#@stops - 1)), stop[1]\to_rgba_string!})

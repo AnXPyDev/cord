@@ -11,27 +11,28 @@ Vector = require "cord.math.vector"
 Margin = require "cord.util.margin"
 
 cord = {
-  table: require "cord.table",
-  util: require "cord.util",
+  table: require "cord.table"
+  util: require "cord.util"
   wim: {
-    layouts: require "cord.wim.layouts",
+    layouts: require "cord.wim.layouts"
     animations: require "cord.wim.animations"
-  },
-  log: require "cord.log",
+    style: require "cord.wim.style"
+  }
+  log: require "cord.log"
   math: require "cord.math"
 }
   
 unique_id_counter = 0
   
 class Node extends Object
-  new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}, data = {}) =>
+  new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}) =>
     super!
     @__name = "cord.wim.node"
     unique_id_counter += 1
     @unique_id = unique_id_counter
     @category = category
     @label = label
-    @identification = "#{@category} #{@label} #{@unique_id}"
+    @identification = "node #{@category} #{@label} #{@unique_id}"
     @style = stylesheet\get_style(@category, @label)
     @style_data = {}
     @children = children
@@ -41,202 +42,170 @@ class Node extends Object
     @stylizers = {}
     @content_container = nil
     @widget = nil
-    @visible = true
-    @pos = cord.math.vector()
     @data = {}
 
-    cord.table.deep_crush(self, data)
-
-    @\for_each_node_child(((child) -> child.parent = self))
-    
+    @\create_current_style!
     @\create_signals!
     @\create_containers!
     @\create_content!
     @\create_stylizers!
+    @\restylize!
 
-    @\connect_signal("request_load_style", () ->
-      @\load_style_data!
-      @\stylize_containers!
-      @\for_each_node_child(((child) -> child\emit_signal("request_load_style")))
-    )
+    @\for_each_node_child(((child) -> child\set_parent(self)))
 
-    @\emit_signal("request_load_style")
-
-    if @visible
-      @\emit_signal("geometry_changed")
+  set_parent: (parent) =>
+    @parent = parent
+    @\restylize!
 
   for_each_node_child: (fn) =>
     for k, child in pairs @children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
+      cn = cord.util.get_object_class(child)
+      if cn  == "cord.wim.node" or cn == "cord.wim.text"
         fn(child)
 
-  create_signals: =>
-    @\connect_signal("request_stylize", (container_name) ->
-      if container_name and @stylizers[container_name]
-        @stylizers[container_name]()
-      else
-        for k, fn in pairs @stylizers
-          fn!
-    )
 
-    @\connect_signal("layout_changed", () ->
-      @style_data.layout\apply_layout(self)
-    )
+  apply_layout_change: (layout, pos, layout_size) =>
+    last_time = layout\node_visible_last_time(self)
+    local layout_anim, opacity_anim
+    if last_time
+      if not @current_style\get("visible")
+        cord.log(@identification, "hiding")
+        opacity_anim = (@style\get("opacity_hide_animation") or cord.wim.animations.opacity.jump)(self, @current_style\get("opacity"), 0)
+        layout_anim = (@style\get("layout_hide_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
+        table.insert(opacity_anim.callbacks, () -> @\set_visible(@current_style\get("visible"), true))
+      else
+        cord.log(@identification, "moving")
+        layout_anim = (@style\get("layout_move_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
+    else
+      if @current_style\get("visible")
+        cord.log(@identification, "showing")
+        @\set_visible(@current_style\get("visible"), true)
+        opacity_anim = (@style\get("opacity_show_animation") or cord.wim.animations.opacity.jump)(self, @current_style\get("opacity"), 1)
+        layout_anim = (@style\get("layout_show_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
+        table.insert(opacity_anim.callbacks, () -> @\set_visible(@current_style\get("visible"), true))
+
+  create_signals: =>
+    @current_style\connect_signal("value_changed", ((key) ->))
 
     @\connect_signal("geometry_changed", () ->
-      @\emit_signal("layout_changed")
       @parent and @parent\emit_signal("layout_changed")
     )
 
-    @\connect_signal("background_color_changed", (color) ->
-      if @style_data.background_color == gears.color.transparent
-        for k, child in pairs @children
-          child\emit_signal("background_color_changed", color)
+    @\connect_signal("layout_changed", () ->
+      @style\get("layout")\apply_layout(self)
     )
-        
-  load_style_data: =>
-    background_padding = @style\get("background_padding") or @style\get("padding")
-    content_padding = @style\get("content_padding") or @style\get("padding")
-    content_margin = @style\get("content_margin") or @style\get("margin")
-    overlay_padding = @style\get("content_padding") or @style\get("padding")
-    size = @style\get("size") or Vector(100)
-    background_pattern_beginning = @style\get("background_pattern_beginning") or @style\get("pattern_beginning")
-    background_pattern_ending = @style\get("background_pattern_ending") or @style\get("pattern_ending")
-    overlay_pattern_beginning = @style\get("overlay_pattern_beginning") or @style\get("pattern_beginning")
-    overlay_pattern_ending = @style\get("overlay_pattern_ending") or @style\get("pattern_ending")
-    background_color = @style\get("background_color")
-    overlay_color = @style\get("overlay_color")
-    color = @style\get("color")
 
-    @style_data = {
-      background_padding: background_padding and background_padding\copy! or Margin(0),
-      content_padding: content_padding and content_padding\copy! or Margin(0),
-      content_margin: content_margin and content_margin\copy! or Margin(0),
-      overlay_padding: overlay_padding and overlay_padding\copy! or Margin(0),
-
-      background_shape: @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle,
-      overlay_shape: @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle,
-
-      background_color: type(background_color) == "string" and cord.util.color(background_color) or type(background_color) == "table" and background_color\copy! or gears.color.transparent,
-      overlay_color: type(overlay_color) == "string" and cord.util.color(overlay_color) or type(overlay_color) == "table" and overlay_color\copy! or gears.color.transparent,
-      color: type(color) == "string" and cord.util.color(color) or color and color\copy! or "#FFFFFF",
-
-      background_pattern_beginning: background_pattern_beginning and background_pattern_beginning\copy! or Vector(0, 0, "percentage"),
-      background_pattern_ending: background_pattern_ending and background_pattern_ending\copy! or Vector(1, 0, "percentage"),
-      overlay_pattern_beginning: overlay_pattern_beginning and overlay_pattern_beginning\copy! or Vector(0, 0, "percentage"),
-      overlay_pattern_ending: overlay_pattern_ending and overlay_pattern_ending\copy!pppp or Vector(1, 0, "percentage"),
-
-      content_clip_shape: @style\get("content_clip_shape") or gears.shape.rectangle,
-
-      layout_hide_animation: @style\get("layout_hide_animation") or cord.wim.animations.position.jump,
-      layout_show_animation: @style\get("layout_show_animation") or cord.wim.animations.position.jump,
-      layout_move_animation: @style\get("layout_move_animation") or cord.wim.animations.position.jump,
-      opacity_show_animation: @style\get("opacity_show_animation") or cord.wim.animations.opacity.jump,
-      opacity_hide_animation: @style\get("opacity_hide_animation") or cord.wim.animations.opacity.jump,
-
-      layout: @style\get("layout") or cord.wim.layouts.manual(),
-      size: size or Vector(100),
-      align_horizontal: @style\get("align_horizontal") or "center",
-      align_vertical: @style\get("align_vertical") or "center"
-    }
-
-  create_containers: =>
-    @containers.background_padding = wibox.container.margin()
-    @containers.content_padding = wibox.container.margin()
-    @containers.content_margin = wibox.container.margin()
-    @containers.content_clip = wibox.container.background()
-    @containers.overlay_padding = wibox.container.margin()
-    @containers.background = wibox.container.background(wibox.widget.textbox())
-    @containers.overlay = wibox.container.background(wibox.widget.textbox())
-    @containers.content_padding.widget = @containers.content_clip
-    @containers.content_clip.widget = @containers.content_margin
-    @containers.background_padding.widget = @containers.background
-    @containers.overlay_padding.widget = @containers.overlay
-    @content_container = @containers.content_margin
-    @widget = wibox.widget({
-      layout: wibox.layout.stack,
-      @containers.background_padding,
-      @containers.content_padding,
-      @containers.overlay_padding
-    })
-    @widget.visible = @visible
+  restylize: (stylizer_name) =>
+    if stylizer_name
+      if type(stylizer_name) == "table"
+        for k, v in pairs stylizer_name
+          v!
+      else
+        @stylizers[stylizer_name]!
+      return
+    for k, stylizer in pairs @stylizers
+      stylizer!
 
   create_stylizers: =>
-    @stylizers.background_padding = () ->
+    @stylizers.size = (sole) ->
       size = @\get_size!
-      @containers.background_padding.forced_width = size.x
-      @containers.background_padding.forced_height = size.y
-      @style_data.background_padding\apply(@containers.background_padding)
-      @containers.background_padding\emit_signal("widget::redraw_needed")
+      @containers.padding.forced_width = size.x
+      @containers.padding.forced_height = size.y
+      inside_size = @\get_inside_size!
+      @containers.background.forced_width = inside_size.x
+      @containers.background.forced_height = inside_size.y
+      @containers.overlay.forced_width = inside_size.x
+      @containers.overlay.forced_height = inside_size.y
+      @containers.margin.forced_width = inside_size.x
+      @containers.margin.forced_height = inside_size.y
+      @\emit_signal("stylized", "size")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.content_padding = () ->
-      size = @\get_size!
-      @containers.content_padding.forced_width = size.x
-      @containers.content_padding.forced_height = size.y
-      @style_data.content_padding\apply(@containers.content_padding)
-      @containers.content_padding\emit_signal("widget::redraw_needed")
+    @stylizers.padding = (sole) ->
+      padding = @current_style\get("padding")
+      padding\apply(@containers.padding)
+      @\emit_signal("stylized", "padding")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.content_margin = () ->
-      size = @\get_inside_size!
-      @containers.content_margin.forced_width = size.x
-      @containers.content_margin.forced_height = size.y
-      @style_data.content_margin\apply(@containers.content_margin)
-      @containers.content_margin\emit_signal("widget::redraw_needed")
+    @stylizers.margin = (sole) ->
+      margin = @current_style\get("margin")
+      margin\apply(@containers.margin)
+      @\emit_signal("stylized", "margin")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.overlay_padding = () ->
-      size = @\get_size!
-      @containers.overlay_padding.forced_width = size.x
-      @containers.overlay_padding.forced_height = size.y
-      @style_data.overlay_padding\apply(@containers.overlay_padding)
-      @containers.overlay_padding\emit_signal("widget::redraw_needed")
+    @stylizers.background = (sole) ->
+      background = @current_style\get("background")
+      @containers.background.bg = cord.util.normalize_as_pattern_or_color(background, nil, nil, @\get_inside_size!)
+      @\emit_signal("stylized", "background")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.background = () ->
-      size = @\get_background_size!
-      if cord.util.get_object_class(@style_data.background_color) == "cord.util.pattern"
-        @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style_data.background_color, @\get_background_pattern_template!)
-      else
-        @containers.background.bg = cord.util.normalize_as_pattern_or_color(@style_data.background_color)
-      @containers.background.fg = cord.util.normalize_as_pattern_or_color(@style_data.color)
-      @containers.background.forced_width = size.x
-      @containers.background.forced_height = size.y
-      @containers.background.shape = @style_data.background_shape
-      @containers.background\emit_signal("widget::redraw_needed")
+    @stylizers.overlay = (sole) ->
+      overlay = @current_style\get("overlay")
+      @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(overlay, nil, nil, @\get_inside_size!)
+      @\emit_signal("stylized", "overlay")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.overlay = () ->
-      size = @\get_overlay_size!
-      if cord.util.get_object_class(@style_data.overlay_color) == "cord.util.pattern"
-        @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style_data.overlay_color, @\get_overlay_pattern_template!)
-      else
-        @containers.overlay.bg = cord.util.normalize_as_pattern_or_color(@style_data.overlay_color)
-      @containers.overlay.fg = gears.color.transparent
-      @containers.overlay.forced_width = size.x
-      @containers.overlay.forced_height = size.y
-      @containers.overlay.shape = @style_data.overlay_shape
-      @containers.overlay\emit_signal("widget::redraw_needed")
+    @stylizers.background_shape = (sole) ->
+      @containers.background.shape = @current_style\get("background_shape")
+      @\emit_signal("stylized", "background_shape")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.layout = () ->
-      old_layout = @style_data.layout
-      @style_data.layout = @style\get("layout") or @style_data.layout
-      if old_layout
-        @style_data.layout\inherit(old_layout)
+    @stylizers.overlay_shape = (sole) ->
+      @containers.background.shape = @current_style\get("background_shape")
+      @\emit_signal("stylized", "overlay_shape")
+      if sole
+        @widget\emit_signal("widget::redraw_needed")
 
-    @stylizers.content_clip = () ->
-      size = @\get_inside_size!
-      @containers.content_clip.forced_width = size.x
-      @containers.content_clip.forced_height = size.y
-      @containers.content_clip.shape_clip = true
-      @containers.content_clip.shape = @style_data.content_clip_shape
-      @containers.content_clip\emit_signal("widget::redraw_needed")
+  create_current_style: =>
+    padding = @style\get("padding") or Margin(0)
+    margin = @style\get("margin") or Margin(0)
+    size = @style\get("size") or Vector(100)
 
-    @stylizers.content = () ->
-      size = @\get_content_size!
-      @content.forced_width = size.x
-      @content.forced_width = size.y
+    background = @style\get("background") or cord.util.color("#000000")
+    overlay = @style\get("overlay") or cord.util.color("#00000000")
 
-  stylize_containers: =>
-    for k, fn in pairs @stylizers
-      fn()
-        
+    if cord.util.get_object_class(background) == "string"
+      background = cord.util.color(background)
+    if cord.util.get_object_class(overlay) == "string"
+      overlay = cord.util.color(overlay)
+
+    background_shape = @style\get("background_shape") or @style\get("shape") or gears.shape.rectangle
+    overlay_shape = @style\get("overlay_shape") or @style\get("shape") or gears.shape.rectangle
+
+    @current_style = cord.wim.style({
+      padding: padding\copy!
+      margin: margin\copy!
+      background_shape: background_shape
+      overlay_shape: background_shape
+      background: background\copy!
+      overlay: overlay\copy!
+      size: size\copy!
+      pos: Vector()
+      visible: false
+      opacity: 0
+    })
+
+  create_containers: =>
+    @containers.padding = wibox.container.margin()
+    @containers.margin = wibox.container.margin()
+    @containers.background = wibox.container.background(wibox.widget.textbox())
+    @containers.overlay = wibox.container.background(wibox.widget.textbox())
+    @content_container = @containers.margin
+    @containers.padding.widget = wibox.widget({
+      layout: wibox.layout.stack,
+      @containers.background,
+      @containers.margin,
+      @containers.overlay
+    })
+    @widget = @containers.padding
+    @widget.visible = false
+
   create_content: =>
     @content = wibox.layout({
       layout: wibox.layout.manual
@@ -249,79 +218,43 @@ class Node extends Object
 
     @content_container.widget = @content
   
-
-  search_node: (category, label) =>
-    results = {}
-    if (not category and true or @category == category) or (not label and true or @label == label)
-      results = gears.table.join(results, {self})
-    for k, child in pairs @children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
-        gears.table.join(results, child\search_node(category, label))
-    return results
-
   get_size: =>
-    return cord.util.normalize_vector_in_context(@style_data.size, @parent and @parent\get_content_size! or Vector(100,100))
+    return cord.util.normalize_vector_in_context(@current_style\get("size"), @parent and @parent\get_content_size! or Vector(100,100))
 
   get_inside_size: =>
     result = @\get_size!
-    result.x -= (@style_data.content_padding.left + @style_data.content_padding.right)
-    result.y -= (@style_data.content_padding.top + @style_data.content_padding.bottom)
+    padding = @current_style\get("padding")
+    result.x -= (padding.left + padding.right)
+    result.y -= (padding.top + padding.bottom)
     return result
 
   get_content_size: =>
     result = @\get_inside_size!
-    result.x -= (@style_data.content_margin.left + @style_data.content_margin.right)
-    result.y -= (@style_data.content_margin.top + @style_data.content_margin.bottom)
-    return result
-
-  get_pos: =>
-    pos = @style\get("pos")
-    result = cord.util.normalize_vector_in_context(pos, @parent and @parent\get_content_size! or Vector(100,100))
+    margin = @current_style\get("margin")
+    result.x -= (margin.left + margin.right)
+    result.y -= (margin.top + margin.bottom)
     return result
 
   set_pos: (pos) =>
+    @current_style\get("pos").x = pos.x
+    @current_style\get("pos").y = pos.y
     if not @parent
       return
-    @parent.content\move_widget(@widget, pos\to_primitive!)
-    @pos.x = pos.x
-    @pos.y = pos.y
+    @parent.content\move_widget(@widget, @current_style.values.pos\to_primitive!)
 
-  get_background_size: =>
-    result = @\get_size!
-    result.x -= (@style_data.background_padding.left + @style_data.background_padding.right)
-    result.y -= (@style_data.background_padding.top + @style_data.background_padding.bottom)
-    return result
-
-  get_background_pattern_template: =>
-    size = @\get_background_size!
-    pattern_beginning = cord.util.normalize_vector_in_context(@style_data.background_pattern_beginning, size)
-    pattern_ending = cord.util.normalize_vector_in_context(@style_data.background_pattern_ending, size)
-    return pattern_beginning, pattern_ending
-
-  get_overlay_size: =>
-    result = @\get_size!
-    result.x -= (@style_data.overlay_padding.left + @style_data.overlay_padding.right)
-    result.y -= (@style_data.overlay_padding.top + @style_data.overlay_padding.bottom)
-    return result
-
-  get_overlay_pattern_template: =>
-    size = @\get_overlay_size!
-    pattern_beginning = cord.util.normalize_vector_in_context(@style_data.overlay_pattern_beginning, size)
-    pattern_ending = cord.util.normalize_vector_in_context(@style_data.overlay_pattern_ending, size)
-    return pattern_beginning, pattern_ending
-
-  set_visible: (visible = not @visible, force = false) =>
-    og = @visible
-    @visible = visible
-    if force == true
-      @widget.visible = @visible
-      @widget\emit_signal("widget::redraw_needed")
-    if @visible != og
+  set_visible: (visible = not @current_style\get("visible"), force = false) =>
+    cord.log(@identification, visible, force)
+    current = @current_style\get("visible")
+    if force
+      @widget.visible = visible
+    @current_style\set("visible", visible)
+    if not (current == visible)
       @\emit_signal("geometry_changed")
-    @\emit_signal("visibility_changed")
 
-  set_opacity: (opacity = 1) =>
-    @widget.opacity = opacity
+  set_opacity: (opacity) =>
+    cord.log(@identification, opacity)
+    @current_style\set("opacity", opacity)
+    @widget.opacity = @current_style\get("opacity")
     @widget\emit_signal("widget::redraw_needed")
 
 return Node
