@@ -10,8 +10,8 @@ class Fit_Horizontal extends Layout
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox")
-        if child.visible == true
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox" or child.__name == "cord.wim.image")
+        if child.current_style\get("visible") == true
           child_size = child\get_size!
           if (current.x + child_size.x) > content_size.x
             current.x = 0
@@ -20,8 +20,6 @@ class Fit_Horizontal extends Layout
           if max.y < (current.y + child_size.y)
             max.y = current.y + child_size.y
           current.x += child_size.x
-        else
-          child\apply_layout_change(self, Vector(), content_size)
 
 class Fit_Vertical extends Layout
   new: =>
@@ -32,8 +30,8 @@ class Fit_Vertical extends Layout
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox")
-        if child.visible == false
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox" or child.__name == "cord.wim.image")
+        if child.current_style\get("visible") == false
           continue
         child_size = child\get_size!
         if (current.y + child_size.y) > content_size.y

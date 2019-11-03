@@ -46,7 +46,7 @@ class Node extends Object
 
     @\create_current_style!
     @\create_signals!
-    @\create_containers!
+    @\create_widgets!
     @\create_content!
     @\create_stylizers!
     @\restylize!
@@ -60,39 +60,44 @@ class Node extends Object
   for_each_node_child: (fn) =>
     for k, child in pairs @children
       cn = cord.util.get_object_class(child)
-      if cn  == "cord.wim.node" or cn == "cord.wim.text"
+      if cn  == "cord.wim.node" or cn == "cord.wim.text" or cn == "cord.wim.image"
         fn(child)
 
 
   apply_layout_change: (layout, pos, layout_size) =>
+    print(@identification, "layout change", pos.x, pos.y)
     last_time = layout\node_visible_last_time(self)
     local layout_anim, opacity_anim
     if last_time
       if not @current_style\get("visible")
-        cord.log(@identification, "hiding")
         opacity_anim = (@style\get("opacity_hide_animation") or cord.wim.animations.opacity.jump)(self, @current_style\get("opacity"), 0)
         layout_anim = (@style\get("layout_hide_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
         table.insert(opacity_anim.callbacks, () -> @\set_visible(@current_style\get("visible"), true))
       else
-        cord.log(@identification, "moving")
         layout_anim = (@style\get("layout_move_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
     else
       if @current_style\get("visible")
-        cord.log(@identification, "showing")
         @\set_visible(@current_style\get("visible"), true)
         opacity_anim = (@style\get("opacity_show_animation") or cord.wim.animations.opacity.jump)(self, @current_style\get("opacity"), 1)
         layout_anim = (@style\get("layout_show_animation") or cord.wim.animations.position.jump)(self, self.current_style\get("pos")\copy!, pos, layout_size)
         table.insert(opacity_anim.callbacks, () -> @\set_visible(@current_style\get("visible"), true))
 
   create_signals: =>
-    @current_style\connect_signal("value_changed", ((key) ->))
+    @current_style\connect_signal("value_changed", (key) ->
+      if key == "layout"
+        new_layout = @style\get("layout")!
+        new_layout\inherit(@current_style\get("layout"))
+        @current_style\set("layout", new_layout)
+        @\emit_signal("layout_changed")
+    )
 
     @\connect_signal("geometry_changed", () ->
       @parent and @parent\emit_signal("layout_changed")
     )
 
     @\connect_signal("layout_changed", () ->
-      @style\get("layout")\apply_layout(self)
+      print("relayouting")
+      @current_style\get("layout")\apply_layout(self)
     )
 
   restylize: (stylizer_name) =>
@@ -166,6 +171,7 @@ class Node extends Object
     padding = @style\get("padding") or Margin(0)
     margin = @style\get("margin") or Margin(0)
     size = @style\get("size") or Vector(100)
+    layout = @style\get("layout") or cord.wim.layouts.manual
 
     background = @style\get("background") or cord.util.color("#000000")
     overlay = @style\get("overlay") or cord.util.color("#00000000")
@@ -189,9 +195,10 @@ class Node extends Object
       pos: Vector()
       visible: false
       opacity: 0
+      layout: layout!
     })
 
-  create_containers: =>
+  create_widgets: =>
     @containers.padding = wibox.container.margin()
     @containers.margin = wibox.container.margin()
     @containers.background = wibox.container.background(wibox.widget.textbox())
@@ -211,7 +218,7 @@ class Node extends Object
       layout: wibox.layout.manual
     })
     for i, child in ipairs @children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text")
+      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.image")
         @content\add_at(child.widget, {x:0,y:0})
       else
         @content\add_at(child, {x:0,y:0})
@@ -219,7 +226,8 @@ class Node extends Object
     @content_container.widget = @content
   
   get_size: =>
-    return cord.util.normalize_vector_in_context(@current_style\get("size"), @parent and @parent\get_content_size! or Vector(100,100))
+    size = cord.util.normalize_vector_in_context(@current_style\get("size"), @parent and @parent\get_content_size! or Vector(100,100))
+    return size
 
   get_inside_size: =>
     result = @\get_size!
@@ -240,10 +248,9 @@ class Node extends Object
     @current_style\get("pos").y = pos.y
     if not @parent
       return
-    @parent.content\move_widget(@widget, @current_style.values.pos\to_primitive!)
+    @parent.content\move_widget(@widget, @current_style\get("pos")\to_primitive!)
 
   set_visible: (visible = not @current_style\get("visible"), force = false) =>
-    cord.log(@identification, visible, force)
     current = @current_style\get("visible")
     if force
       @widget.visible = visible
@@ -252,7 +259,6 @@ class Node extends Object
       @\emit_signal("geometry_changed")
 
   set_opacity: (opacity) =>
-    cord.log(@identification, opacity)
     @current_style\set("opacity", opacity)
     @widget.opacity = @current_style\get("opacity")
     @widget\emit_signal("widget::redraw_needed")

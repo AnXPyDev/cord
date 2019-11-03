@@ -35,14 +35,20 @@ set_key = (tbl, keys, value) ->
 
 get_key = (tbl, keys) ->
   if type(keys) != "table"
-    return tbl[keys] or nil
+    if tbl[keys] != nil
+      return tbl[keys]
+    else
+      return nil
   else
     lastAccess = tbl
     for i, key in ipairs keys
-      if i == #tbl
-        return lastAccess[key] or nil
+      if i == #keys
+        if lastAccess[key] != nil
+          return lastAccess[key]
+        else
+          return nil
       else
-        if not lastAccess[key] then return nil
+        if lastAccess[key] == nil then return nil
         lastAccess = lastAccess[key]
 
 sum = (tbl) ->

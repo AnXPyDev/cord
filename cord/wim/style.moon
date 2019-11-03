@@ -14,7 +14,7 @@ class Style extends Object
     @\emit_signal("value_changed", key)
   get: (key, shallow = false) =>
     ret = cord.table.get_key(@values, key)
-    if shallow == false and not ret
+    if shallow == false and (ret == nil)
       for k, v in pairs @parents
         ret = v\get(key)
         if ret then break

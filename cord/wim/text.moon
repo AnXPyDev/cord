@@ -24,7 +24,7 @@ class Text extends Node
 
   create_current_style: =>
     color = @style\get("color") or cord.util.color("#FFFFFF")
-    size = @style\get("size") or Vector(100)
+    size = @style\get("size") or Vector(1, nil, "percentage")
 
     if cord.util.get_object_class(color) == "string"
       color = cord.util.color(color)
@@ -39,13 +39,13 @@ class Text extends Node
       visible: false
       size: size\copy!
     })
-
     
-  create_containers: =>
+  create_widgets: =>
     @textbox = wibox.widget.textbox()
     @containers.constraint = wibox.container.constraint(@textbox)
     @containers.background = wibox.container.background(@containers.constraint)
     @widget = @containers.background
+    @widget.visible = false
 
   create_stylizers: =>
     @stylizers.size = (sole) ->
