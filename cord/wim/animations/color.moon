@@ -34,20 +34,20 @@ class Color_Lerp extends Color
     super(node, start, target, color_index)
     @speed = node.style\get("color_lerp_animation_speed") or @speed
   tick: =>
-    clr, result = @current\lerp(@target, @speed)
+    @current\lerp(@target, @speed)
     @node\emit_signal("request_stylize", @color_index)
-    if result == true
+    if @current\equals(@target)
       @done = true
     return @done
 
 class Color_Approach extends Color
   new: (node, start, target, color_index) =>
     super(node, start, target, color_index)
-    @speed = node.style\get("color_lerp_animation_speed") or @speed
+    @speed = node.style\get("color_approach_animation_speed") or @speed
   tick: =>
-    clr, result = @current\approach(@target, @speed)
+    @current\approach(@target, @speed)
     @node\emit_signal("request_stylize", @color_index)
-    if result
+    if @current\equals(@target)
       @done = true
     return @done
 

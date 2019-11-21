@@ -93,6 +93,7 @@ class Node extends Object
 
     @\connect_signal("geometry_changed", () ->
       @parent and @parent\emit_signal("layout_changed")
+      @\for_each_node_child((node) -> node\restylize("size"))
     )
 
     @\connect_signal("layout_changed", () ->
@@ -124,6 +125,7 @@ class Node extends Object
       @containers.margin.forced_width = inside_size.x
       @containers.margin.forced_height = inside_size.y
       @\emit_signal("stylized", "size")
+      @\emit_signal("geometry_changed")
       if sole
         @widget\emit_signal("widget::redraw_needed")
 

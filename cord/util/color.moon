@@ -105,5 +105,9 @@ class Color
     @\refresh_hsl!
   is_light: () =>
     return @L > 0.5
+  equals: (color) =>
+    if color.R == @R and color.G == @G and color.B == @B and color.A == @A
+      return true
+    return false
 
 return Color

@@ -1,3 +1,8 @@
+crush = (tbl1 = {}, tbl2 = {}) ->
+  for k, v in pairs tbl2
+    tbl1[k] = v
+  return tbl1
+
 deep_crush = (tbl1 = {}, tbl2 = {}) ->
   for k, v in pairs tbl2
     if type(v) == "table" then
@@ -70,20 +75,35 @@ equal = (tbl1, tbl2) ->
       if type(v) == "table" and not equal(v, tbl2[k]) or not v == tbl2[k] or v != tbl2[k] then return false
   return true
 
+contains = (tbl1, elm) ->
+  for i, v in ipairs tbl1
+    if v == elm
+      return true
+  return false
+    
 map = (tbl, fn) ->
   result = {}
-  for i, v in pairs tbl
+  for k, v in pairs tbl
+    result[k] = fn(v)
+  return result
+
+imap = (tbl, fn) ->
+  result = {}
+  for i, v in ipairs tbl
     result[i] = fn(v)
   return result
-    
+
 return {
-  deep_crush: deep_crush,
-  deep_copy: deep_copy,
-  deep_copy_crush: deep_copy_crush,
-  set_key: set_key,
-  get_key: get_key,
-  sum: sum,
-  concat: concat,
-  equal: equal,
+  crush: crush
+  deep_crush: deep_crush
+  deep_copy: deep_copy
+  deep_copy_crush: deep_copy_crush
+  set_key: set_key
+  get_key: get_key
+  sum: sum
+  concat: concat
+  equal: equal
   map: map
+  imap: imap
+  contains: contains
 }
