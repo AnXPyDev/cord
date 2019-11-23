@@ -31,29 +31,27 @@ do
     for_each_node_child = function(self, fn)
       for k, child in pairs(self.children) do
         local cn = cord.util.get_object_class(child)
-        if cn == "cord.wim.node" then
+        if cn == "cord.wim.node" or cn == "cord.wim.text" or cn == "cord.wim.image" then
           fn(child)
         end
       end
     end,
     apply_layout_change = function(self, layout, pos, layout_size)
+      print(self.identification, "layout change", pos.x, pos.y)
       local last_time = layout:node_visible_last_time(self)
       local layout_anim, opacity_anim
       if last_time then
         if not self.current_style:get("visible") then
-          cord.log(self.identification, "hiding")
           opacity_anim = (self.style:get("opacity_hide_animation") or cord.wim.animations.opacity.jump)(self, self.current_style:get("opacity"), 0)
           layout_anim = (self.style:get("layout_hide_animation") or cord.wim.animations.position.jump)(self, self.current_style:get("pos"):copy(), pos, layout_size)
           return table.insert(opacity_anim.callbacks, function()
             return self:set_visible(self.current_style:get("visible"), true)
           end)
         else
-          cord.log(self.identification, "moving")
           layout_anim = (self.style:get("layout_move_animation") or cord.wim.animations.position.jump)(self, self.current_style:get("pos"):copy(), pos, layout_size)
         end
       else
         if self.current_style:get("visible") then
-          cord.log(self.identification, "showing")
           self:set_visible(self.current_style:get("visible"), true)
           opacity_anim = (self.style:get("opacity_show_animation") or cord.wim.animations.opacity.jump)(self, self.current_style:get("opacity"), 1)
           layout_anim = (self.style:get("layout_show_animation") or cord.wim.animations.position.jump)(self, self.current_style:get("pos"):copy(), pos, layout_size)
@@ -64,24 +62,40 @@ do
       end
     end,
     create_signals = function(self)
-      self.current_style:connect_signal("value_changed", (function(key) end))
+      self.current_style:connect_signal("value_changed", function(key)
+        if key == "layout" then
+          local new_layout = self.style:get("layout")()
+          new_layout:inherit(self.current_style:get("layout"))
+          self.current_style:set("layout", new_layout)
+          return self:emit_signal("layout_changed")
+        end
+      end)
       self:connect_signal("geometry_changed", function()
-        return self.parent and self.parent:emit_signal("layout_changed")
+        local _ = self.parent and self.parent:emit_signal("layout_changed")
+        return self:for_each_node_child(function(node)
+          return node:restylize("size")
+        end)
       end)
       return self:connect_signal("layout_changed", function()
-        return self.style:get("layout"):apply_layout(self)
+        print("relayouting")
+        return self.current_style:get("layout"):apply_layout(self)
       end)
     end,
-    restylize = function(self, stylizer_name)
-      if stylizer_name then
-        if type(stylizer_name) == "table" then
-          for k, v in pairs(stylizer_name) do
-            v()
+    restylize = function(self, ...)
+      local names = {
+        ...
+      }
+      if #names > 0 then
+        for i, name in ipairs(names) do
+          if type(stylizer_name) == "table" then
+            for k, v in pairs(stylizer_name) do
+              v()
+            end
+          else
+            self.stylizers[stylizer_name]()
           end
-        else
-          self.stylizers[stylizer_name]()
+          return 
         end
-        return 
       end
       for k, stylizer in pairs(self.stylizers) do
         stylizer()
@@ -100,6 +114,7 @@ do
         self.containers.margin.forced_width = inside_size.x
         self.containers.margin.forced_height = inside_size.y
         self:emit_signal("stylized", "size")
+        self:emit_signal("geometry_changed")
         if sole then
           return self.widget:emit_signal("widget::redraw_needed")
         end
@@ -155,6 +170,7 @@ do
       local padding = self.style:get("padding") or Margin(0)
       local margin = self.style:get("margin") or Margin(0)
       local size = self.style:get("size") or Vector(100)
+      local layout = self.style:get("layout") or cord.wim.layouts.manual
       local background = self.style:get("background") or cord.util.color("#000000")
       local overlay = self.style:get("overlay") or cord.util.color("#00000000")
       if cord.util.get_object_class(background) == "string" then
@@ -175,10 +191,11 @@ do
         size = size:copy(),
         pos = Vector(),
         visible = false,
-        opacity = 0
+        opacity = 0,
+        layout = layout()
       })
     end,
-    create_containers = function(self)
+    create_widgets = function(self)
       self.containers.padding = wibox.container.margin()
       self.containers.margin = wibox.container.margin()
       self.containers.background = wibox.container.background(wibox.widget.textbox())
@@ -198,7 +215,7 @@ do
         layout = wibox.layout.manual
       })
       for i, child in ipairs(self.children) do
-        if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text") then
+        if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.image") then
           self.content:add_at(child.widget, {
             x = 0,
             y = 0
@@ -213,7 +230,8 @@ do
       self.content_container.widget = self.content
     end,
     get_size = function(self)
-      return cord.util.normalize_vector_in_context(self.current_style:get("size"), self.parent and self.parent:get_content_size() or Vector(100, 100))
+      local size = cord.util.normalize_vector_in_context(self.current_style:get("size"), self.parent and self.parent:get_content_size() or Vector(100, 100))
+      return size
     end,
     get_inside_size = function(self)
       local result = self:get_size()
@@ -235,7 +253,7 @@ do
       if not self.parent then
         return 
       end
-      return self.parent.content:move_widget(self.widget, self.current_style.values.pos:to_primitive())
+      return self.parent.content:move_widget(self.widget, self.current_style:get("pos"):to_primitive())
     end,
     set_visible = function(self, visible, force)
       if visible == nil then
@@ -244,18 +262,17 @@ do
       if force == nil then
         force = false
       end
-      cord.log(self.identification, visible, force)
       local current = self.current_style:get("visible")
       if force then
         self.widget.visible = visible
       end
       self.current_style:set("visible", visible)
       if not (current == visible) then
-        return self:emit_signal("geometry_changed")
+        self:emit_signal("geometry_changed")
+        return self:emit_signal("visibility_changed")
       end
     end,
     set_opacity = function(self, opacity)
-      cord.log(self.identification, opacity)
       self.current_style:set("opacity", opacity)
       self.widget.opacity = self.current_style:get("opacity")
       return self.widget:emit_signal("widget::redraw_needed")
@@ -293,7 +310,7 @@ do
       self.data = { }
       self:create_current_style()
       self:create_signals()
-      self:create_containers()
+      self:create_widgets()
       self:create_content()
       self:create_stylizers()
       self:restylize()

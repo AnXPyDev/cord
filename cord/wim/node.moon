@@ -101,13 +101,12 @@ class Node extends Object
       @current_style\get("layout")\apply_layout(self)
     )
 
-  restylize: (stylizer_name) =>
-    if stylizer_name
-      if type(stylizer_name) == "table"
-        for k, v in pairs stylizer_name
-          v!
-      else
-        @stylizers[stylizer_name]!
+  restylize: (...) =>
+    names = {...}
+    if #names > 0
+      for i, name in ipairs names
+        if @stylizers[name]
+          @stylizers[name]!
       return
     for k, stylizer in pairs @stylizers
       stylizer!
@@ -259,6 +258,7 @@ class Node extends Object
     @current_style\set("visible", visible)
     if not (current == visible)
       @\emit_signal("geometry_changed")
+      @\emit_signal("visibility_changed")
 
   set_opacity: (opacity) =>
     @current_style\set("opacity", opacity)
