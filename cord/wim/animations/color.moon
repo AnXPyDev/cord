@@ -25,7 +25,7 @@ class Color extends Animation
       @current = type(start) == "string" and cord.util.color(start) or start\copy!
     @target = type(target) == "string" and cord.util.color(target) or target\copy!
     @speed = node.style\get("color_animation_speed") or 1
-    @node.style_data["#{@color_index}_color"] = @current
+    @node.current_style\set(@color_index, @current)
     animator\add(self)
     
 
@@ -35,7 +35,8 @@ class Color_Lerp extends Color
     @speed = node.style\get("color_lerp_animation_speed") or @speed
   tick: =>
     @current\lerp(@target, @speed)
-    @node\emit_signal("request_stylize", @color_index)
+    print(@current\to_rgba_string!)
+    @node\restylize(@color_index)
     if @current\equals(@target)
       @done = true
     return @done
@@ -46,7 +47,7 @@ class Color_Approach extends Color
     @speed = node.style\get("color_approach_animation_speed") or @speed
   tick: =>
     @current\approach(@target, @speed)
-    @node\emit_signal("request_stylize", @color_index)
+    @node\restylize(@color_index)
     if @current\equals(@target)
       @done = true
     return @done

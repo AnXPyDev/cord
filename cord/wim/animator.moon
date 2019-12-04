@@ -43,7 +43,6 @@ class Animator extends Object
       if do_remove
         for k, v in pairs @queue[i].callbacks
           pcall(v)
-
         table.remove(@queue, i)
         i -= 1
       i += 1

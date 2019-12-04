@@ -8,8 +8,8 @@ Vector = require "cord.math.vector"
 animator = require "cord.wim.default_animator"
 
 class Opacity extends Animation
-  new: (node, start, target, layout_size) =>
-    super!
+  new: (node, start, target, layout_size, ...) =>
+    super(...)
     @node = node
     if @node.data.opacity_animation
       @node.data.opacity_animation.done = true
@@ -26,14 +26,14 @@ class Opacity extends Animation
     animator\add(self)
 
 class Opacity_Jump extends Opacity
-  new: (node, start, target, layout_size) =>
-    super(node, start, target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, target, layout_size, ...)
     @node\set_opacity(@target)
     @done = true
     
 class Opacity_Lerp extends Opacity
-  new: (node, start, target, layout_size) =>
-    super(node, start, target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, target, layout_size, ...)
     @speed = node.style\get("opacity_lerp_animation_speed") or @speed
   tick: () =>
     @current = cord.math.lerp(@current, @target, @speed, 0.005)

@@ -1,12 +1,12 @@
 Object = require "cord.util.object"
 
 class Animation extends Object
-  new: =>
+  new: (callbacks) =>
     super!
     @__name = "cord.wim.animation"
     @done = false
     @tick_function = ( -> )
-    @callbacks = {}
+    @callbacks = callbacks or {}
   update: =>
     @done = @\tick!
     @done = @tick_function! or @done

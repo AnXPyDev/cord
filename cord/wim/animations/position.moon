@@ -37,8 +37,8 @@ get_edge_start = (pos, size, layout_size) ->
   return start
 
 class Position extends Animation
-  new: (node, start, target, layout_size) =>
-    super!
+  new: (node, start, target, layout_size, ...) =>
+    super(...)
     @node = node
     if @node.data.position_animation
       @node.data.position_animation.done = true
@@ -55,14 +55,14 @@ class Position extends Animation
     animator\add(self)
 
 class Position_Jump extends Position
-  new: (node, start, target, layout_size) =>
-    super(node, start, target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, target, layout_size, ...)
     @node\set_pos(@target)
     @done = true
 
 class Position_Lerp extends Position
-  new: (node, start, target, layout_size) =>
-    super(node, start, target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, target, layout_size, ...)
     @speed = node.style\get("position_lerp_animation_speed") or @speed
   tick: =>
     @current.x = cord.math.lerp(@current.x, @target.x, @speed, @speed)
@@ -74,8 +74,8 @@ class Position_Lerp extends Position
     return false
 
 class Position_Approach extends Position
-  new: (node, start, target, layout_size) =>
-    super(node, start, target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, target, layout_size, ...)
     @speed = node.style\get("position_approach_animation_speed") or @speed
   tick: =>
     @current.x = cord.math.approach(@current.x, @target.x, @speed)
@@ -88,23 +88,23 @@ class Position_Approach extends Position
 
 
 class Position_Lerp_From_Edge extends Position_Lerp
-  new: (node, start, target, layout_size) =>
-    super(node, get_edge_start(target, node\get_size!, layout_size), target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, get_edge_start(target, node\get_size!, layout_size), target, layout_size, ...)
     @speed = node.style\get("position_lerp_from_edge_animation_speed") or @speed
 
 class Position_Approach_From_Edge extends Position_Approach
-  new: (node, start, target, layout_size) =>
-    super(node, get_edge_start(target, node\get_size!, layout_size), target, layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, get_edge_start(target, node\get_size!, layout_size), target, layout_size, ...)
     @speed = node.style\get("position_approach_from_edge_animation_speed") or @speed
 
 class Position_Lerp_To_Edge extends Position_Lerp
-  new: (node, start, target, layout_size) =>
-    super(node, start, get_edge_start(target, node\get_size!, layout_size), layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, get_edge_start(target, node\get_size!, layout_size), layout_size, ...)
     @speed = node.style\get("position_lerp_to_edge_animation_speed") or @speed
 
 class Position_Approach_To_Edge extends Position_Approach
-  new: (node, start, target, layout_size) =>
-    super(node, start, get_edge_start(target, node\get_size!, layout_size), layout_size)
+  new: (node, start, target, layout_size, ...) =>
+    super(node, start, get_edge_start(target, node\get_size!, layout_size), layout_size, ...)
     @speed = node.style\get("position_approach_to_edge_animation_speed") or @speed
 
 return {
