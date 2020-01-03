@@ -63,3 +63,5 @@ back\set_opacity(1)
 front\set_visible(true)
 front2\set_visible(true)
 text\set_visible(true)
+
+front2.widget\connect_signal("button::press", () -> cord.wim.animations.color.lerp(front2, nil, "#FFFFFF", "background"))

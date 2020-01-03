@@ -18,11 +18,14 @@ class Color extends Animation
     super!
     @node = node
     @color_index = color_index
-    if @node.data["#{@color_index}_color_animation"]
-      @node.data["#{@color_index}_color_animation"].done = true
-      @current = @node.data["#{@color_index}_color_animation"].current
-    else
+    if start
       @current = type(start) == "string" and cord.util.color(start) or start\copy!
+    else
+      if @node.data["#{@color_index}_color_animation"]
+        @node.data["#{@color_index}_color_animation"].done = true
+        @current = @node.data["#{@color_index}_color_animation"].current
+      else
+        @current = @node.current_style\get(@color_index)
     @target = type(target) == "string" and cord.util.color(target) or target\copy!
     @speed = node.style\get("color_animation_speed") or 1
     @node.current_style\set(@color_index, @current)
@@ -35,7 +38,6 @@ class Color_Lerp extends Color
     @speed = node.style\get("color_lerp_animation_speed") or @speed
   tick: =>
     @current\lerp(@target, @speed)
-    print(@current\to_rgba_string!)
     @node\restylize(@color_index)
     if @current\equals(@target)
       @done = true
@@ -52,7 +54,16 @@ class Color_Approach extends Color
       @done = true
     return @done
 
+class Color_Jump extends Color
+  new: (node, start, target, color_index) =>
+    super(node, start, target, color_index)
+    @current\lerp(@target, 1)
+    @done = true
+  tick: =>
+    return @done
+
 return {
   approach: Color_Approach,
-  lerp: Color_Lerp
+  lerp: Color_Lerp,
+  jump: Color_Jump
 }

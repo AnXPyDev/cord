@@ -43,7 +43,7 @@ class Node extends Object
     @content_container = nil
     @widget = nil
     @data = {}
-
+    
     @\create_current_style!
     @\create_signals!
     @\create_widgets!
