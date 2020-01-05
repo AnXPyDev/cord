@@ -6,6 +6,7 @@ cord.log = require "cord.log"
 
 class Layout extends Object
   new: =>
+    super!
     @node_visibility = {}
 
   node_visible_last_time: (node) =>

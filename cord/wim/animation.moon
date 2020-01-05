@@ -3,7 +3,7 @@ Object = require "cord.util.object"
 class Animation extends Object
   new: (callbacks) =>
     super!
-    @__name = "cord.wim.animation"
+    table.insert(@__name, "cord.wim.animation")
     @done = false
     @tick_function = ( -> )
     @callbacks = callbacks or {}

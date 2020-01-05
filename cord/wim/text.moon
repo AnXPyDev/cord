@@ -15,7 +15,7 @@ class Text extends Node
     @text = text
     super(category, label, stylesheet)
     @identification = "text #{@category} #{@label} #{@unique_id}"
-    @__name = "cord.wim.text"
+    table.insert(@__name, "cord.wim.text")
 
   create_signals: =>
     @\connect_signal("geometry_changed", () ->

@@ -2,16 +2,21 @@ gears = require "gears"
 
 Object = require "cord.util.object"
 
+cord = {
+  util: require "cord.util.base"
+}
+
 class Image extends Object
   new: (path) =>
-    @__name = "cord.util.image"
+    super!
+    table.insert(@__name, "cord.util.image")
     @base_surface = gears.surface(path)
     @color_cache = {}
   get: (color) =>
     local string_color
     if not color
       return @base_surface
-    elseif type(color) == "table" and color.__name == "cord.util.color"
+    elseif cord.util.is_object_class(color, "cord.util.color")
       string_color = color\to_rgba_string!
     elseif type(color) == "string"
       string_color = color

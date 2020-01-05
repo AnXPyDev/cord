@@ -8,7 +8,7 @@ Node = require "cord.wim.node"
 class Nodebox extends Node
   new: (...) =>
     super(...)
-    @__name = "cord.wim.nodebox"
+    table.insert(@__name, "cord.wim.nodebox")
     @wibox = nil
     @visible = false
     @\create_wibox!

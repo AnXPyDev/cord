@@ -4,7 +4,7 @@ Style = require "cord.wim.style"
 class StyleSheet extends Object
   new: =>
     super!
-    @__name = "cord.wim.stylsheet"
+    table.insert(@__name, "cord.wim.stylsheet")
     @by_category = {}
     @by_label = {}
   add_style: (category, label, style, parents = {}) =>

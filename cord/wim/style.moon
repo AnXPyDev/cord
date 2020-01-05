@@ -6,7 +6,7 @@ cord = { table: require "cord.table" }
 class Style extends Object
   new: (values, parents) =>
     super!
-    @__name = "cord.wim.style"
+    table.insert(@__name, "cord.wim.style")
     @values = values or {}
     @parents = parents or {}
   set: (key, value) =>

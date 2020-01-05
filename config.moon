@@ -47,7 +47,7 @@ sheet\add_style("image", nil, cord.wim.style({
 }), {{"box"}})
 
 text = cord.wim.text("text", nil, sheet, "r/unixporn")
-image = cord.wim.image("image", nil, sheet, cord.util.image("/home/bob/.icons/emacs.png"))
+--image = cord.wim.image("image", nil, sheet, cord.util.image("/home/bob/.icons/emacs.png"))
 front = cord.wim.node("box", "front", sheet, {image})
 front2 = cord.wim.node("box", "front", sheet, {text})
 back = cord.wim.nodebox("box", "back", sheet, {front, front2})

@@ -27,7 +27,7 @@ unique_id_counter = 0
 class Node extends Object
   new: (category="__empty_node_category__", label="__empty_node_label__", stylesheet, children={}) =>
     super!
-    @__name = "cord.wim.node"
+    table.insert(@__name, "cord.wim.node")
     unique_id_counter += 1
     @unique_id = unique_id_counter
     @category = category
@@ -59,8 +59,7 @@ class Node extends Object
 
   for_each_node_child: (fn) =>
     for k, child in pairs @children
-      cn = cord.util.get_object_class(child)
-      if cn  == "cord.wim.node" or cn == "cord.wim.text" or cn == "cord.wim.image"
+      if cord.util.is_object_class(child, "cord.wim.node")
         fn(child)
 
 
@@ -219,7 +218,7 @@ class Node extends Object
       layout: wibox.layout.manual
     })
     for i, child in ipairs @children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.image")
+      if cord.util.is_object_class(child, "cord.wim.node")
         @content\add_at(child.widget, {x:0,y:0})
       else
         @content\add_at(child, {x:0,y:0})

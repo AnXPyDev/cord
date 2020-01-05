@@ -16,7 +16,7 @@ class Image extends Node
     @image = image
     super(category, label, stylesheet)
     @identification = "image #{@category} #{@label} #{@unique_id}"
-    @__name = "cord.wim.image"
+    table.insert(@__name, "cord.wim.image")
 
   create_signals: =>
     @\connect_signal("geometry_changed", () ->

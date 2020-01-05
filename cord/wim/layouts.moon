@@ -1,16 +1,20 @@
+cord = {
+  util: require "cord.util"
+}
+
 Layout = require "cord.wim.layout"
 Vector = require "cord.math.vector"
 
 class Fit_Horizontal extends Layout
   new: =>
     super!
-    @__name = "cord.wim.layouts.fit.horizontal"
+    table.insert(@__name, "cord.wim.layouts.fit.horizontal")
   apply_layout: (node) =>
     content_size = node\get_content_size!
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox" or child.__name == "cord.wim.image")
+      if cord.util.is_object_class(child, "cord.wim.node")
         if child.current_style\get("visible") == true
           child_size = child\get_size!
           if (current.x + child_size.x) > content_size.x
@@ -24,13 +28,13 @@ class Fit_Horizontal extends Layout
 class Fit_Vertical extends Layout
   new: =>
     super!
-    @__name = "cord.wim.layouts.fit.vertical"
+    table.insert(@__name, "cord.wim.layouts.fit.vertical")
   apply_layout: (node) =>
     content_size = node\get_content_size!
     max = Vector()
     current = Vector()
     for k, child in pairs node.children
-      if child.__name and (child.__name == "cord.wim.node" or child.__name == "cord.wim.text" or child.__name == "cord.wim.nodebox" or child.__name == "cord.wim.image")
+      if cord.util.is_object_class(child, "cord.wim.node")
         if child.current_style\get("visible") == false
           continue
         child_size = child\get_size!
