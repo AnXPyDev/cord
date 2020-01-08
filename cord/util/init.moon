@@ -7,4 +7,6 @@ return crush({
   object: require "cord.util.object"
   shape: require "cord.util.shape"
   image: require "cord.util.image"
+  normalize: require "cord.util.normalize"
+  types: require "cord.util.types"
 }, (require "cord.util.base"))

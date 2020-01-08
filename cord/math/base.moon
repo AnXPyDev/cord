@@ -26,7 +26,6 @@ wrap = (x, min, max) ->
   elseif x < min
     return max - (min - x)
   return x
-
       
 distance = (v1, v2) ->
   return math.sqrt(math.pow(v1.x - v2.x, 2) + math.pow(v1.y - v2.y, 2))

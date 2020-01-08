@@ -1,6 +1,5 @@
 cord = { math: require "cord.math" }
 
-
 hsla_to_rgba = (hsla_array) ->
    h, s, l, a = unpack(hsla_array)
    local m1, m2

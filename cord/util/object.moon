@@ -18,15 +18,20 @@ class Object
     @__name = {"cord.util.object"}
     @_signals = {}
     @_weak_signals = {}
+
   connect_signal: (name, callback, tbl) =>
     connect_signal(@_signals, name, callback)
+
   weak_connect_signal: (name, callback) =>
     connect_signal(@_weak_signals, name, callback)
+
   emit_signal: (name, ...) =>
     emit_signal(@_signals, name, ...)
     emit_signal(@_weak_signals, name, ...)
+
   disconnect_signal: (name, callback) =>
     disconnect_signal(@_signals, name, callback)
+
   weak_disconnect_signal: (name, callback) =>
     disconnect_signal(@_weak_signals, name, callback)
 

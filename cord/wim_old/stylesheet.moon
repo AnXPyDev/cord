@@ -1,16 +1,13 @@
 Object = require "cord.util.object"
 Style = require "cord.wim.style"
 
-class Stylesheet extends Object
+class StyleSheet extends Object
   new: =>
     super!
     table.insert(@__name, "cord.wim.stylsheet")
     @by_category = {}
     @by_label = {}
-
-  add_style: (identification = {}, parents = {}) =>
-    category = identification[1]
-    label = identification[2]
+  add_style: (category, label, style, parents = {}) =>
     if category and category != "__empty_node_category__"
       @by_category[category] = @by_category[category] or style
       @by_category[category]\join(style)
@@ -19,16 +16,11 @@ class Stylesheet extends Object
       @by_label[label]\join(style)
     style = @\get_style(category, label)
     for k, v in pairs parents
-      style\add_parent(@\get_style(v))
+      style\add_parent(@\get_style(v[1], v[2]))
     return style
-
-  get_style: (identification = {}) =>
-    category = identification[1]
-    label = identification[2]
-    if label and label != "__empty_label__" and @by_label[label]
+  get_style: (category, label) =>
+    if label and label != "__empty_node_label__" and @by_label[label]
       return @by_label[label]
-    elseif category and category != "__empty_category__" and @by_category[category]
+    elseif category and category != "__empty_node_category__" and @by_category[category]
       return @by_category[category]
     return Style()
-
-return Stylesheet

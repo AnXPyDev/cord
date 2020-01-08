@@ -9,11 +9,9 @@ class Style extends Object
     table.insert(@__name, "cord.wim.style")
     @values = values or {}
     @parents = parents or {}
-
   set: (key, value) =>
     cord.table.set_key(@values, key, value)
     @\emit_signal("value_changed", key)
-
   get: (key, shallow = false) =>
     ret = cord.table.get_key(@values, key)
     if shallow == false and (ret == nil)
@@ -21,10 +19,8 @@ class Style extends Object
         ret = v\get(key)
         if ret then break
     return ret
-
   join: (other_style) =>
     gears.table.crush(@values, other_style.values)
-
   add_parent: (style) =>
     table.insert(@parents, style)
   
