@@ -24,12 +24,13 @@ class Node extends Object
 
     -- Gather children
     for i, child in ipairs {...}
-      add_child(child)
+      @\add_child(child)
 
     -- Create data
     @data\set("size", @style\get("size") or Vector())
     @data\set("pos", @style\get("pos") or Vector())
     @data\set("visible", @style\get("visible") or true)
+    @data\set("parent_index", 0)
 
     @stylizers = {}
     @\connect_signal("request_stylize", (stylizer_name) ->
@@ -51,6 +52,10 @@ class Node extends Object
   set_parent: (parent) =>
     if types.match(parent, "cord.wim.node")
       @parent = parent
+      for i, sibling in ipairs parent.children
+        if sibling.id = @id
+          @data\set("parent_index", i)
+          
       @\emit_signal("parent_changed")
 
   get_size: () =>
