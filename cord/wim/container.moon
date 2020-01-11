@@ -1,16 +1,18 @@
 gears = require "gears"
-wibox = require "wiobox"
+wibox = require "wibox"
 
 Node = require "cord.wim.node"
 
 types = require "cord.util.types"
 normalize = require "cord.util.normalize"
 
-cord = { table: require "cord.table" }
+cord = {
+  table: require "cord.table"
+  log: require "cord.log"
+}
   
 Margin = require "cord.util.margin"
-
-layer_names = {"padding", "background", "margin"}
+Vector = require "cord.math.vector"
 
 stylizers = {
   geometry: (container) ->
@@ -23,10 +25,10 @@ stylizers = {
       padding = container.data\get("padding")
       if padding
         padding = normalize.margin(padding, outside_size)
-        conatiner.layers.padding.left = padding.left
-        conatiner.layers.padding.right = padding.right
-        conatiner.layers.padding.top = padding.top
-        conatiner.layers.padding.bottom = padding.bottom
+        container.layers.padding.left = padding.left
+        container.layers.padding.right = padding.right
+        container.layers.padding.top = padding.top
+        container.layers.padding.bottom = padding.bottom
 
     if container.layers.background or container.layers.margin
       inside_size = container\get_size("inside")
@@ -42,10 +44,10 @@ stylizers = {
         margin = container.data\get("margin")
         if margin
           margin = normalize.margin(margin, inside_size)
-          conatiner.layers.margin.left = margin.left
-          conatiner.layers.margin.right = margin.right
-          conatiner.layers.margin.top = margin.top
-          conatiner.layers.margin.bottom = margin.bottom
+          container.layers.margin.left = margin.left
+          container.layers.margin.right = margin.right
+          container.layers.margin.top = margin.top
+          container.layers.margin.bottom = margin.bottom
 
     content_size = container\get_size("content")
     container.content.force_width = content_size.x
@@ -89,11 +91,12 @@ class Container extends Node
     }
 
     -- Create base widget and layout
-    @widget = wibox.widget!
     @content = wibox.layout.stack!
 
     @\create_layers!
     @\reorder_layers!
+
+    @widget = @layers.padding
 
     -- Setup stylizers
     cord.table.crush(@stylizers, stylizers)
@@ -108,19 +111,20 @@ class Container extends Node
     for i, child in ipairs @children
       @\add_to_content(child, i)
     
+    for k, stylizer in pairs @stylizers
+      stylizer(self)
 
   -- Creates only necessary layers
   create_layers: () =>
-    if @data\get("padding") and not @layers.padding
-      @layers.padding = wibox.container.margin!
+    @layers.padding = wibox.container.margin!
     if (@data\get("shape") or @data\get("background") or @data\get("foreground")) and not @layers.background
       @layers.background = wibox.container.background!
     if @data\get("margin") and not @layers.margin
       @layers.margin = wibox.container.margin!
     
   reorder_layers: () =>
-    last = @widget
-    for i, layer_name in ipairs layer_names
+    last = {}
+    for i, layer_name in ipairs {"padding", "background", "margin"}
       if @layers[layer_name]
         last.widget = @layers[layer_name]
         last = @layers[layer_name]
@@ -133,8 +137,8 @@ class Container extends Node
   remove_from_content: (child, index) =>
     @content\remove(index)
 
-  get_size: (scope = "content") ->
-    result = normalize.vector(@data\get("size"), @parent and @parent\get_size!
+  get_size: (scope = "content") =>
+    result = normalize.vector(@data\get("size"), @parent and @parent\get_size!)
     if scope == "content" or scope == "inside"
       padding = @data\get("padding")
       if padding
@@ -147,7 +151,7 @@ class Container extends Node
           margin = normalize.margin(margin, result)
           result.x -= margin.left + margin.right
           result.y -= margin.top + margin.bottom
-        
+
     return result
 
 return Container

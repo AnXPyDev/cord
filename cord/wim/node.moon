@@ -1,5 +1,6 @@
 Object = require "cord.util.object"
 Style = require "cord.wim.style"
+Vector = require "cord.math.vector"
 
 types = require "cord.util.types"
 normalize = require "cord.util.normalize"
@@ -16,7 +17,7 @@ class Node extends Object
 
     @identification = identification or {}
 
-    @style = stylesheet\get_style(@category, @label)
+    @style = stylesheet\get_style(@identification)
     @data = Style()
 
     @parent = nil

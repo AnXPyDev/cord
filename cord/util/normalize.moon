@@ -40,6 +40,7 @@ color_or_pattern = (cop, ...) ->
 return {
   value: value
   vector: vector
+  margin: margin
   color_or_pattern: color_or_pattern
   sum: sum
 }

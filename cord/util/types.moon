@@ -1,3 +1,5 @@
+cord = { table: require "cord.table" }
+
 match = (obj, ...) ->
   for i, type_name in ipairs {...}
     if type(obj) == "table"

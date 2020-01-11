@@ -8,13 +8,13 @@ class Stylesheet extends Object
     @by_category = {}
     @by_label = {}
 
-  add_style: (identification = {}, parents = {}) =>
+  add_style: (identification = {}, style, parents = {}) =>
     category = identification[1]
     label = identification[2]
-    if category and category != "__empty_node_category__"
+    if category and category != "__empty_category__"
       @by_category[category] = @by_category[category] or style
       @by_category[category]\join(style)
-    if label and label != "__empty_node_label__"
+    if label and label != "__empty_label__"
       @by_label[label] = @by_label[label] or style
       @by_label[label]\join(style)
     style = @\get_style(category, label)
