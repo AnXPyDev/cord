@@ -18,7 +18,6 @@ stylizers = {
   geometry: (container) ->
     if container.layers.padding
       outside_size = container\get_size("outside")
-
       container.layers.padding.forced_width = outside_size.x
       container.layers.padding.forced_height = outside_size.y
       
@@ -32,7 +31,6 @@ stylizers = {
 
     if container.layers.background or container.layers.margin
       inside_size = container\get_size("inside")
-
       if container.layers.background
         container.layers.background.forced_width = inside_size.x
         container.layers.background.forced_height = inside_size.y
@@ -105,7 +103,9 @@ class Container extends Node
     @\connect_signal("added_child", (child, index) -> @\add_to_content(child,index))
     @\connect_signal("removed_child", (child, index) -> @\remove_from_content(child,index))
 
-    @\connect_signal("geometry_changed", () -> @\emit_signal("request_stylize", "geometry"))
+    @\connect_signal("geometry_changed", () ->
+      @\stylize("geometry")
+    )
 
     -- Add children to content
     for i, child in ipairs @children

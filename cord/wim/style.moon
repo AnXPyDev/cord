@@ -11,8 +11,9 @@ class Style extends Object
     @parents = parents or {}
 
   set: (key, value) =>
-    cord.table.set_key(@values, key, value)
-    @\emit_signal("value_changed", key)
+    if value then cord.table.set_key(@values, key, value)
+    @\emit_signal("value_changed", key, value)
+    @\emit_signal("key_changed::#{key}", value)
 
   get: (key, shallow = false) =>
     ret = cord.table.get_key(@values, key)

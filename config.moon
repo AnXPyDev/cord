@@ -11,7 +11,7 @@ sheet = cord.wim.stylesheet()
 sheet\add_style({"box"}, cord.wim.style({
   padding: cord.util.margin(25)
   background: "#FF0000"
-  size: cord.math.vector(1, 1, "percentage")
+  size: cord.math.vector(1, 0.5, "percentage")
   shape: cord.util.shape.rectangle(20)
 }))
 
@@ -20,7 +20,9 @@ sheet\add_style({"box", "main"}, cord.wim.style({
   background: "#00FF00"
 }), {{"box"}})
 
-container = cord.wim.container(sheet, {"box", "main"}, cord.wim.container(sheet, {"box"}))
+container2 = cord.wim.container(sheet, {"box"})
+layout = cord.wim.layout(sheet, {"layout"}, container2)
+container = cord.wim.container(sheet, {"box", "main"}, layout)
 
 box = wibox({
   x: 0

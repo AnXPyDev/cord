@@ -23,20 +23,32 @@ class Node extends Object
     @parent = nil
     @children = {}
 
-    -- Gather children
-    for i, child in ipairs {...}
-      @\add_child(child)
-
     -- Create data
-    @data\set("size", @style\get("size") or Vector())
+    @data\set("size", @style\get("size") or Vector(1, 1, "percentage"))
     @data\set("pos", @style\get("pos") or Vector())
     @data\set("visible", @style\get("visible") or true)
     @data\set("parent_index", 0)
 
     @stylizers = {}
-    @\connect_signal("request_stylize", (stylizer_name) ->
-      @stylizers[stylizer_name] and @stylizers[stylizer_name](self)
+
+    @\connect_signal("geometry_changed", () ->
+      print(@id, "geometry_changed")
+      for i, child in ipairs @children
+        child\emit_signal("geometry_changed")
     )
+
+    @\connect_signal("parent_changed", () -> @\emit_signal("geometry_changed"))
+
+    -- Gather children
+    for i, child in ipairs {...}
+      @\add_child(child)
+
+  stylize: (...) =>
+    if #{...} == 0
+      for k, stylizer in pairs @stylizers
+        stylizer(self)
+    for i, name in ipairs {...}
+      @stylizers[name] and @stylizers[name](self)
 
   add_child: (child, index = #@children + 1) =>
     if types.match(child, "cord.wim.node")
@@ -56,11 +68,10 @@ class Node extends Object
       for i, sibling in ipairs parent.children
         if sibling.id = @id
           @data\set("parent_index", i)
-          
       @\emit_signal("parent_changed")
 
   get_size: () =>
-    return normalize.vector(@data\get(size), @parent and @parent\get_size())
+    return normalize.vector(@data\get("size"), @parent and @parent\get_size!)
 
   set_visible: (visible) =>
     if visible != @data\get("visible")
