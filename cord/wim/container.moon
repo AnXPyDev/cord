@@ -66,6 +66,12 @@ stylizers = {
     if container.layers.background and shape
       container.layers.background.shape = shape
 
+  opacity: (container) ->
+    container.widget.opacity = container.data\get("opacity")
+
+  visibile: (container) ->
+    container.widget.visible = container.data\get("visible")
+
 }
 
 
@@ -106,6 +112,9 @@ class Container extends Node
     @\connect_signal("geometry_changed", () ->
       @\stylize("geometry")
     )
+
+    @data\connect_signal("key_changed::opacity", () -> @stylize("opacity"))
+    @data\connect_signal("key_changed::visible", () -> @stylize("visible"))
 
     -- Add children to content
     for i, child in ipairs @children

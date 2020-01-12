@@ -16,6 +16,8 @@ class Layout extends Node
 
     @\connect_signal("added_child", (child, index) -> @\add_to_content(child,index))
     @\connect_signal("removed_child", (child, index) -> @\remove_from_content(child,index))
+    @\connect_signal("geometry_changed", () -> @\emit_signal("layout_changed"))
+    @\connect_signal("layout_changed", () -> @\apply_layout!)
 
     for i, child in ipairs @children
       @\add_to_content(child, i)
@@ -24,13 +26,16 @@ class Layout extends Node
     child.widget.point = {x:0,y:0}
     @content\insert(index, child.widget)
     @\update_in_content(child, index)
-    child.data\connect_signal("key_changed::pos", () -> @\update_in_content(child, index), "#{@id}_layout_signal")
+    @node_visibility_cache[child.id] = child.data\get("visible")
 
   update_in_content: (child, index) =>
     @content\move(index, child.data\get("pos")\to_primitive!)
 
   remove_from_content: (child, index) =>
     @content\remove(index)
-    child.data\disconnect_signal("key_changed::pos", nil, "#{@id}_layout_signal")
+
+  apply_layout: () =>
+
+  apply_for_child: (child, index, target_pos) =>
 
 return Layout

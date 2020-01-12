@@ -21,7 +21,7 @@ sheet\add_style({"box", "main"}, cord.wim.style({
 }), {{"box"}})
 
 container2 = cord.wim.container(sheet, {"box"})
-layout = cord.wim.layout(sheet, {"layout"}, container2)
+layout = cord.wim.layout.base(sheet, {"layout"}, container2)
 container = cord.wim.container(sheet, {"box", "main"}, layout)
 
 box = wibox({

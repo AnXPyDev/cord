@@ -27,6 +27,7 @@ class Node extends Object
     @data\set("size", @style\get("size") or Vector(1, 1, "percentage"))
     @data\set("pos", @style\get("pos") or Vector())
     @data\set("visible", @style\get("visible") or true)
+    @data\set("opacity", 1)
     @data\set("parent_index", 0)
 
     @stylizers = {}
@@ -35,6 +36,15 @@ class Node extends Object
       print(@id, "geometry_changed")
       for i, child in ipairs @children
         child\emit_signal("geometry_changed")
+      @parent and @parent\emit_signal("layout_changed")
+    )
+
+    @data\connect_signal("key_changed::visible", () ->
+      @parent and @parent\emit_signal("layout_changed")
+    )
+
+    @data\connect_signal("key_changed::pos", () ->
+      @parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self, @data\get("parent_index"))
     )
 
     @\connect_signal("parent_changed", () -> @\emit_signal("geometry_changed"))
@@ -49,11 +59,12 @@ class Node extends Object
         stylizer(self)
     for i, name in ipairs {...}
       @stylizers[name] and @stylizers[name](self)
+    @widget and @widget\emit_signal("widget::redraw_needed")
 
   add_child: (child, index = #@children + 1) =>
     if types.match(child, "cord.wim.node")
       table.insert(@children, index, child)
-      child\set_parent(self)
+      child\set_parent(self, index)
       @\emit_signal("added_child", child, index)
 
   remove_child: (to_remove) =>
@@ -62,12 +73,10 @@ class Node extends Object
         table.remove(@children, i)
         @\emit_signal("removed_child", child, i)
   
-  set_parent: (parent) =>
+  set_parent: (parent, index) =>
     if types.match(parent, "cord.wim.node")
       @parent = parent
-      for i, sibling in ipairs parent.children
-        if sibling.id = @id
-          @data\set("parent_index", i)
+      @data\set("parent_index", index)
       @\emit_signal("parent_changed")
 
   get_size: () =>
@@ -76,6 +85,14 @@ class Node extends Object
   set_visible: (visible) =>
     if visible != @data\get("visible")
       @data\set("visible", visible)
-      @\emit_signal("visibility_changed")
+
+  set_opacity: (opacity, change_visibility = true) =>
+    if opacity != @data\get("opacity")
+      @data\set("opacity", opacity)
+    if change_visibility
+      if opacity == 1
+        @\set_visible(true)
+      elseif opacity == 0
+        @\set_visible(false)
 
 return Node
