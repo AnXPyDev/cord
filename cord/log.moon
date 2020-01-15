@@ -1,12 +1,16 @@
-log_table = (tbl, depth = 0, max_depth = 5) ->
+log_table = (tbl, max_depth = 5, depth = 0) ->
   if depth > max_depth
     return
   prefix = "#{string.rep("-", depth)}>"
   for key, value in pairs tbl
     key_name = type(key) == "string" and "\"#{key}\"" or key
     if type(value) == "table"
-      print "#{prefix} #{key_name}:"
-      log_table(value, depth + 1, max_depth)
+      if depth + 1 <= max_depth
+        print "#{prefix} #{key_name}:"
+        log_table(value, max_depth, depth + 1)
+      else
+        print "#{prefix} #{key_name}: #{value}"
+    
     else
       print "#{prefix} #{key_name}: #{value}"
 

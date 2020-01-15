@@ -22,11 +22,13 @@ class Node extends Object
 
     @parent = nil
     @children = {}
+    @widget = {}
 
     -- Create data
     @data\set("size", @style\get("size") or Vector(1, 1, "percentage"))
     @data\set("pos", @style\get("pos") or Vector())
-    @data\set("visible", @style\get("visible") or true)
+    @data\set("visible", @style\get("visible") == nil and true or @style\get("visible"))
+    @data\set("hidden", @style\get("hidden"))
     @data\set("opacity", 1)
     @data\set("parent_index", 0)
 

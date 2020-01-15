@@ -1,5 +1,6 @@
 cord = {
   math: require "cord.math"
+  util: require "cord.util"
 }
 
 Animation = require "cord.wim.animation.base"
@@ -39,13 +40,15 @@ get_edge_start = (pos, size, layout_size) ->
 class Position extends Animation
   new: (node, start, target, layout_size, ...) =>
     super(...)
+    table.insert(@__name, "cord.wim.animation.position")
     @node = node
-    if @node.data\get("position_animation")
-      @node.data\get("position_animation").done = true
-      @current = @node.data\get("position_animation").current
+    start = start or node.data\get("pos")
+    if @node.data\get("active_position_animation")
+      @node.data\get("active_position_animation").done = true
+      @current = @node.data\get("active_position_animation").current
     else
       @current = start\copy!
-    @node.data\set("position_animation", self)
+    @node.data\set("active_position_animation", self)
     @target = target
     @speed = node.style\get("position_animation_speed") or 1
     @node.data\set("pos", @current)
@@ -55,16 +58,19 @@ class Position extends Animation
     animator\add(self)
 
 Position_Jump = (node, start, target, layout_size, ...) ->
-    node.data\set("pos", @target)
+  node.data\set("pos", target)
+  cord.util.call(...)
 
 class Position_Lerp extends Position
   new: (node, start, target, layout_size, ...) =>
     super(node, start, target, layout_size, ...)
+    table.insert(@__name, "cord.wim.animation.position.lerp")
     @speed = node.style\get("position_lerp_animation_speed") or @speed
   tick: =>
-    @current.x = cord.math.lerp(@current.x, @target.x, @speed, @speed)
-    @current.y = cord.math.lerp(@current.y, @target.y, @speed, @speed)
+    @current.x = cord.math.lerp(@current.x, @target.x, @speed, 0.1)
+    @current.y = cord.math.lerp(@current.y, @target.y, @speed, 0.1)
     @node.data\set("pos", @current)
+    @node.data\update("pos")
     if @current.x == @target.x and @current.y == @target.y
       @done = true
       return true
@@ -73,11 +79,13 @@ class Position_Lerp extends Position
 class Position_Approach extends Position
   new: (node, start, target, layout_size, ...) =>
     super(node, start, target, layout_size, ...)
+    table.insert(@__name, "cord.wim.animation.position.approach")
     @speed = node.style\get("position_approach_animation_speed") or @speed
   tick: =>
     @current.x = cord.math.approach(@current.x, @target.x, @speed)
     @current.y = cord.math.approach(@current.y, @target.y, @speed)
     @node.data\set("pos", @current)
+    @node.data\update("pos")
     if @current.x == @target.x and @current.y == @target.y
       @done = true
       return true

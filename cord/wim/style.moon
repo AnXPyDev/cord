@@ -10,8 +10,13 @@ class Style extends Object
     @values = values or {}
     @parents = parents or {}
 
-  set: (key, value) =>
-    if value then cord.table.set_key(@values, key, value)
+  set: (key, value, silent) =>
+    if value != nil and ((@values[key] != nil and @values[key] != value) or @values[key] == nil) then
+      cord.table.set_key(@values, key, value)
+      if not silent then @\update(key)
+      
+
+  update: (key) =>
     @\emit_signal("value_changed", key, value)
     @\emit_signal("key_changed::#{key}", value)
 

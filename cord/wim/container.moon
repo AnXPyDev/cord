@@ -69,8 +69,8 @@ stylizers = {
   opacity: (container) ->
     container.widget.opacity = container.data\get("opacity")
 
-  visibile: (container) ->
-    container.widget.visible = container.data\get("visible")
+  visibility: (container) ->
+    container.widget.visible = container.data\get("visible") and not container.data\get("hidden")
 
 }
 
@@ -114,7 +114,8 @@ class Container extends Node
     )
 
     @data\connect_signal("key_changed::opacity", () -> @stylize("opacity"))
-    @data\connect_signal("key_changed::visible", () -> @stylize("visible"))
+    @data\connect_signal("key_changed::visible", () -> @stylize("visibility"))
+    @data\connect_signal("key_changed::hidden", () -> @stylize("visibility"))
 
     -- Add children to content
     for i, child in ipairs @children

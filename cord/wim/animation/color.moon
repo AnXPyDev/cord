@@ -1,3 +1,5 @@
+-- NEEDS REWRITE
+
 Animation = require "cord.wim.animation.base"
 
 cord = {
