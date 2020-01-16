@@ -27,7 +27,7 @@ class Layout extends Node
     child.widget.point = {x:0,y:0}
     @content\insert(index, child.widget)
     @\update_in_content(child, index)
-    @child_visibility_cache[child.id] = not child.data\get("hidden")
+    @child_visibility_cache[child.id] = child.data\get("visible")
 
   update_in_content: (child, index) =>
     @content\move(index, child.data\get("pos")\to_primitive!)
@@ -40,18 +40,18 @@ class Layout extends Node
 
   apply_for_child: (child, index, target_pos, visible) =>
     child.data\set("visible", visible, true)
-    last_visibility = @child_visibility_cache[id]
+    last_visibility = @child_visibility_cache[child.id]
     current_visibility = child.data\get("visible") and not child.data\get("hidden")
     target_opacity = child.data\get("opacity")
     opacity_animation = child.style\get("opacity_animation") or animation.opacity.jump
     position_animation = child.style\get("position_animation") or animation.position.jump
     if current_visibility and not last_visibility
-      opacity_animation = child.data\get("opacity_hide_animation") or opacity_animation
-      position_animation = child.data\get("position_hide_animation") or position_animation
-      target_opacity = 1
-    elseif not current_visibility and last_visibility
       opacity_animation = child.data\get("opacity_show_animation") or opacity_animation
       position_animation = child.data\get("position_show_animation") or position_animation
+      target_opacity = 1
+    elseif not current_visibility and last_visibility
+      opacity_animation = child.data\get("opacity_hide_animation") or opacity_animation
+      position_animation = child.data\get("position_hide_animation") or position_animation
       target_opacity = 0
     opacity_animation(child, nil, target_opacity, () -> child.data\update("visible"))
     position_animation(child, nil, target_pos, @\get_size!)

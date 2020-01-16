@@ -22,7 +22,7 @@ class Opacity extends Animation
     @node.data\set("opacity_animation", self)
     @target = target
     @speed = node.style\get("opacity_animation_speed") or 1
-    node\set_opacity(@current)
+    node.data\set("opacity", @current)
     table.insert(@callbacks, () ->
       @node.data\set("opacity", @target)
     )

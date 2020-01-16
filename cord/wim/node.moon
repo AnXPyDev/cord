@@ -35,7 +35,6 @@ class Node extends Object
     @stylizers = {}
 
     @\connect_signal("geometry_changed", () ->
-      print(@id, "geometry_changed")
       for i, child in ipairs @children
         child\emit_signal("geometry_changed")
       @parent and @parent\emit_signal("layout_changed")
@@ -83,18 +82,5 @@ class Node extends Object
 
   get_size: () =>
     return normalize.vector(@data\get("size"), @parent and @parent\get_size!)
-
-  set_visible: (visible) =>
-    if visible != @data\get("visible")
-      @data\set("visible", visible)
-
-  set_opacity: (opacity, change_visibility = true) =>
-    if opacity != @data\get("opacity")
-      @data\set("opacity", opacity)
-    if change_visibility
-      if opacity == 1
-        @\set_visible(true)
-      elseif opacity == 0
-        @\set_visible(false)
 
 return Node
