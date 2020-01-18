@@ -51,17 +51,21 @@ class Position extends Animation
     @node.data\set("active_position_animation", self)
     @target = target
     @speed = node.style\get("position_animation_speed") or 1
-    @node.data\set("pos", @current)
+    @node.data\set("pos", @current, true)
+    @node.data\update("pos")
     if target then
       table.insert(@callbacks, () ->
         @node.data\set("pos", @target)
+        @node.data\update("pos")
       )
     else
       @done = true
     animator\add(self)
     
 Position_Jump = (node, start, target, layout_size, ...) ->
-  if target then node.data\set("pos", target)
+  if target then
+    node.data\set("pos", target, true)
+    node.data\update("pos")
   cord.util.call(...)
 
 class Position_Lerp extends Position
@@ -72,7 +76,7 @@ class Position_Lerp extends Position
   tick: =>
     @current.x = cord.math.lerp(@current.x, @target.x, @speed, 0.1)
     @current.y = cord.math.lerp(@current.y, @target.y, @speed, 0.1)
-    @node.data\set("pos", @current)
+    @node.data\set("pos", @current, true)
     @node.data\update("pos")
     if @current.x == @target.x and @current.y == @target.y
       @done = true
@@ -87,7 +91,7 @@ class Position_Approach extends Position
   tick: =>
     @current.x = cord.math.approach(@current.x, @target.x, @speed)
     @current.y = cord.math.approach(@current.y, @target.y, @speed)
-    @node.data\set("pos", @current)
+    @node.data\set("pos", @current, true)
     @node.data\update("pos")
     if @current.x == @target.x and @current.y == @target.y
       @done = true

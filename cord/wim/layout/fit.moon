@@ -32,7 +32,7 @@ class Fit extends Layout
     for i, child in ipairs @children
       if child.data\get("hidden")
         table.insert(results, {child, i, nil, false})
-      child_size = child\@get_size("outside")
+      child_size = child\get_size("outside")
       if (current[m[1]] + child_size[m[1]]) > size[m[1]]
         current[m[1]] = 0
         current[m[2]] = max
@@ -49,4 +49,4 @@ class Fit extends Layout
       if result[3]
         if corner_translation[1] then result[3].x = cord.math.flip(result[3].x, 0, size.x)
         if corner_translation[2] then result[3].y = cord.math.flip(result[3].y, 0, size.y)
-      apply_for_child(unpack(result))
+      @\apply_for_child(unpack(result))

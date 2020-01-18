@@ -40,7 +40,7 @@ class Node extends Object
       @parent and @parent\emit_signal("layout_changed")
     )
 
-    @data\connect_signal("key_changed::visible", () ->
+    @data\connect_signal("key_changed::hidden", () ->
       @parent and @parent\emit_signal("layout_changed")
     )
 

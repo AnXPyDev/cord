@@ -11,7 +11,7 @@ class Style extends Object
     @parents = parents or {}
 
   set: (key, value, silent) =>
-    if value != nil and ((@values[key] != nil and @values[key] != value) or @values[key] == nil) then
+    if value != nil and ((@values[key] != nil and @values[key] != value) or @values[key] == nil) and @values[key] != value then
       cord.table.set_key(@values, key, value)
       if not silent then @\update(key)
       
