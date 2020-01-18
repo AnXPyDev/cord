@@ -52,13 +52,16 @@ class Position extends Animation
     @target = target
     @speed = node.style\get("position_animation_speed") or 1
     @node.data\set("pos", @current)
-    table.insert(@callbacks, () ->
-      @node.data\set("pos", @target)
-    )
+    if target then
+      table.insert(@callbacks, () ->
+        @node.data\set("pos", @target)
+      )
+    else
+      @done = true
     animator\add(self)
-
+    
 Position_Jump = (node, start, target, layout_size, ...) ->
-  node.data\set("pos", target)
+  if target then node.data\set("pos", target)
   cord.util.call(...)
 
 class Position_Lerp extends Position

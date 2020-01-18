@@ -30,10 +30,14 @@ wrap = (x, min, max) ->
 distance = (v1, v2) ->
   return math.sqrt(math.pow(v1.x - v2.x, 2) + math.pow(v1.y - v2.y, 2))
 
+flip = (x, a, b) ->
+  return b - (x - a)
+
 return {
   clamp: clamp
   lerp: lerp
   approach: approach
   distance: distance
   wrap: wrap
+  flip: flip
 }

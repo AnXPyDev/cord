@@ -36,12 +36,12 @@ class Layout extends Node
     @content\remove(index)
 
   apply_layout: () =>
-    
 
   apply_for_child: (child, index, target_pos, visible) =>
     child.data\set("visible", visible, true)
     last_visibility = @child_visibility_cache[child.id]
     current_visibility = child.data\get("visible") and not child.data\get("hidden")
+    @child_visibility_cache[child.id] = current_visibility
     target_opacity = child.data\get("opacity")
     opacity_animation = child.style\get("opacity_animation") or animation.opacity.jump
     position_animation = child.style\get("position_animation") or animation.position.jump
