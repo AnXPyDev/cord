@@ -9,31 +9,56 @@ cord = require "cord"
 sheet = cord.wim.stylesheet()
 
 sheet\add_style({"box"}, cord.wim.style({
-  padding: cord.util.margin(25)
-  background: "#FF0000"
+  padding: cord.util.margin(10)
+  background: "#FFFFFF"
+  foreground: "#000000"
   size: cord.math.vector(1, 0.5, "percentage")
   shape: cord.util.shape.rectangle(20)
-  position_animation: cord.wim.animation.position.approach
-  position_animation_speed: 1
-  opacity_animation: cord.wim.animation.opacity.approach
+  position_show_animation: cord.wim.animation.position.lerp_from_edge
+  position_animation: cord.wim.animation.position.lerp
+  position_animation_speed: 0.2
+  opacity_animation: cord.wim.animation.opacity.jump
   opacity_animation_speed: 0.01
 }))
 
-sheet\add_style({"box", "main"}, cord.wim.style({
-  size: cord.math.vector(400)
-  background: "#00FF00"
+sheet\add_style({"box", "container2"}, cord.wim.style({
+  size: cord.math.vector(1, 1, "percentage")
+  background: "#FF0000"
 }), {{"box"}})
 
-container2 = cord.wim.container(sheet, {"box"})
-layout = cord.wim.layout.base(sheet, {"layout"}, container2)
+sheet\add_style({"box", "container3"}, cord.wim.style({
+  size: cord.math.vector(1, 0.5, "percentage")
+  background: "#0000FF"
+}), {{"box"}})
+
+sheet\add_style({"textbox"}, cord.wim.style({
+  halign: "center"
+  valign: "center"
+  font_name: "Mono"
+  font_size: 30
+  visible: true
+}))
+
+sheet\add_style({"imagebox"}, cord.wim.style({
+  color: "#000000"
+}))
+
+sheet\add_style({"box", "main"}, cord.wim.style({
+  padding: cord.util.margin(0)
+  size: cord.math.vector(1, 1, "percentage")
+  background: "#FFFFFF"
+  visible: true
+}), {{"box"}})
+
+sheet\add_style({"nodebox"}, cord.wim.style({
+  size: cord.math.vector(400)
+  background: "#CCCCCC"
+  visible: true
+}))
+
+imagebox = cord.wim.imagebox(sheet, {"imagebox"}, cord.util.image("/home/bob/.icons/awesomewm.png"))
+container2 = cord.wim.container(sheet, {"box", "container2"}, imagebox)
+layout = cord.wim.layout.fit(sheet, {"layout"}, container2, container3, container4)
 container = cord.wim.container(sheet, {"box", "main"}, layout)
 
-box = wibox({
-  x: 0
-  y: 0
-  width: 400
-  height: 400
-  widget: container.widget
-  visible: true
-  bg: "#FFFFFF"
-})
+box = cord.wim.nodebox(sheet, {"nodebox"}, container)

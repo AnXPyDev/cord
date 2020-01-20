@@ -22,12 +22,12 @@ class Node extends Object
 
     @parent = nil
     @children = {}
-    @widget = {}
+    @widget = nil
 
     -- Create data
     @data\set("size", @style\get("size") or Vector(1, 1, "percentage"))
     @data\set("pos", @style\get("pos") or Vector())
-    @data\set("visible", @style\get("visible") == nil and true or @style\get("visible"))
+    @data\set("visible", @style\get("visible"))
     @data\set("hidden", @style\get("hidden"))
     @data\set("opacity", 1)
     @data\set("parent_index", 0)
@@ -75,9 +75,10 @@ class Node extends Object
         @\emit_signal("removed_child", child, i)
   
   set_parent: (parent, index) =>
-    if types.match(parent, "cord.wim.node")
+    if types.match(parent, "cord.wim.node") or parent == nil
+      @\emit_signal("before_parent_change")
       @parent = parent
-      @data\set("parent_index", index)
+      @data\set("parent_index", index or 1)
       @\emit_signal("parent_changed")
 
   get_size: () =>

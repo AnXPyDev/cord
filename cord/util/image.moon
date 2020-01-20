@@ -6,6 +6,8 @@ cord = {
   util: require "cord.util.base"
 }
 
+types = require "cord.util.types"
+
 class Image extends Object
   new: (path) =>
     super!
@@ -16,7 +18,7 @@ class Image extends Object
     local string_color
     if not color
       return @base_surface
-    elseif cord.util.is_object_class(color, "cord.util.color")
+    elseif types.match(color, "cord.util.color")
       string_color = color\to_rgba_string!
     elseif type(color) == "string"
       string_color = color

@@ -121,8 +121,7 @@ class Container extends Node
     for i, child in ipairs @children
       @\add_to_content(child, i)
     
-    for k, stylizer in pairs @stylizers
-      stylizer(self)
+    @\stylize!
 
   -- Creates only necessary layers
   create_layers: () =>

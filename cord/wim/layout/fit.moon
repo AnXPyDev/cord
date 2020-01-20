@@ -2,7 +2,7 @@ Vector = require "cord.math.vector"
 Layout = require "cord.wim.layout.base"
 
 cord = {
-  math = require "cord.math.base"
+  math: require "cord.math.base"
 }
   
 corners = {
@@ -13,8 +13,8 @@ corners = {
 }
 
 directions = {
-  vertical = {"y", "x"}
-  horizontal = {"x", "y"}
+  vertical: {"y", "x"}
+  horizontal: {"x", "y"}
 }
  
 class Fit extends Layout
@@ -29,24 +29,30 @@ class Fit extends Layout
     current = Vector()
     max = 0
     m = directions[@direction]
-    for i, child in ipairs @children
+    for i, child in ipairs @widget_children
+      child_size = child\get_size("outside")
       if child.data\get("hidden")
         table.insert(results, {child, i, nil, false})
-      child_size = child\get_size("outside")
-      if (current[m[1]] + child_size[m[1]]) > size[m[1]]
-        current[m[1]] = 0
-        current[m[2]] = max
-      if not (current[m[2]] + child_size[m[2]] > size[m[2]] or current[m[1]] + child_size[m[1]] > size[m[1]])
-        current[m[1]] += child_size[m[1]]
-        if max < (current[m[2]] + child_size[m[2]])
-          max = current[m[2]] + child_size[m[2]]
-        table.insert(results, {child, i, current\copy!, true})
-      else
-        table.insert(results, {child, i, nil, false})
+        continue
+      if current[m[1]] + child_size[m[1]] > size[m[1]]
+        if not (max + child_size[m[2]] > size[m[2]] or child_size[m[1]] > size[m[1]])
+          current[m[2]] = max
+          current[m[1]] = 0
+        else
+          table.insert(results, {child, nil, false})
+          continue
+      elseif current[m[2]] + child_size[m[2]] > size[m[2]]
+        table.insert(results, {child, nil, false})
+        continue
+      table.insert(results, {child, current\copy!, true})
+      current[m[1]] += child_size[m[1]]
+      if current[m[2]] + child_size[m[2]] > max
+        max = current[m[2]] + child_size[m[2]]
 
     corner_translation = corners[@corner]
     for i, result in ipairs results
       if result[3]
-        if corner_translation[1] then result[3].x = cord.math.flip(result[3].x, 0, size.x)
-        if corner_translation[2] then result[3].y = cord.math.flip(result[3].y, 0, size.y)
+        child_size = result[1]\get_size("outside")
+        if corner_translation[1] then result[3].x = cord.math.flip(result[3].x, 0, size.x) - child_size.x
+        if corner_translation[2] then result[3].y = cord.math.flip(result[3].y, 0, size.y) - child_size.y
       @\apply_for_child(unpack(result))
