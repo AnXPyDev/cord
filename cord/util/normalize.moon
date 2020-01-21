@@ -7,8 +7,8 @@ Value = require "cord.math.value"
 Margin = require "cord.util.margin"
 
 value = (val = 0, context = 1, metric) ->
-  if types.match(val) == "cord.math.value"
-    if val.metric == "percentage"
+  if types.match(val, "cord.math.value")
+    if val.metric == "percentage" or val.metric == "ratio"
       return val.value * value(context) + val.offset
     else
       return val.value + val.offset
@@ -18,7 +18,17 @@ value = (val = 0, context = 1, metric) ->
     return val
   
 vector = (vec = Vector(), context = Vector()) ->
-  return Vector(value(vec.x, context.x, vec.metric), value(vec.y, context.y, vec.metric))
+  result = Vector()
+  if types.match(vec.x, "cord.math.value") and vec.x.metric == "ratio"
+    result.y = value(vec.y, context.y, vec.metric)
+    result.x = value(vec.x, result.y, vec.metric)
+  elseif types.match(vec.y, "cord.math.value") and vec.y.metric == "ratio"
+    result.x = value(vec.x, context.x, vec.metric)
+    result.y = value(vec.y, result.x, vec.metric)
+  else
+    result.x = value(vec.x, context.x, vec.metric)
+    result.y = value(vec.y, context.y, vec.metric)
+  return result
 
 margin = (mar = Margin(), context = Vector()) ->
   return Margin(

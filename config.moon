@@ -22,7 +22,7 @@ sheet\add_style({"box"}, cord.wim.style({
 }))
 
 sheet\add_style({"box", "container2"}, cord.wim.style({
-  size: cord.math.vector(1, 1, "percentage")
+  size: cord.math.vector(1, cord.math.value(0.5, 0, "ratio"), "percentage")
   background: "#FF0000"
 }), {{"box"}})
 
@@ -51,14 +51,12 @@ sheet\add_style({"box", "main"}, cord.wim.style({
 }), {{"box"}})
 
 sheet\add_style({"nodebox"}, cord.wim.style({
-  size: cord.math.vector(400)
-  background: "#CCCCCC"
+  size: cord.math.vector(400, 300)
   visible: true
 }))
 
-imagebox = cord.wim.imagebox(sheet, {"imagebox"}, cord.util.image("/home/bob/.icons/awesomewm.png"))
-container2 = cord.wim.container(sheet, {"box", "container2"}, imagebox)
-layout = cord.wim.layout.fit(sheet, {"layout"}, container2, container3, container4)
+container2 = cord.wim.container(sheet, {"box", "container2"}, textbox)
+layout = cord.wim.layout.fit(sheet, {"layout"}, container2)
 container = cord.wim.container(sheet, {"box", "main"}, layout)
 
 box = cord.wim.nodebox(sheet, {"nodebox"}, container)

@@ -20,8 +20,8 @@ get_closest_edge = (pos, size, layout_size) ->
   dist["bottom"] = layout_size.y - pos.y
 
   min = math.min(dist.left, dist.right, dist.top, dist.bottom)
-  for k, v in pairs dist
-    if v == min
+  for i, k in ipairs {"left", "right", "top", "bottom"}
+    if dist[k] == min
       return k
 
 get_edge_start = (pos, size, layout_size) ->

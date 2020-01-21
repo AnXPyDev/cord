@@ -9,22 +9,22 @@ cord = {
 Node = require "cord.wim.node"
 
 stylizers = {
-  geometry: (nodebox) ->
-    size = nodebox\get_size("outside")
-    nodebox.wibox.width = size.x
-    nodebox.wibox.height = size.y
+  geometry: =>
+    size = @\get_size("outside")
+    @wibox.width = size.x
+    @wibox.height = size.y
     
-  shape: (nodebox) ->
-    nodebox.wibox.shape = nodebox.data\get("shape") or gears.shape.rectangle
+  shape: =>
+    @wibox.shape = @data\get("shape") or gears.shape.rectangle
 
-  visibility: (nodebox) ->
-    nodebox.wibox.visible = nodebox.data\get("visible") and not nodebox.data\get("hidden") or false
+  visibility: =>
+    @wibox.visible = @data\get("visible") and not @data\get("hidden") or false
 
 }
 
 class Nodebox extends Node
-  new: (stylesheet, identification, ...) =>
-    super(stylesheet, identification, ...)
+  new: (stylesheet, identification, child) =>
+    super(stylesheet, identification, child)
     table.insert(@__name, "cord.wim.nodebox")
 
     @data\set("shape", @style\get("shape"))
