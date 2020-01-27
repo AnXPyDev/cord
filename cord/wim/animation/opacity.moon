@@ -3,30 +3,16 @@ cord = {
   util: require "cord.util"
 }
 
-Animation = require "cord.wim.animation.base"
+Animation = require "cord.wim.animation.node_data"
 Vector = require "cord.math.vector"
 
 animator = require "cord.wim.default_animator"
 
 class Opacity extends Animation
   new: (node, start, target, ...) =>
-    super(...)
+    super(node, start, target, "opacity", ...)
     table.insert(@__name, "cord.wim.animation.opacity")
-    @node = node
-    start = start or node.data\get("opacity")
-    if @node.data\get("opacity_animation")
-      @node.data\get("opacity_animation").done = true
-      @current = @node.data\get("opacity_animation").current
-    else
-      @current = start
-    @node.data\set("opacity_animation", self)
-    @target = target
     @speed = node.style\get("opacity_animation_speed") or 1
-    node.data\set("opacity", @current)
-    table.insert(@callbacks, () ->
-      @node.data\set("opacity", @target)
-    )
-    animator\add(self)
 
 Opacity_Jump = (node, start, target, ...) ->
   node.data\set("opacity", target)

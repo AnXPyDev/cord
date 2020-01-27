@@ -51,8 +51,8 @@ class Fit extends Layout
 
     corner_translation = corners[@corner]
     for i, result in ipairs results
-      if result[3]
+      if result[2]
         child_size = result[1]\get_size("outside")
-        if corner_translation[1] then result[3].x = cord.math.flip(result[3].x, 0, size.x) - child_size.x
-        if corner_translation[2] then result[3].y = cord.math.flip(result[3].y, 0, size.y) - child_size.y
+        if corner_translation[1] then result[2].x = cord.math.flip(result[2].x, 0, size.x) - child_size.x
+        if corner_translation[2] then result[2].y = cord.math.flip(result[2].y, 0, size.y) - child_size.y
       @\apply_for_child(unpack(result))

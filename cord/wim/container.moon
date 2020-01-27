@@ -109,7 +109,10 @@ class Container extends Node
     @\create_layers!
     @\reorder_layers!
 
-    @widget = @layers.padding
+    for i, layer_name in ipairs {"padding", "background", "margin"}
+      if @layers[layer_name]
+        @widget = @layers[layer_name]
+        break
 
     -- Setup stylizers
     cord.table.crush(@stylizers, stylizers)
@@ -141,12 +144,84 @@ class Container extends Node
 
   -- Creates only necessary layers
   create_layers: () =>
-    @layers.padding = wibox.container.margin!
+    if @data\get("padding") and not @layers.padding
+      @layers.padding = wibox.container.margin!
+
+      @layers.padding\connect_signal("mouse::enter", () ->
+        @\emit_signal("mouse_enter")
+        @\emit_signal("mouse_enter::outside")
+      )
+
+      @layers.padding\connect_signal("mouse::leave", () ->
+        @\emit_signal("mouse_leave")
+        @\emit_signal("mouse_leave::outside")
+      )
+
+      @layers.padding\connect_signal("button::press", (w, x, y, button, mods) ->
+        @\emit_signal("button_press", button, mods, x, y)
+        @\emit_signal("button_press::outside", button, mods, x, y)
+      )
+
+      @layers.padding\connect_signal("button::release", (w, x, y, button, mods) ->
+        @\emit_signal("button_release", button, mods, x, y)
+        @\emit_signal("button_release::outside", button, mods, x, y)
+      )
+
     if (@data\get("shape") or @data\get("background") or @data\get("foreground") or (@data\get("border_width") and @data\get("border_color"))) and not @layers.background
       @layers.background = wibox.container.background!
+
+      if not @layers.margin
+        @layers.background\connect_signal("mouse::enter", () ->
+          if not @layers.padding
+            @\emit_signal("mouse_enter")
+          @\emit_signal("mouse_enter::inside")
+        )
+
+        @layers.background\connect_signal("mouse::leave", () ->
+          if not @layers.padding
+            @\emit_signal("mouse_leave")
+          @\emit_signal("mouse_leave::inside")
+        )
+
+        @layers.background\connect_signal("button::press", (w, x, y, button, mods) ->
+          if not @layers.padding
+            @\emit_signal("button_press", button, mods, x, y)
+          @\emit_signal("button_press::inside", button, mods, x, y)
+        )
+
+        @layers.background\connect_signal("button::release", (w, x, y, button, mods) ->
+          if not @layers.padding
+            @\emit_signal("button_release", button, mods, x, y)
+          @\emit_signal("button_release::inside", button, mods, x, y)
+        )
+
     if @data\get("margin") and not @layers.margin
       @layers.margin = wibox.container.margin!
-    
+      if not @layers.background
+        @layers.margin\connect_signal("mouse::enter", () ->
+          if not @layers.padding
+            @\emit_signal("mouse_enter")
+          @\emit_signal("mouse_enter::inside")
+        )
+
+        @layers.margin\connect_signal("mouse::leave", () ->
+          if not @layers.padding
+            @\emit_signal("mouse_leave")
+          @\emit_signal("mouse_leave::inside")
+        )
+
+        @layers.margin\connect_signal("button::press", (w, x, y, button, mods) ->
+          if not @layers.padding
+            @\emit_signal("button_press", button, mods, x, y)
+          @\emit_signal("button_press::inside", button, mods, x, y)
+        )
+
+        @layers.margin\connect_signal("button::release", (w, x, y, button, mods) ->
+          if not @layers.padding
+            @\emit_signal("button_release", button, mods, x, y)
+          @\emit_signal("button_release::inside", button, mods, x, y)
+        )
+
   reorder_layers: () =>
     last = {}
     for i, layer_name in ipairs {"padding", "background", "margin"}
@@ -162,7 +237,7 @@ class Container extends Node
   remove_from_content: (child, index) =>
     @content\remove(index)
 
-  get_size: (scope = "content") =>
+  get_size: (scope = "outside") =>
     result = normalize.vector(@data\get("size"), @parent and @parent\get_size!)
     if scope == "content" or scope == "inside"
       padding = @data\get("padding")

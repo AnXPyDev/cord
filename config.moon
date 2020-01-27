@@ -24,6 +24,7 @@ sheet\add_style({"box"}, cord.wim.style({
 sheet\add_style({"box", "container2"}, cord.wim.style({
   size: cord.math.vector(1, cord.math.value(0.5, 0, "ratio"), "percentage")
   background: "#FF4444"
+  hidden: true
 }), {{"box"}})
 
 sheet\add_style({"box", "container3"}, cord.wim.style({
@@ -55,8 +56,9 @@ sheet\add_style({"nodebox"}, cord.wim.style({
   visible: true
 }))
 
-container2 = cord.wim.container(sheet, {"box", "container2"}, textbox)
+container2 = cord.wim.container(sheet, {"box", "container2"})
 layout = cord.wim.layout.fit(sheet, {"layout"}, container2)
 container = cord.wim.container(sheet, {"box", "main"}, layout)
-
 box = cord.wim.nodebox(sheet, {"nodebox"}, container)
+
+container2.data\set("hidden", false)

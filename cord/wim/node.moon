@@ -45,7 +45,7 @@ class Node extends Object
     )
 
     @data\connect_signal("key_changed::pos", () ->
-      @parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self, @data\get("parent_index"))
+      @parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self)
     )
 
     @\connect_signal("parent_changed", () -> @\emit_signal("geometry_changed"))
