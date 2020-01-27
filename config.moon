@@ -23,7 +23,7 @@ sheet\add_style({"box"}, cord.wim.style({
 
 sheet\add_style({"box", "container2"}, cord.wim.style({
   size: cord.math.vector(1, cord.math.value(0.5, 0, "ratio"), "percentage")
-  background: "#FF0000"
+  background: "#FF4444"
 }), {{"box"}})
 
 sheet\add_style({"box", "container3"}, cord.wim.style({

@@ -10,4 +10,5 @@ return {
   textbox: require "cord.wim.textbox"
   imagebox: require "cord.wim.imagebox"
   nodebox: require "cord.wim.nodebox"
+  screen: require "cord.wim.screen"
 }

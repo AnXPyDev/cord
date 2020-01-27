@@ -9,4 +9,5 @@ return crush({
   image: require "cord.util.image"
   normalize: require "cord.util.normalize"
   types: require "cord.util.types"
+  callback_value: require "cord.util.callback_value"
 }, (require "cord.util.base"))

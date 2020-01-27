@@ -23,11 +23,11 @@ class Color extends Animation
     if start
       @current = type(start) == "string" and cord.util.color(start) or start\copy!
     else
-      if @node.data["#{@color_index}_color_animation"]
-        @node.data["#{@color_index}_color_animation"].done = true
-        @current = @node.data["#{@color_index}_color_animation"].current
+      if @node.data\get("active_#{@color_index}_color_animation")
+        @node.data\get("active_#{@color_index}_color_animation"]).done = true
+        @current = @node.data\get("active_#{@color_index}_color_animation").current
       else
-        @current = @node.current_style\get(@color_index)
+        @current = @node.data\get(@color_index)
     @target = type(target) == "string" and cord.util.color(target) or target\copy!
     @speed = node.style\get("color_animation_speed") or 1
     @node.current_style\set(@color_index, @current)

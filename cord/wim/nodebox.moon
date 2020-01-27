@@ -5,6 +5,7 @@ normalize = require "cord.util.normalize"
 cord = {
   table: require "cord.table"
 }
+types = require "cord.util.types"
   
 Node = require "cord.wim.node"
 
@@ -34,8 +35,8 @@ class Nodebox extends Node
 
     @data\connect_signal("key_changed::pos", (pos) ->
       tpos = pos\copy!
-      if @parent
-        ppos = @parent.data\get("pos")
+      if @parent and @parent.parent and types.match(@parent.parent, "cord.wim.screen")
+        ppos = @parent.parent.data\get("pos")
         tpos.x += ppos.x
         tpos.y += ppos.y
       @wibox.x = tpos.x

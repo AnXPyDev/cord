@@ -15,62 +15,69 @@ Margin = require "cord.util.margin"
 Vector = require "cord.math.vector"
 
 stylizers = {
-  geometry: (container) ->
-    if container.layers.padding
-      outside_size = container\get_size("outside")
-      container.layers.padding.forced_width = outside_size.x
-      container.layers.padding.forced_height = outside_size.y
+  geometry: =>
+    if @layers.padding
+      outside_size = @\get_size("outside")
+      @layers.padding.forced_width = outside_size.x
+      @layers.padding.forced_height = outside_size.y
       
-      padding = container.data\get("padding")
+      padding = @data\get("padding")
       if padding
         padding = normalize.margin(padding, outside_size)
-        container.layers.padding.left = padding.left
-        container.layers.padding.right = padding.right
-        container.layers.padding.top = padding.top
-        container.layers.padding.bottom = padding.bottom
+        @layers.padding.left = padding.left
+        @layers.padding.right = padding.right
+        @layers.padding.top = padding.top
+        @layers.padding.bottom = padding.bottom
 
-    if container.layers.background or container.layers.margin
-      inside_size = container\get_size("inside")
-      if container.layers.background
-        container.layers.background.forced_width = inside_size.x
-        container.layers.background.forced_height = inside_size.y
+    if @layers.background or @layers.margin
+      inside_size = @\get_size("inside")
+      if @layers.background
+        @layers.background.forced_width = inside_size.x
+        @layers.background.forced_height = inside_size.y
 
-      if container.layers.margin
-        container.layers.margin.forced_width = inside_size.x
-        container.layers.margin.forced_height = inside_size.y
+      if @layers.margin
+        @layers.margin.forced_width = inside_size.x
+        @layers.margin.forced_height = inside_size.y
 
-        margin = container.data\get("margin")
+        margin = @data\get("margin")
         if margin
           margin = normalize.margin(margin, inside_size)
-          container.layers.margin.left = margin.left
-          container.layers.margin.right = margin.right
-          container.layers.margin.top = margin.top
-          container.layers.margin.bottom = margin.bottom
+          @layers.margin.left = margin.left
+          @layers.margin.right = margin.right
+          @layers.margin.top = margin.top
+          @layers.margin.bottom = margin.bottom
 
-    content_size = container\get_size("content")
-    container.content.force_width = content_size.x
-    container.content.force_height = content_size.y
+    content_size = @\get_size("content")
+    @content.force_width = content_size.x
+    @content.force_height = content_size.y
 
-  background: (container) ->
-    background = container.data\get("background")
-    if container.layers.background and background
-      container.layers.background.bg = normalize.color_or_pattern(background, container.data\get("pattern_template"), container\get_size("inside"))
+  border: =>
+    width = @data\get("border_width")
+    color = @data\get("border_color")
+    if width and color
+      @layers.background.border_width = width
+      @layers.background.border_color = normalize.color_or_pattern(color, @data\get("pattern_template"), @\get_size("inside"))
 
-  foreground: (container) ->
-    foreground = container.data\get("foreground")
-    if container.layers.background and foreground
-      container.layers.background.fg = normalize.color_or_pattern(foreground)
+  background: =>
+    background = @data\get("background")
+    if @layers.background and background
+      @layers.background.bg = normalize.color_or_pattern(background, @data\get("pattern_template"), @\get_size("inside"))
 
-  shape: (container) ->
-    shape = container.data\get("shape")
-    if container.layers.background and shape
-      container.layers.background.shape = shape
+  foreground: =>
+    foreground = @data\get("foreground")
+    if @layers.background and foreground
+      @layers.background.fg = normalize.color_or_pattern(foreground)
 
-  opacity: (container) ->
-    container.widget.opacity = container.data\get("opacity")
+  shape: =>
+    shape = @data\get("shape")
+    if @layers.background and shape
+      @layers.background.shape = shape
 
-  visibility: (container) ->
-    container.widget.visible = container.data\get("visible") and not container.data\get("hidden")
+  opacity: =>
+    @widget.opacity = @data\get("opacity")
+
+  visibility: =>
+    @widget.visible = @data\get("visible") and not @data\get("hidden")
 
 }
 
@@ -84,6 +91,8 @@ class Container extends Node
     @data\set("shape", @style\get("shape") or nil)
     @data\set("background", @style\get("background") or nil)
     @data\set("foreground", @style\get("foreground") or nil)
+    @data\set("border_width", @style\get("border_width") or nil)
+    @data\set("border_color", @style\get("border_color") or nil)
     @data\set("margin", @style\get("margin") or nil)
     @data\set("padding", @style\get("padding") or nil)
     @data\set("pattern_template", @style\get("pattern_template") or {Vector(0, 0, "percentage"), Vector(1, 0, "percentage")})
@@ -116,6 +125,13 @@ class Container extends Node
     @data\connect_signal("key_changed::opacity", () -> @stylize("opacity"))
     @data\connect_signal("key_changed::visible", () -> @stylize("visibility"))
     @data\connect_signal("key_changed::hidden", () -> @stylize("visibility"))
+    @data\connect_signal("key_changed::background", () -> @stylize("background"))
+    @data\connect_signal("key_changed::foreground", () -> @stylize("foreground"))
+    @data\connect_signal("key_changed::shape", () -> @stylize("shape"))
+    @data\connect_signal("key_changed::border_width", () -> @stylize("border"))
+    @data\connect_signal("key_changed::border_color", () -> @stylize("border"))
+    @data\connect_signal("key_changed::margin", () -> @\emit_signal("geometry_changed"))
+    @data\connect_signal("key_changed::padding", () -> @\emit_signal("geometry_changed"))
 
     -- Add children to content
     for i, child in ipairs @children
@@ -126,7 +142,7 @@ class Container extends Node
   -- Creates only necessary layers
   create_layers: () =>
     @layers.padding = wibox.container.margin!
-    if (@data\get("shape") or @data\get("background") or @data\get("foreground")) and not @layers.background
+    if (@data\get("shape") or @data\get("background") or @data\get("foreground") or (@data\get("border_width") and @data\get("border_color"))) and not @layers.background
       @layers.background = wibox.container.background!
     if @data\get("margin") and not @layers.margin
       @layers.margin = wibox.container.margin!
