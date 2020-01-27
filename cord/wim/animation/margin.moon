@@ -10,4 +10,5 @@ class Margin extends Animation
     start = start or @node.data\get(@data_index)
     if not start
       return
-    if @node.data\get("active_#{}")
+    if @node.data\get("active_#{@data_index}_animation")
+      @node.data\get("active_#{@data_index}_animation")
