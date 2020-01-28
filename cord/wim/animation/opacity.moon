@@ -8,18 +8,18 @@ Vector = require "cord.math.vector"
 
 animator = require "cord.wim.default_animator"
 
-class Opacity extends Animation
+class Base extends Animation
   new: (node, start, target, ...) =>
     super(node, start, target, "opacity", ...)
     table.insert(@__name, "cord.wim.animation.opacity")
     @speed = node.style\get("opacity_animation_speed") or 1
 
-Opacity_Jump = (node, start, target, ...) ->
-  node.data\set("opacity", target)
+Jump = (node, start, target, ...) ->
+  node and node.data\set("opacity", target)
   cord.util.call(...)
     
     
-class Opacity_Lerp extends Opacity
+class Lerp extends Base
   new: (node, start, target, ...) =>
     super(node, start, target, ...)
     table.insert(@__name, "cord.wim.animation.opacity.lerp")
@@ -29,10 +29,9 @@ class Opacity_Lerp extends Opacity
     @node.data\set("opacity", @current)
     if @current == @target
       @done = true
-      return true
-    return false
+    return @done
 
-class Opacity_Approach extends Opacity
+class Approach extends Base
   new: (node, start, target, ...) =>
     super(node, start, target, ...)
     table.insert(@__name, "cord.wim.animation.opacity.approach")
@@ -42,11 +41,11 @@ class Opacity_Approach extends Opacity
     @node.data\set("opacity", @current)
     if @current == @target
       @done = true
-      return true
-    return false
+    return @done
 
 return {
-  jump: Opacity_Jump,
-  lerp: Opacity_Lerp,
-  approach: Opacity_Approach
+  base: Base
+  jump: Jump,
+  lerp: Lerp,
+  approach: Approach
 }

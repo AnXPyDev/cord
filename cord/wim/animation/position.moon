@@ -84,7 +84,6 @@ class Position_Approach extends Position
 class Position_Lerp_From_Edge extends Position_Lerp
   new: (node, start, target, layout_size, ...) =>
     super(node, get_edge_start(target, node\get_size("outside"), layout_size), target, layout_size, ...)
-    cord.log(get_edge_start(target, node\get_size("outside"), layout_size))
     table.insert(@__name, "cord.wim.animation.position.lerp_from_edge")
     @speed = node.style\get("position_lerp_from_edge_animation_speed") or @speed
 

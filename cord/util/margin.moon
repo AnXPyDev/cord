@@ -22,5 +22,9 @@ class Margin
     @right = cord.math.approach(@right, margin.right, ammount)
     @top = cord.math.approach(@top, margin.top, ammount)
     @bottom = cord.math.approach(@bottom, margin.bottom, ammount)
+  equal: (margin) =>
+    if @left == margin.left and @right == margin.right and @top == margin.top and @bottom == margin.bottom then
+      return true
+    return false
 
 return Margin

@@ -19,17 +19,26 @@ sheet\add_style({"box"}, cord.wim.style({
   position_animation_speed: 0.2
   opacity_animation: cord.wim.animation.opacity.jump
   opacity_animation_speed: 0.01
+  color_lerp_animation_speed: 0.3
+  margin_lerp_animation_speed: 0.3
 }))
 
 sheet\add_style({"box", "container2"}, cord.wim.style({
-  size: cord.math.vector(1, cord.math.value(0.5, 0, "ratio"), "percentage")
+  size: cord.math.vector(1, 0.5, "percentage")
   background: "#FF4444"
+  hover_background: "#FF6666"
+  hover_padding: cord.util.margin(15)
+  margin: cord.util.margin(10)
   hidden: true
 }), {{"box"}})
 
 sheet\add_style({"box", "container3"}, cord.wim.style({
   size: cord.math.vector(1, 0.5, "percentage")
-  background: "#0000FF"
+  background: "#FF4444"
+  hover_background: "#FF6666"
+  hover_padding: cord.util.margin(15)
+  margin: cord.util.margin(10)
+  hidden: true
 }), {{"box"}})
 
 sheet\add_style({"textbox"}, cord.wim.style({
@@ -56,9 +65,23 @@ sheet\add_style({"nodebox"}, cord.wim.style({
   visible: true
 }))
 
-container2 = cord.wim.container(sheet, {"box", "container2"})
-layout = cord.wim.layout.fit(sheet, {"layout"}, container2)
+textbox1 = cord.wim.textbox(sheet, {"textbox"}, "text 1")
+textbox2 = cord.wim.textbox(sheet, {"textbox"}, "text 2")
+container2 = cord.wim.container(sheet, {"box", "container2"}, textbox1)
+container3 = cord.wim.container(sheet, {"box", "container3"}, textbox2)
+layout = cord.wim.layout.fit(sheet, {"layout"}, container2, container3)
 container = cord.wim.container(sheet, {"box", "main"}, layout)
 box = cord.wim.nodebox(sheet, {"nodebox"}, container)
 
-container2.data\set("hidden", false)
+for i, cont in ipairs {container2, container3}
+  cont.data\set("hidden", false)
+
+  cont\connect_signal("mouse_enter", () ->
+    cord.wim.animation.color.lerp(cont, nil, cont.style\get("hover_background"), "background")
+    cord.wim.animation.margin.lerp(cont, nil, cont.style\get("hover_padding"), "padding")
+  )
+
+  cont\connect_signal("mouse_leave", () ->
+    cord.wim.animation.color.lerp(cont, nil, cont.style\get("background"), "background")
+    cord.wim.animation.margin.lerp(cont, nil, cont.style\get("padding"), "padding")
+  )

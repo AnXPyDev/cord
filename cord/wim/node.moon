@@ -34,9 +34,13 @@ class Node extends Object
 
     @stylizers = {}
 
-    @\connect_signal("geometry_changed", () ->
+    @\connect_signal("geometry_changed::inside", () ->
       for i, child in ipairs @children
         child\emit_signal("geometry_changed")
+    )
+
+    @\connect_signal("geometry_changed", () ->
+      @\emit_signal("geometry_changed::inside")
       @parent and @parent\emit_signal("layout_changed")
     )
 

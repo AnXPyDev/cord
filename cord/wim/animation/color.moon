@@ -1,71 +1,56 @@
--- NEEDS REWRITE
-
-Animation = require "cord.wim.animation.base"
+Animation = require "cord.wim.animation.node_data"
+Color = require "cord.util.color"
 
 cord = {
   util: require "cord.util",
   table: require "cord.table"
 }
 
-
-node_color_index = {
-  background: {{"style_data", "background_color"}, {"stylizers", "background"}},
-  overlay: {{"style_data", "overlay_color"}, {"stylizers", "overlay"}}
-}
+types = require "cord.util.types"
 
 animator = require "cord.wim.default_animator"
 
-class Color extends Animation
-  new: (node, start, target, color_index = "background") =>
-    super!
-    @node = node
-    @color_index = color_index
-    if start
-      @current = type(start) == "string" and cord.util.color(start) or start\copy!
-    else
-      if @node.data\get("active_#{@color_index}_color_animation")
-        @node.data\get("active_#{@color_index}_color_animation"]).done = true
-        @current = @node.data\get("active_#{@color_index}_color_animation").current
-      else
-        @current = @node.data\get(@color_index)
-    @target = type(target) == "string" and cord.util.color(target) or target\copy!
-    @speed = node.style\get("color_animation_speed") or 1
-    @node.current_style\set(@color_index, @current)
-    animator\add(self)
-    
+class Base extends Animation
+  new: (node, start, target, color_data_index = "background", ...) =>
+    super(node, start, target, color_data_index, ...)
+    table.insert(@__name, "cord.wim.animation.color")
+    @speed = @node.style\get("color_animation_speed") or 0.5
+    if types.match(@start, "string") then @start = Color(@start)
+    if types.match(@target, "string") then @target = Color(@target)
+    if types.match(@current, "string") then @current = Color(@current)
 
-class Color_Lerp extends Color
-  new: (node, start, target, color_index) =>
-    super(node, start, target, color_index)
-    @speed = node.style\get("color_lerp_animation_speed") or @speed
+class Lerp extends Base
+  new: (node, start, target, color_data_index) =>
+    super(node, start, target, color_data_index)
+    @speed = @node.style\get("color_lerp_animation_speed") or @speed
   tick: =>
     @current\lerp(@target, @speed)
-    @node\restylize(@color_index)
+    @node.data\set(@data_index, @current)
+    @node.data\update(@data_index)
     if @current\equals(@target)
       @done = true
     return @done
 
-class Color_Approach extends Color
-  new: (node, start, target, color_index) =>
-    super(node, start, target, color_index)
-    @speed = node.style\get("color_approach_animation_speed") or @speed
+class Approach extends Base
+  new: (node, start, target, color_data_index) =>
+    super(node, start, target, color_data_index)
+    @speed = @node.style\get("color_approach_animation_speed") or @speed
   tick: =>
+    print(@current\to_rgba_string!)
     @current\approach(@target, @speed)
-    @node\restylize(@color_index)
+    @node.data\set(@data_index, @current)
+    @node.data\update(@data_index)
     if @current\equals(@target)
       @done = true
     return @done
 
-class Color_Jump extends Color
-  new: (node, start, target, color_index) =>
-    super(node, start, target, color_index)
-    @current\lerp(@target, 1)
-    @done = true
-  tick: =>
-    return @done
+Jump = (node, start, target, color_data_index, ...) ->
+  node and node.data\set(color_data_index, target)
+  cord.util.call(...)
 
 return {
-  approach: Color_Approach,
-  lerp: Color_Lerp,
-  jump: Color_Jump
+  base: Base
+  approach: Approach
+  lerp: Lerp
+  jump: Jump
 }

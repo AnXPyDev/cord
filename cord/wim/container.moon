@@ -121,7 +121,7 @@ class Container extends Node
     @\connect_signal("added_child", (child, index) -> @\add_to_content(child,index))
     @\connect_signal("removed_child", (child, index) -> @\remove_from_content(child,index))
 
-    @\connect_signal("geometry_changed", () ->
+    @\connect_signal("geometry_changed::inside", () ->
       @\stylize("geometry")
     )
 
@@ -133,8 +133,8 @@ class Container extends Node
     @data\connect_signal("key_changed::shape", () -> @stylize("shape"))
     @data\connect_signal("key_changed::border_width", () -> @stylize("border"))
     @data\connect_signal("key_changed::border_color", () -> @stylize("border"))
-    @data\connect_signal("key_changed::margin", () -> @\emit_signal("geometry_changed"))
-    @data\connect_signal("key_changed::padding", () -> @\emit_signal("geometry_changed"))
+    @data\connect_signal("key_changed::margin", () -> @\emit_signal("geometry_changed::inside"))
+    @data\connect_signal("key_changed::padding", () -> @\emit_signal("geometry_changed::inside"))
 
     -- Add children to content
     for i, child in ipairs @children
