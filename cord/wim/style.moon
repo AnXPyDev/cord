@@ -18,8 +18,8 @@ class Style extends Object
       if not silent then @\update(key)
 
   update: (key) =>
-    @\emit_signal("value_changed", key, value)
-    @\emit_signal("key_changed::#{key}", value)
+    @\emit_signal("value_changed", key, @\get(key))
+    @\emit_signal("key_changed::#{key}", @\get(key))
 
   get: (key, shallow = false) =>
     ret = cord.table.get_key(@values, key)

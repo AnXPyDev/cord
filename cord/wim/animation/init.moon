@@ -5,4 +5,5 @@ return {
   opacity: require "cord.wim.animation.opacity"
   color: require "cord.wim.animation.color"
   margin: require "cord.wim.animation.margin"
+  scalar: require "cord.wim.animation.scalar"
 }
