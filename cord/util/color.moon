@@ -1,7 +1,7 @@
 cord = { math: require "cord.math" }
 
 hsla_to_rgba = (hsla_array) ->
-   h, s, l, a = unpack(hsla_array)
+   h, s, l, a = table.unpack(hsla_array)
    local m1, m2
    if l<=0.5 then 
       m2 = l*(s+1)
@@ -24,7 +24,7 @@ hsla_to_rgba = (hsla_array) ->
    return {_h2rgb(m1, m2, h+1/3), _h2rgb(m1, m2, h), _h2rgb(m1, m2, h-1/3), a or 1}
 
 rgba_to_hsla = (rgba_array) ->
-   r, g, b, a = unpack(rgba_array)
+   r, g, b, a = table.unpack(rgba_array)
    min = math.min(r, g, b)
    max = math.max(r, g, b)
    delta = max - min
@@ -72,12 +72,12 @@ edit_translations = {
 class Color
   new: (rgba_string) =>
     @__name = "cord.util.color"
-    @R, @G, @B, @A = unpack(hex_string_to_array(rgba_string))
-    @H, @S, @L, @A = unpack(rgba_to_hsla({@R, @G, @B, @A}))
+    @R, @G, @B, @A = table.unpack(hex_string_to_array(rgba_string))
+    @H, @S, @L, @A = table.unpack(rgba_to_hsla({@R, @G, @B, @A}))
   refresh_hsl: =>
-    @H, @S, @L, @A = unpack(rgba_to_hsla({@R, @G, @B, @A}))
+    @H, @S, @L, @A = table.unpack(rgba_to_hsla({@R, @G, @B, @A}))
   refresh_rgb: =>
-    @R, @G, @B, @A = unpack(hsla_to_rgba({@H, @S, @L, @A}))
+    @R, @G, @B, @A = table.unpack(hsla_to_rgba({@H, @S, @L, @A}))
   set: (property, value = @[property], offset = 0) =>
     @[property] = value + offset
     if edit_translations[property] == "rgb"

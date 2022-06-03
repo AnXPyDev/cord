@@ -31,7 +31,7 @@ log = (...) ->
     if type(pair[1]) == "table"
       log_table(pair[1])
     else
-      print(unpack(pair))
+      print(table.unpack(pair))
 
 module = {
   table: log_table

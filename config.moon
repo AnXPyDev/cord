@@ -5,7 +5,6 @@ beautiful = require "beautiful"
 
 cord = require "cord"
 
-
 sheet = cord.wim.stylesheet()
 
 sheet\add_style({"box"}, cord.wim.style({
@@ -63,13 +62,13 @@ sheet\add_style({"nodebox"}, cord.wim.style({
 containers = {}
 
 for i = 0,9
-  cont = cord.wim.container(sheet, {"container", "container#{i}"})
+  tb = cord.wim.textbox(sheet, {"textbox", "textbox#{i}"}, "#{i}")
+  cont = cord.wim.container(sheet, {"container", "container#{i}"}, tb)
   cont.data\set("hidden", false)
 
   cont.data\set("shape_radius", 0)
 
   cont.data\connect_signal("key_changed::shape_radius", (radius) ->
-    print(radius)
     cont.data\set("shape", cord.util.shape.rectangle(radius))
   )
 
@@ -85,8 +84,12 @@ for i = 0,9
     cord.wim.animation.scalar.lerp(cont, nil, cont.style\get("shape_corner_radius"), "shape_radius")
   )
 
+  cont\connect_signal("button_press", () ->
+	tb.data\set("text", "testing")
+  )
+
   table.insert(containers, cont)
 
-layout = cord.wim.layout.fit(sheet, {"layout"}, unpack(containers))
+layout = cord.wim.layout.fit(sheet, {"layout"}, table.unpack(containers))
 container = cord.wim.container(sheet, {"box", "main"}, layout)
 box = cord.wim.nodebox(sheet, {"nodebox"}, container)
