@@ -1,3 +1,3 @@
 return {
-  fuzzy: require "cord.string.fuzzy"
+	fuzzy: require "cord.string.fuzzy"
 }

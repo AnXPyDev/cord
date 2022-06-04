@@ -4,88 +4,121 @@ Vector = require "cord.math.vector"
 
 types = require "cord.util.types"
 normalize = require "cord.util.normalize"
-  
+	
 id_counter = 0
 
 class Node extends Object
-  new: (stylesheet, identification, ...) =>
-    super!
-    table.insert(@__name, "cord.wim.node")
+	defaults: {
+		size: -> Vector(1, 1, "percentage")
+		pos: -> Vector()
+		visible: -> true
+		hidden: -> false
+		opacity: -> 1
+	}
 
-    @id = id_counter
-    id_counter += 1
+	new: (config, ...) =>
+		super!
+		table.insert(@__name, "cord.wim.node")
 
-    @identification = identification or {}
+		@id = id_counter
+		id_counter += 1
 
-    @style = stylesheet\get_style(@identification)
-    @data = Style()
+		@identification = config.identification or config[2] or {config.class, config.label}
+	
+		@stylesheet = config.stylesheet or config.sheet or config[1]
+		@style = @stylesheet and @stylesheet\get_mutable_style(@identification) or config.style or Style()
+		@data = Style()
+	
+		@style.defaults = @defaults
 
-    @parent = nil
-    @children = {}
-    @widget = nil
+		@parent = nil
+		@children = {}
+		@widget = nil
 
-    -- Create data
-    @data\set("size", @style\get("size") or Vector(1, 1, "percentage"))
-    @data\set("pos", @style\get("pos") or Vector())
-    @data\set("visible", @style\get("visible"))
-    @data\set("hidden", @style\get("hidden"))
-    @data\set("opacity", 1)
-    @data\set("parent_index", 0)
+		@traits =  config.traits or config[3] or @style\get("traits") or {}
 
-    @stylizers = {}
+		for _, trait in pairs @traits
+			trait\connect(self)	
 
-    @\connect_signal("geometry_changed::inside", () ->
-      for i, child in ipairs @children
-        child\emit_signal("geometry_changed")
-    )
+		-- Create data
+		@data\set("size", @style\get("size"))
+		@data\set("pos", @style\get("pos"))
+		@data\set("visible", @style\get("visible"))
+		@data\set("hidden", @style\get("hidden"))
+		@data\set("opacity", @style\get("opacity"))
+		@data\set("parent_index", 0)
 
-    @\connect_signal("geometry_changed", () ->
-      @\emit_signal("geometry_changed::inside")
-      @parent and @parent\emit_signal("layout_changed")
-    )
+		@stylizers = {}
 
-    @data\connect_signal("key_changed::hidden", () ->
-      @parent and @parent\emit_signal("layout_changed")
-    )
+		@\connect_signal("geometry_changed::inside", () ->
+			for i, child in ipairs @children
+				child\emit_signal("geometry_changed")
+		)
 
-    @data\connect_signal("key_changed::pos", () ->
-      @parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self)
-    )
+		@\connect_signal("geometry_changed::local", () ->
+			@\emit_signal("geometry_changed::inside")
+		)
 
-    @\connect_signal("parent_changed", () -> @\emit_signal("geometry_changed"))
+		@\connect_signal("geometry_changed", () ->
+			@\emit_signal("geometry_changed::local")
+			@parent and @parent\emit_signal("layout_changed")
+		)
 
-    -- Gather children
-    for i, child in ipairs {...}
-      @\add_child(child)
+		@data\connect_signal("key_changed::hidden", () ->
+			@parent and @parent\emit_signal("layout_changed")
+		)
 
-  stylize: (...) =>
-    if #{...} == 0
-      for k, stylizer in pairs @stylizers
-        stylizer(self)
-    for i, name in ipairs {...}
-      @stylizers[name] and @stylizers[name](self)
-    @widget and @widget\emit_signal("widget::redraw_needed")
+		@data\connect_signal("key_changed::pos", () ->
+			@parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self)
+		)
 
-  add_child: (child, index = #@children + 1) =>
-    if types.match(child, "cord.wim.node")
-      table.insert(@children, index, child)
-      child\set_parent(self, index)
-      @\emit_signal("added_child", child, index)
+		@data\connect_signal("key_changed::size", () ->
+			if @data\get("layout_size")
+				@\emit_signal("geometry_changed::local")
+			else
+				@\emit_signal("geometry_changed")
+		)
+		
+		@data\connect_signal("key_changed::layout_size", () ->
+			@\emit_signal("geometry_changed")
+		)
 
-  remove_child: (to_remove) =>
-    for i, child in ipairs @children
-      if child.id == to_remove.id
-        table.remove(@children, i)
-        @\emit_signal("removed_child", child, i)
-  
-  set_parent: (parent, index) =>
-    if types.match(parent, "cord.wim.node") or parent == nil
-      @\emit_signal("before_parent_change")
-      @parent = parent
-      @data\set("parent_index", index or 1)
-      @\emit_signal("parent_changed")
+		@\connect_signal("parent_changed", () -> @\emit_signal("geometry_changed"))
 
-  get_size: () =>
-    return normalize.vector(@data\get("size"), @parent and @parent\get_size!)
+		-- Gather children
+		for i, child in ipairs {...}
+			@\add_child(child)
+
+	stylize: (...) =>
+		if #{...} == 0
+			for k, stylizer in pairs @stylizers
+				stylizer(self)
+		for i, name in ipairs {...}
+			@stylizers[name] and @stylizers[name](self)
+		@widget and @widget\emit_signal("widget::redraw_needed")
+
+	add_child: (child, index = #@children + 1) =>
+		if types.match(child, "cord.wim.node")
+			table.insert(@children, index, child)
+			child\set_parent(self, index)
+			@\emit_signal("added_child", child, index)
+
+	remove_child: (to_remove) =>
+		for i, child in ipairs @children
+			if child.id == to_remove.id
+				table.remove(@children, i)
+				@\emit_signal("removed_child", child, i)
+	
+	set_parent: (parent, index) =>
+		if types.match(parent, "cord.wim.node") or parent == nil
+			@\emit_signal("before_parent_change")
+			@parent = parent
+			@data\set("parent_index", index or 1)
+			@\emit_signal("parent_changed")
+
+	get_size: (scope = nil) =>
+		if scope == "layout"
+			return normalize.vector(@data\get("layout_size") or @data\get("size"), @parent and @parent\get_size!)
+		return normalize.vector(@data\get("size"), @parent and @parent\get_size!)
 
 return Node

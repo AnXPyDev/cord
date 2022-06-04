@@ -6,36 +6,53 @@ cord = { table: require "cord.table" }
 types = require "cord.util.types"
 
 class Style extends Object
-  new: (values, parents) =>
-    super!
-    table.insert(@__name, "cord.wim.style")
-    @values = values or {}
-    @parents = parents or {}
+	new: (values, parents) =>
+		super!
+		table.insert(@__name, "cord.wim.style")
+		@values = values or {}
+		@parents = parents or {}
+		@defaults = {}
 
-  set: (key, value, silent) =>
-    if value != nil and ((@values[key] != nil and @values[key] != value) or @values[key] == nil) and @values[key] != value then
-      cord.table.set_key(@values, key, value)
-      if not silent then @\update(key)
+	set: (key, value, silent, ...) =>
+		if key == nil
+			return
+		cord.table.set_key(@values, key, value)
+		if not silent then @\update(key, ...)
 
-  update: (key) =>
-    @\emit_signal("value_changed", key, @\get(key))
-    @\emit_signal("key_changed::#{key}", @\get(key))
+	update: (key, ...) =>
+		value = @\get(key)
+		@\emit_signal("value_changed", key, value, ...)
+		@\emit_signal("key_changed::#{key}", value, ...)
 
-  get: (key, shallow = false) =>
-    ret = cord.table.get_key(@values, key)
-    if shallow == false and (ret == nil)
-      for k, v in pairs @parents
-        ret = v\get(key)
-        if ret then break
-    if types.match(ret, "cord.util.callback_value")
-      return ret\get!
-    return ret
+	get: (key, shallow = false) =>
+		ret = @values[key]
+		default = false
+		local parent_default
+		if shallow == false and ret == nil
+			for k, v in pairs @parents
+				lret, default = v\get(key)
+				if lret 
+					if not default then
+						ret = lret
+						break
+					elseif not parent_default
+						parent_default = true
+						ret = parent_default
+		if (not ret or default) and @defaults[key]
+			ret = @defaults[key]!
+			default = true
+		if types.match(ret, "cord.util.callback_value")
+			ret = ret\get!
+		return ret, default
 
-  join: (other_style) =>
-    gears.table.crush(@values, other_style.values)
+	join: (other_style) =>
+		gears.table.crush(@values, other_style.values)
 
-  add_parent: (style) =>
-    table.insert(@parents, style)
-  
-      
+	add_parent: (style) =>
+		table.insert(@parents, style)
+
+	add_defaults: (...) =>
+		gears.table.crush(@defaults, ...)
+
+
 return Style
