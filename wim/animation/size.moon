@@ -19,8 +19,8 @@ class Size extends Animation
 		@speed = node.style\get("size_animation_speed") or 1
 		node.data\set("layout_size", target)
 	disconnect: =>
-		@node.data\set("layout_size", nil)
-		@node\emit_signal("geometry_changed")
+		@node.data\set("layout_size", nil, true)
+		-- @node\emit_signal("geometry_changed")
 
 		
 Size_Jump = (node, start, target, ...) ->

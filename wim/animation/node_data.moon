@@ -24,7 +24,7 @@ class Node_Data extends Animation
 			last_anim.done = true
 		@current = @start and cord.util.copy(@start) or last_anim and last_anim.current
 		@node.data\set("active_animation::#{@data_index}", self)
-		@node.data\set(@data_index, @current)
+		--@node.data\set(@data_index, @current)
 		@animator\add(self)
 
 return Node_Data

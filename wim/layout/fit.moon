@@ -19,10 +19,10 @@ directions = {
  
 class Fit extends Layout
 	new: (config, ...) =>
+		@corner = "top_right"
+		@direction = "horizontal"
 		super(config, ...)
 		table.insert(@__name, "cord.wim.layout.fit")
-		@corner = "top_left"
-		@direction = "horizontal"
 	apply_layout: =>
 		results = {}
 		size = @\get_size!

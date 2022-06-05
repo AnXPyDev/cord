@@ -29,6 +29,8 @@ class Layout extends Node
 				table.insert(@widget_children, child)
 				@\add_to_content(child)
 
+		@\emit_signal("layout_changed")
+
 	get_index: (node) =>
 		if types.match(node, "cord.wim.nodebox") or types.match(node, "cord.wim.screen")
 			return
