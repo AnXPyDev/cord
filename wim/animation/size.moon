@@ -33,7 +33,7 @@ class Size_Lerp extends Size
 	new: (node, start, target, ...) =>
 		super(node, start, target, ...)
 		table.insert(@__name, "cord.wim.animation.size.lerp")
-		@delta = @current.metric == "percentage" and 0.001 or 0.1
+		@delta = @current.metric == "ratio" and 0.001 or 0.1
 		@speed = node.style\get("size_lerp_animation_speed") or @speed
 	tick: =>
 		@current.x = cord.math.lerp(@current.x, @target.x, @speed, @delta)

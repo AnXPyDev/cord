@@ -3,6 +3,6 @@ class Callback_Value
 		@__name = "cord.util.callback_value"
 		@callback = callback
 	get: =>
-		return callback!
+		return @callback!
 
 return Callback_Value

@@ -57,12 +57,14 @@ stylizers = {
 		if width and color
 			@layers.background.border_width = width
 			@layers.background.border_color = normalize.color_or_pattern(color, @data\get("pattern_template"), @\get_size("inside"))
-
+	
+	-- TODO: Optimize
 	background: =>
 		background = @data\get("background")
 		if @layers.background and background
 			@layers.background.bg = normalize.color_or_pattern(background, @data\get("pattern_template"), @\get_size("inside"))
 
+	-- TODO: Optimize
 	foreground: =>
 		foreground = @data\get("foreground")
 		if @layers.background and foreground
@@ -84,7 +86,7 @@ stylizers = {
 
 class Container extends Node
 	defaults: cord.table.crush({}, Node.defaults, {
-		pattern_template: -> {Vector(0, 0, "percentage"), Vector(1, 0, "percentage")}
+		pattern_template: -> {Vector(0, 0, "ratio"), Vector(1, 0, "ratio")}
 	})
 
 	new: (config, ...) =>

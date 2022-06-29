@@ -8,11 +8,11 @@ Margin = require "cord.util.margin"
 
 value = (val = 0, context = 1, metric) ->
 	if types.match(val, "cord.math.value")
-		if val.metric == "percentage" or val.metric == "ratio"
+		if val.metric == "ratio"
 			return val.value * value(context) + val.offset
 		else
 			return val.value + val.offset
-	elseif metric == "percentage"
+	elseif metric == "ratio"
 		return val * value(context)
 	else
 		return val

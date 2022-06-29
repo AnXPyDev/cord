@@ -9,17 +9,18 @@ id_counter = 0
 
 class Node extends Object
 	defaults: {
-		size: -> Vector(1, 1, "percentage")
+		size: -> Vector(1, 1, "ratio")
 		pos: -> Vector()
 		visible: -> true
 		hidden: -> false
 		opacity: -> 1
+		fake_parent_size: -> Vector(200, 200)
 	}
 
 	new: (config, ...) =>
 		super!
 		table.insert(@__name, "cord.wim.node")
-
+	
 		@id = id_counter
 		id_counter += 1
 
@@ -47,6 +48,7 @@ class Node extends Object
 		@data\set("hidden", @style\get("hidden"))
 		@data\set("opacity", @style\get("opacity"))
 		@data\set("parent_index", 0)
+		@data\set("fake_parent_size", @style\get("fake_parent_size"))
 
 		@stylizers = {}
 
@@ -118,7 +120,7 @@ class Node extends Object
 
 	get_size: (scope = nil) =>
 		if scope == "layout"
-			return normalize.vector(@data\get("layout_size") or @data\get("size"), @parent and @parent\get_size!)
-		return normalize.vector(@data\get("size"), @parent and @parent\get_size!)
+			return normalize.vector(@data\get("layout_size") or @data\get("size"), @parent and @parent\get_size! or @data\get("fake_parent_size"))
+		return normalize.vector(@data\get("size"), @parent and @parent\get_size! or @data\get("fake_parent_size"))
 
 return Node

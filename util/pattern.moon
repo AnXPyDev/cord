@@ -14,7 +14,7 @@ Color = require "cord.util.color"
 Vector = require "cord.math.vector"
 	
 class Pattern
-	new: (stops, beginning = Vector(0, 0, "percentage"), ending = Vector(1, 0, "percentage")) =>
+	new: (stops, beginning = Vector(0, 0, "ratio"), ending = Vector(1, 0, "ratio")) =>
 		@__name = "cord.util.pattern"
 		@stops = cord.table.map(stops, (stop) ->
 			return {type(stop[1]) == "table" and stop[1] or type(stop[1] == "string") and Color(stop[1]), stop[2]}
