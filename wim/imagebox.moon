@@ -23,13 +23,14 @@ stylizers = {
 }  
 
 class Imagebox extends Node
+	@__name: "cord.wim.imagebox"
+
 	defaults: cord.table.crush({}, Node.defaults, {
 		resize: -> true
 	})
 
 	new: (config, image) =>
 		super(config)
-		table.insert(@__name, "cord.wim.imagebox")
 
 		@data\set("image", image)
 		@data\set("color", @style\get("color"))

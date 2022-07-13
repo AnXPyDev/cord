@@ -6,9 +6,10 @@ cord = { table: require "cord.table" }
 types = require "cord.util.types"
 
 class Style extends Object
+	@__name: "cord.wim.style"
+
 	new: (values, parents) =>
 		super!
-		table.insert(@__name, "cord.wim.style")
 		@values = values or {}
 		@parents = parents or {}
 		@defaults = {}
@@ -16,7 +17,7 @@ class Style extends Object
 	set: (key, value, silent, ...) =>
 		if key == nil
 			return
-		cord.table.set_key(@values, key, value)
+		@values[key] = value
 		if not silent then @\update(key, ...)
 
 	update: (key, ...) =>

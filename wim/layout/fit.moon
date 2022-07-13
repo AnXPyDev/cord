@@ -1,9 +1,10 @@
 Vector = require "cord.math.vector"
 Layout = require "cord.wim.layout.base"
-
 cord = {
 	math: require "cord.math.base"
+	table: require "cord.table"
 }
+
 	
 corners = {
 	top_left: {false, false}
@@ -18,18 +19,27 @@ directions = {
 }
  
 class Fit extends Layout
+	@__name: "cord.wim.layout.fit"
+
+	defaults: cord.table.crush({}, Layout.defaults, {
+		corner: -> "top_left"
+		direction: -> "horizontal"
+	})
 	new: (config, ...) =>
-		@corner = "top_right"
-		@direction = "horizontal"
 		super(config, ...)
-		table.insert(@__name, "cord.wim.layout.fit")
+		
+		@data\set("corner", config.corner or @style\get("corner"))
+		@data\set("direction", config.direction or @style\get("direction"))
+
+		@\emit_signal("constructor_finished")
+
 	apply_layout: =>
 		results = {}
 		size = @\get_size!
 		current = Vector()
 		max = 0
-		m = directions[@direction]
-		for i, child in ipairs @widget_children
+		m = directions[@data\get("direction")]
+		for i, child in ipairs @children
 			child_size = child\get_size("layout")
 			if child.data\get("hidden")
 				table.insert(results, {child, i, nil, false})
@@ -49,7 +59,7 @@ class Fit extends Layout
 			if current[m[2]] + child_size[m[2]] > max
 				max = current[m[2]] + child_size[m[2]]
 
-		corner_translation = corners[@corner]
+		corner_translation = corners[@data\get("corner")]
 		for i, result in ipairs results
 			if result[2]
 				child_size = result[1]\get_size("layout")

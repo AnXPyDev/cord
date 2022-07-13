@@ -70,8 +70,9 @@ edit_translations = {
 }
 
 class Color
+	@__name: "cord.util.color"
+
 	new: (rgba_string) =>
-		@__name = "cord.util.color"
 		@R, @G, @B, @A = table.unpack(hex_string_to_array(rgba_string))
 		@H, @S, @L, @A = table.unpack(rgba_to_hsla({@R, @G, @B, @A}))
 	refresh_hsl: =>

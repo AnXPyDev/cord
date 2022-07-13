@@ -28,6 +28,8 @@ stylizers = {
 }
 	
 class Textbox extends Node
+	@__name: "cord.wim.textbox"
+
 	defaults: cord.table.crush({}, Node.defaults, {
 		halign: -> "center"
 		valign: -> "center"
@@ -37,7 +39,6 @@ class Textbox extends Node
 
 	new: (config, text) =>
 		super(config)
-		table.insert(@__name, "cord.wim.textbox")
 
 		@data\set("halign", @style\get("halign"))
 		@data\set("valign", @style\get("valign"))

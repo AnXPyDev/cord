@@ -8,9 +8,10 @@ Animation = require "cord.wim.animation.node_data"
 Vector = require "cord.math.vector"
 
 class Size extends Animation
+	@__name: "cord.wim.animation.size"
+
 	new: (node, start, target, ...) =>
 		super(node, start, target, "size", ...)
-		table.insert(@__name, "cord.wim.animation.size")
 	
 		if @current.metric != @target.metric
 			@done = true
@@ -30,9 +31,10 @@ Size_Jump = (node, start, target, ...) ->
 	cord.util.call(...)
 
 class Size_Lerp extends Size
+	@__name: "cord.wim.animation.size.lerp"
+
 	new: (node, start, target, ...) =>
 		super(node, start, target, ...)
-		table.insert(@__name, "cord.wim.animation.size.lerp")
 		@delta = @current.metric == "ratio" and 0.001 or 0.1
 		@speed = node.style\get("size_lerp_animation_speed") or @speed
 	tick: =>
@@ -47,9 +49,10 @@ class Size_Lerp extends Size
 		return false
 
 class Size_Approach extends Size
+	@__name: "cord.wim.animation.size.approach"
+
 	new: (node, start, target, ...) =>
 		super(node, start, target, ...)
-		table.insert(@__name, "cord.wim.animation.size.approach")
 		@speed = node.style\get("position_approach_animation_speed") or @speed
 	tick: =>
 		@current.x = cord.math.approach(@current.x, @target.x, @speed, @delta)

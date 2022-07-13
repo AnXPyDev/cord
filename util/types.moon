@@ -1,26 +1,21 @@
 cord = { table: require "cord.table" }
 
-match = (obj, ...) ->
-	for i, type_name in ipairs {...}
-		if type(obj) == "table"
-			if type(obj.__name) == "table"
-				if cord.table.contains(obj.__name, type_name)
-					return true
-			else
-				if obj.__name == type_name
-					return true
-		else
-			if type(obj) == type_name
+match = (obj, name) ->
+	T = type(obj)
+	if T == name
+		return true
+	if T == "table"
+		if obj.__class
+			if obj.__class.__name == name
 				return true
+			elseif obj.__class.__lineage and cord.table.contains(obj.__class.__lineage, name)
+				return true
+	return false
 
 get = (obj) ->
 	if type(obj) == "table"
-		if type(obj.__name) == "table"
-			return obj.__name[#obj.__name]
-		else
-			return obj.__name or "table"
-	else
-		return type(obj)
+		return obj.__class.__name if obj.__class
+	return type(obj)
 
 return {
 	match: match

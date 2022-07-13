@@ -39,9 +39,10 @@ get_edge_start = (pos, size, layout_size, edge) ->
 	return start
 
 class Position extends Animation
+	@__name: "cord.wim.animation.position"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, start, target, "pos", ...)
-		table.insert(@__name, "cord.wim.animation.position")
 		@speed = node.style\get("position_animation_speed") or 1
 		
 Position_Jump = (node, start, target, layout_size, ...) ->
@@ -51,9 +52,10 @@ Position_Jump = (node, start, target, layout_size, ...) ->
 	cord.util.call(...)
 
 class Position_Lerp extends Position
+	@__name: "cord.wim.animation.position.lerp"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, start, target, layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.lerp")
 		@speed = node.style\get("position_lerp_animation_speed") or @speed
 	tick: =>
 		@current.x = cord.math.lerp(@current.x, @target.x, @speed, 0.1)
@@ -66,9 +68,10 @@ class Position_Lerp extends Position
 		return false
 
 class Position_Approach extends Position
+	@__name: "cord.wim.animation.position.approach"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, start, target, layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.approach")
 		@speed = node.style\get("position_approach_animation_speed") or @speed
 	tick: =>
 		@current.x = cord.math.approach(@current.x, @target.x, @speed)
@@ -82,27 +85,31 @@ class Position_Approach extends Position
 
 
 class Position_Lerp_From_Edge extends Position_Lerp
+	@__name: "cord.wim.animation.position.lerp_from_edge"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, get_edge_start(target, node\get_size("outside"), layout_size), target, layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.lerp_from_edge")
 		@speed = node.style\get("position_lerp_from_edge_animation_speed") or @speed
 
 class Position_Approach_From_Edge extends Position_Approach
+	@__name: "cord.wim.animation.position.approach_from_edge"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, get_edge_start(target, node\get_size("outside"), layout_size), target, layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.approach_from_edge")
 		@speed = node.style\get("position_approach_from_edge_animation_speed") or @speed
 
 class Position_Lerp_To_Edge extends Position_Lerp
+	@__name: "cord.wim.animation.position.lerp_to_edge"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, start, get_edge_start(target, node\get_size("outside"), layout_size), layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.lerp_to_edge")
 		@speed = node.style\get("position_lerp_to_edge_animation_speed") or @speed
 
 class Position_Approach_To_Edge extends Position_Approach
+	@__name: "cord.wim.animation.position.approach_to_edge"
+
 	new: (node, start, target, layout_size, ...) =>
 		super(node, start, get_edge_start(target, node\get_size("outside"), layout_size), layout_size, ...)
-		table.insert(@__name, "cord.wim.animation.position.approach_to_edge")
 		@speed = node.style\get("position_approach_to_edge_animation_speed") or @speed
 
 return {

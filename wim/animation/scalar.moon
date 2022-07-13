@@ -5,12 +5,15 @@ cord = {
 Animation = require "cord.wim.animation.node_data"
 
 class Base extends Animation
+	@__name: "cord.wim.animation.scalar"
+
 	new: (node, start, target, data_index, ...) =>
 		super(node, start, target, data_index, ...)
-		table.insert(@__name, "cord.wim.animation.scalar")
 		@speed = @node.style\get("scalar_animation_speed") or 1
 
 class Lerp extends Base
+	@__name: "cord.wim.animation.scalar.lerp"
+
 	new: (node, start, target, data_index, ...) =>
 		super(node, start, target, data_index, ...)
 		@precision_treshold = 0.005
@@ -23,6 +26,8 @@ class Lerp extends Base
 		return @done
 
 class Approach extends Base
+	@__name: "cord.wim.animation.scalar.approach"
+
 	new: (node, start, target, data_index, ...) =>
 		super(node, start, target, data_index, ...)
 		@speed = @node.style\get("scalar_approach_animation_speed") or @speed

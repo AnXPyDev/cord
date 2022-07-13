@@ -1,6 +1,7 @@
 class Callback_Value
+	@__name: "cord.util.callback_value"
+
 	new: (callback) =>
-		@__name = "cord.util.callback_value"
 		@callback = callback
 	get: =>
 		return @callback!

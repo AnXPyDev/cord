@@ -6,9 +6,12 @@ Node = require "cord.wim.node"
 animation = require "cord.wim.animation"
 
 class Layout extends Node
+	@__name: "cord.wim.layout"
+
 	new: (config, ...) =>
 		super(config, ...)
-		table.insert(@__name, "cord.wim.layout")
+
+		@_constructors_finished = 0
 
 		@child_visibility_cache = {}
 
@@ -17,43 +20,34 @@ class Layout extends Node
 		})
 		@widget = @content
 
-		@\connect_signal("added_child", (child, index) -> @\add_to_content(child,index))
+		@\connect_signal("added_child", (child, index) -> 
+			@\add_to_content(child,index)
+		)
 		@\connect_signal("removed_child", (child, index) -> @\remove_from_content(child,index))
 		@\connect_signal("geometry_changed", () -> @\emit_signal("layout_changed"))
 		@\connect_signal("layout_changed", () -> @\apply_layout!)
 
-		@widget_children = {}
-		
-		for i, child in ipairs @children
-			if not types.match(child, "cord.wim.nodebox") and not types.match(child, "cord.wim.screen")
-				table.insert(@widget_children, child)
-				@\add_to_content(child)
+		@\connect_signal("constructor_finished", () ->
+			@_constructors_finished += 1
+			if @_constructors_finished == (#@@__lineage - 1)
+				@\emit_signal("layout_changed")
+		)
 
-		@\emit_signal("layout_changed")
+		for index, child in ipairs @children
+			@\add_to_content(child, index)
 
-	get_index: (node) =>
-		if types.match(node, "cord.wim.nodebox") or types.match(node, "cord.wim.screen")
-			return
-		for i, child in ipairs @widget_children
-			if node == child
-				return i
+		@\emit_signal("constructor_finished")
 
-	add_to_content: (child) =>
-		index = @\get_index(child)
-		if not index then return
+	add_to_content: (child, index = @\get_index(child)) =>
 		child.widget.point = {x:0,y:0}
 		@content\insert(index, child.widget)
 		@\update_in_content(child, index)
 		@child_visibility_cache[child.id] = child.data\get("visible")
 
-	update_in_content: (child) =>
-		index = @\get_index(child)
-		if not index then return
+	update_in_content: (child, index = @\get_index(child)) =>
 		@content\move(index, child.data\get("pos")\to_primitive!)
 
-	remove_from_content: (child) =>
-		index = @\get_index(child)
-		if not index then return
+	remove_from_content: (child, index = @\get_index(child)) =>
 		@content\remove(index)
 
 	apply_layout: () =>
@@ -61,7 +55,7 @@ class Layout extends Node
 	apply_for_child: (child, target_pos, visible) =>
 		index = @\get_index(child)
 		if not index then return
-		child.data\set("visible", visible, true)
+		child.data\set("visible", visible or true, true)
 		last_visibility = @child_visibility_cache[child.id]
 		current_visibility = child.data\get("visible") and not child.data\get("hidden")
 		@child_visibility_cache[child.id] = current_visibility

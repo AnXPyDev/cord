@@ -2,9 +2,10 @@ Object = require "cord.util.object"
 Style = require "cord.wim.style"
 
 class Stylesheet extends Object
+	@__name: "cord.wim.stylsheet"
+
 	new: =>
 		super!
-		table.insert(@__name, "cord.wim.stylsheet")
 		@by_category = {}
 		@by_label = {}
 

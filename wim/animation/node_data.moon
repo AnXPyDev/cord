@@ -8,11 +8,12 @@ animator = require "cord.wim.default_animator"
 Animation = require "cord.wim.animation.base"
 
 class Node_Data extends Animation
+	@__name: "cord.wim.animation.node_data"
+
 	animator: animator
 
 	new: (node, start, target, data_index, ...) =>
 		super(...)
-		table.insert(@__name, "cord.wim.animation.node_data")
 		@node = node
 		@data_index = data_index
 		@start = start or @node.data\get(@data_index)

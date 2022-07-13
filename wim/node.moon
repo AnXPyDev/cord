@@ -8,6 +8,8 @@ normalize = require "cord.util.normalize"
 id_counter = 0
 
 class Node extends Object
+	@__name: "cord.wim.node"
+
 	defaults: {
 		size: -> Vector(1, 1, "ratio")
 		pos: -> Vector()
@@ -19,12 +21,11 @@ class Node extends Object
 
 	new: (config, ...) =>
 		super!
-		table.insert(@__name, "cord.wim.node")
 	
 		@id = id_counter
 		id_counter += 1
 
-		@identification = config.identification or config[2] or {config.class, config.label}
+		@identification = config.identification or config[2] or {config.category, config.label}
 	
 		@stylesheet = config.stylesheet or config.sheet or config[1]
 		@style = @stylesheet and @stylesheet\get_mutable_style(@identification) or config.style or Style()
@@ -69,7 +70,8 @@ class Node extends Object
 		@data\connect_signal("key_changed::hidden", () ->
 			@parent and @parent\emit_signal("layout_changed")
 		)
-
+		
+		-- TODO: Optimize
 		@data\connect_signal("key_changed::pos", () ->
 			@parent and types.match(@parent, "cord.wim.layout") and @parent\update_in_content(self)
 		)
@@ -102,15 +104,20 @@ class Node extends Object
 	add_child: (child, index = #@children + 1) =>
 		if types.match(child, "cord.wim.node")
 			table.insert(@children, index, child)
-			child\set_parent(self, index)
 			@\emit_signal("added_child", child, index)
+			child\set_parent(self, index)
 
 	remove_child: (to_remove) =>
 		for i, child in ipairs @children
 			if child.id == to_remove.id
 				table.remove(@children, i)
 				@\emit_signal("removed_child", child, i)
-	
+
+	get_index: (node) =>
+		for i, child in ipairs @children
+			if child == node
+				return i
+
 	set_parent: (parent, index) =>
 		if types.match(parent, "cord.wim.node") or parent == nil
 			@\emit_signal("before_parent_change")

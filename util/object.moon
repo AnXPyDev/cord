@@ -1,4 +1,18 @@
+log = require "cord.log"
+cord = {
+	table: require "cord.table"
+}
+
 class Object
+
+	@__name = "cord.util.object"
+	@__lineage = {}
+
+	@__inherited: (child) =>
+		child.__lineage = cord.table.deep_copy(@__lineage)
+		table.insert(child.__lineage, @__name)
+		--log(child.__lineage, child.__name)
+
 	exit_code: {}
 
 	new: =>

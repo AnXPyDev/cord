@@ -6,15 +6,17 @@ cord = {
 }
 
 class Base extends Animation
+	@__name: "cord.wim.animation.margin"
+
 	new: (node, start, target, data_index = "padding", ...) =>
 		super(node, start, target, data_index, ...)
-		table.insert(@__name, "cord.wim.animation.margin")
 		@speed = @node.style\get("margin_animation_speed") or 1
 
 class Lerp extends Base
+	@__name: "cord.wim.animation.margin.lerp"
+
 	new: (node, start, target, data_index, ...) =>
 		super(node, start, target , data_index, ...)
-		table.insert(@__name, "cord.wim.animation.margin.lerp")
 		@speed = @node.style\get("margin_lerp_animation_speed")
 	tick: =>
 		@current\lerp(@target, @speed)
@@ -25,9 +27,10 @@ class Lerp extends Base
 		return @done
 
 class Approach extends Base
+	@__name: "cord.wim.animation.margin.approach"
+
 	new: (node, start, target, data_index, ...) =>
 		super(node, start, target , data_index, ...)
-		table.insert(@__name, "cord.wim.animation.margin.approach")
 		@speed = @node.style\get("margin_approach_animation_speed")
 	tick: =>
 		@current\approach(@target, @speed)

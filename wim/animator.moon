@@ -3,9 +3,10 @@ gears = { timer: require "gears.timer" }
 Object = require "cord.util.object"
 
 class Animator extends Object
+	@__name: "cord.wim.animator"
+
 	new: (tps = 60) =>
 		super!
-		table.insert(@__name, "cord.wim.animator")
 		@queue = {}
 		@tps = tps
 		@timer = gears.timer({

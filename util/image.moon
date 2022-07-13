@@ -9,9 +9,10 @@ cord = {
 types = require "cord.util.types"
 
 class Image extends Object
+	@__name: "cord.util.image"
+
 	new: (path) =>
 		super!
-		table.insert(@__name, "cord.util.image")
 		@base_surface = gears.surface(path)
 		@color_cache = {}
 	get: (color) =>

@@ -24,13 +24,14 @@ stylizers = {
 }
 
 class Nodebox extends Node
+	@__name: "cord.wim.nodebox"
+
 	defaults: cord.table.crush({}, Node.defaults, {
 		shape: -> gears.shape.rectangle
 	})
 
 	new: (config, child) =>
 		super(config, child)
-		table.insert(@__name, "cord.wim.nodebox")
 
 		@data\set("shape", @style\get("shape"))
 

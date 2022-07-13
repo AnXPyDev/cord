@@ -11,5 +11,8 @@ return {
 	imagebox: require "cord.wim.imagebox"
 	nodebox: require "cord.wim.nodebox"
 	screen: require "cord.wim.screen"
+	client: require "cord.wim.client"
+	bar: require "cord.wim.bar"
+	titlebar: require "cord.wim.titlebar"
 	trait: require "cord.wim.trait"
 }

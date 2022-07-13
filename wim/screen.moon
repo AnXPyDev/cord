@@ -4,9 +4,10 @@ Vector = require "cord.math.vector"
 Callback_Value = require "cord.util.callback_value"
 
 class Screen extends Node
+	@__name: "cord.wim.screen"
+
 	new: (config, screen, ...) =>
 		super(config, ...)
-		table.insert(@__name, "cord.wim.screen")
 
 		@screen = screen
 

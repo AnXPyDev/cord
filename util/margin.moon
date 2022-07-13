@@ -3,8 +3,9 @@ cord = {
 }
 
 class Margin
+	@__name: "cord.util.margin"
+
 	new: (left = 0, right = left, top = right, bottom = top, metric = "undefined") =>
-		@__name = "cord.util.margin"
 		@metric = metric
 		@left = left
 		@right = right

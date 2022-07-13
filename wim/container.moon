@@ -85,13 +85,14 @@ stylizers = {
 
 
 class Container extends Node
+	@__name: "cord.wim.container"
+
 	defaults: cord.table.crush({}, Node.defaults, {
 		pattern_template: -> {Vector(0, 0, "ratio"), Vector(1, 0, "ratio")}
 	})
 
 	new: (config, ...) =>
 		super(config, ...)
-		table.insert(@__name, "cord.wim.container")
 
 		-- Add to data
 		@data\set("shape", @style\get("shape") or nil)
@@ -198,7 +199,7 @@ class Container extends Node
 					@\emit_signal("button_release::inside", button, mods, x, y)
 				)
 
-		if @data\get("margin") and not @layers.margin
+		if @data\get("margin") and not @layers.margin or not (@layers.padding or @layers.background)
 			@layers.margin = wibox.container.margin!
 			if not @layers.background
 				@layers.margin\connect_signal("mouse::enter", () ->
@@ -256,7 +257,7 @@ class Container extends Node
 				result.x -= padding.left + padding.right
 				result.y -= padding.top + padding.bottom
 			if scope == "content"
-				margin = @data\get("margin")
+				margin = @data\get("margin") 
 				if margin
 					margin = normalize.margin(margin, result)
 					result.x -= margin.left + margin.right
