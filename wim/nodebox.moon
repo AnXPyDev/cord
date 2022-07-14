@@ -19,7 +19,7 @@ stylizers = {
 		@wibox.shape = @data\get("shape") or gears.shape.rectangle
 
 	visibility: =>
-		@wibox.visible = @data\get("visible") and not @data\get("hidden") or false
+		@wibox.visible = @data\get("visible")
 
 }
 
@@ -50,7 +50,6 @@ class Nodebox extends Node
 
 		@data\connect_signal("key_changed::shape", () -> @\stylize("shape"))
 		@data\connect_signal("key_changed::visible", () -> @stylize("visibility"))
-		@data\connect_signal("key_changed::hidden", () -> @stylize("visibility"))
 
 		cord.table.crush(@stylizers, stylizers)
 

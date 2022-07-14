@@ -8,53 +8,44 @@ cord = {
 
 types = require "cord.util.types"
 
-animator = require "cord.wim.default_animator"
+Base = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.color"
 
-class Base extends Animation
-	@__name: "cord.wim.animation.color"
+		new: (node, data_index, target, start, ...) =>
+			super(node, data_index, target, start, ...)
+			if not @target or not @start
+				return
+			
+			@frame = 0
+			@length = @animator\duration(duration)
 
-	new: (node, start, target, color_data_index = "background", ...) =>
-		super(node, start, target, color_data_index, ...)
-		@speed = @node.style\get("color_animation_speed") or 0.5
-		if types.match(@start, "string") then @start = Color(@start)
-		if types.match(@target, "string") then @target = Color(@target)
-		if types.match(@current, "string") then @current = Color(@current)
+			if types.match(@start, "string") then @start = Color(@start)
+			if types.match(@target, "string") then @target = Color(@target)
+			if types.match(@current, "string") then @current = Color(@current)
 
-class Lerp extends Base
-	@__name: "cord.wim.animation.color.lerp"
+			@delta = Color(@target.R - @start.R, @target.G - @start.G, @target.B - @start.B, @target.A - @start.A, "rgba")
 
-	new: (node, start, target, color_data_index) =>
-		super(node, start, target, color_data_index)
-		@speed = @node.style\get("color_lerp_animation_speed") or @speed
-	tick: =>
-		@current\lerp(@target, @speed)
-		@node.data\set(@data_index, @current)
-		print("nigger")
-		if @current\equals(@target)
-			@done = true
-		return @done
+		tick: =>
+			@frame += 1
 
-class Approach extends Base
-	@__name: "cord.wim.animation.color.approach"
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				return true
 
-	new: (node, start, target, color_data_index) =>
-		super(node, start, target, color_data_index)
-		@speed = @node.style\get("color_approach_animation_speed") or @speed
-	tick: =>
-		print(@current\to_rgba_string!)
-		@current\approach(@target, @speed)
-		@node.data\set(@data_index, @current)
-		if @current\equals(@target)
-			@done = true
-		return @done
+			k = f(@frame / @length)
 
-Jump = (node, start, target, color_data_index, ...) ->
-	node and node.data\set(color_data_index, target)
-	cord.util.call(...)
+			@current.R = @start.R + @delta.R * k
+			@current.G = @start.G + @delta.G * k
+			@current.B = @start.B + @delta.B * k
+			@current.A = @start.A + @delta.A * k
 
-return {
+			@node.data\set(@data_index, @current)
+
+			return false
+
+return setmetatable({
 	base: Base
-	approach: Approach
-	lerp: Lerp
-	jump: Jump
-}
+}, {
+	__call: (...) => Base(...)
+})

@@ -14,7 +14,6 @@ class Node extends Object
 		size: -> Vector(1, 1, "ratio")
 		pos: -> Vector()
 		visible: -> true
-		hidden: -> false
 		opacity: -> 1
 		fake_parent_size: -> Vector(200, 200)
 	}
@@ -46,7 +45,6 @@ class Node extends Object
 		@data\set("size", @style\get("size"))
 		@data\set("pos", @style\get("pos"))
 		@data\set("visible", @style\get("visible"))
-		@data\set("hidden", @style\get("hidden"))
 		@data\set("opacity", @style\get("opacity"))
 		@data\set("parent_index", 0)
 		@data\set("fake_parent_size", @style\get("fake_parent_size"))
@@ -67,7 +65,7 @@ class Node extends Object
 			@parent and @parent\emit_signal("layout_changed")
 		)
 
-		@data\connect_signal("key_changed::hidden", () ->
+		@data\connect_signal("key_changed::visible", () ->
 			@parent and @parent\emit_signal("layout_changed")
 		)
 		

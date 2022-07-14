@@ -79,7 +79,7 @@ stylizers = {
 		@widget.opacity = @data\get("opacity")
 
 	visibility: =>
-		@widget.visible = @data\get("visible") and not @data\get("hidden")
+		@widget.visible = @data\get("visible")
 
 }
 
@@ -131,7 +131,6 @@ class Container extends Node
 
 		@data\connect_signal("key_changed::opacity", () -> @stylize("opacity"))
 		@data\connect_signal("key_changed::visible", () -> @stylize("visibility"))
-		@data\connect_signal("key_changed::hidden", () -> @stylize("visibility"))
 		@data\connect_signal("key_changed::background", () -> @stylize("background"))
 		@data\connect_signal("key_changed::foreground", () -> @stylize("foreground"))
 		@data\connect_signal("key_changed::shape", () -> @stylize("shape"))

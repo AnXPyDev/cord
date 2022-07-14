@@ -4,42 +4,33 @@ cord = {
 
 Animation = require "cord.wim.animation.node_data"
 
-class Base extends Animation
-	@__name: "cord.wim.animation.scalar"
+Base = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.scalar"
 
-	new: (node, start, target, data_index, ...) =>
-		super(node, start, target, data_index, ...)
-		@speed = @node.style\get("scalar_animation_speed") or 1
+		new: (node, data_index, target, start, ...) =>
+			super(node, data_index, target, start)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = @target - @start
 
-class Lerp extends Base
-	@__name: "cord.wim.animation.scalar.lerp"
+		tick: =>
+			@frame += 1
+			
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				return true
+			
+			k = f(@frame / @length)
 
-	new: (node, start, target, data_index, ...) =>
-		super(node, start, target, data_index, ...)
-		@precision_treshold = 0.005
-		@speed = @node.style\get("scalar_lerp_animation_speed") or @speed
-	tick: =>
-		@current = cord.math.lerp(@current, @target, @speed, @precision_treshold)
-		@node.data\set(@data_index, @current)
-		if @current == @target
-			@done = true
-		return @done
+			@current = @start + @delta * k
 
-class Approach extends Base
-	@__name: "cord.wim.animation.scalar.approach"
+			@node.data\set(@data_index, @current)
 
-	new: (node, start, target, data_index, ...) =>
-		super(node, start, target, data_index, ...)
-		@speed = @node.style\get("scalar_approach_animation_speed") or @speed
-	tick: =>
-		@current = cord.math.approach(@current, @target, @speed)
-		@node.data\set(@data_index, @current)
-		if @current == @target
-			@done = true
-		return @done
+			return false
 
-return {
+return setmetatable({
 	base: Base
-	lerp: Lerp
-	approach: Approach
-}
+}, {
+	__call: (...) => Base(...)
+})

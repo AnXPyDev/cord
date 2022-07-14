@@ -5,14 +5,14 @@ cord = {
 class Margin
 	@__name: "cord.util.margin"
 
-	new: (left = 0, right = left, top = right, bottom = top, metric = "undefined") =>
-		@metric = metric
+	new: (left = 0, right = left, top = left, bottom = top, unit = "undefined") =>
+		@unit = unit
 		@left = left
 		@right = right
 		@top = top
 		@bottom = bottom
 	copy: =>
-		return Margin(@left, @right, @top, @bottom, @metric)
+		return Margin(@left, @right, @top, @bottom, @unit)
 	lerp: (margin, ammount, treshold = 0.5) =>
 		@left = cord.math.lerp(@left, margin.left, ammount, treshold)
 		@right = cord.math.lerp(@right, margin.right, ammount, treshold)

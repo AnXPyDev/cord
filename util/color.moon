@@ -1,4 +1,5 @@
 cord = { math: require "cord.math" }
+types = require "cord.util.types"
 
 hsla_to_rgba = (hsla_array) ->
  	h, s, l, a = table.unpack(hsla_array)
@@ -60,30 +61,52 @@ array_to_hex_string = (array) ->
 	return result
 
 edit_translations = {
-	R: "rgb",
-	G: "rgb",
-	B: "rgb",
-	A: "none",
-	H: "hsl",
-	S: "hsl",
-	L: "hsl"
+	R: 1
+	G: 1
+	B: 1
+	A: 0
+	H: 2
+	S: 2
+	L: 2
 }
 
 class Color
 	@__name: "cord.util.color"
 
-	new: (rgba_string) =>
-		@R, @G, @B, @A = table.unpack(hex_string_to_array(rgba_string))
-		@H, @S, @L, @A = table.unpack(rgba_to_hsla({@R, @G, @B, @A}))
+	new: (...) =>
+		args = {...}
+		
+		if types.match(args[1], "cord.util.color")
+			C = args[1]
+			@R, @G, @B, @A, @H, @S, @L = C.R, C.G, C.B, C.A, C.H, C.S, C.L
+			return
+		
+		if #args >= 4
+			if args[5] and args[5][1] == "h"
+				@H, @S, @L, @A = args[1] or 1, args[2] or 1, args[3] or 1, args[4] or 1
+				@\refresh_rgb!
+			else
+				@R, @G, @B, @A = args[1] or 1, args[2] or 1, args[3] or 1, args[4] or 1
+				@\refresh_hsl!
+		elseif #args >= 1
+			if args[2] and args[2][1] == "h"
+				@H, @S, @L, @A = table.unpack(hex_string_to_array(args[1]))
+				@\refresh_rgb!
+			else
+				@R, @G, @B, @A = table.unpack(hex_string_to_array(args[1]))
+				@\refresh_hsl!
+
+		@A = @A or 1
+
 	refresh_hsl: =>
 		@H, @S, @L, @A = table.unpack(rgba_to_hsla({@R, @G, @B, @A}))
 	refresh_rgb: =>
 		@R, @G, @B, @A = table.unpack(hsla_to_rgba({@H, @S, @L, @A}))
 	set: (property, value = @[property], offset = 0) =>
 		@[property] = value + offset
-		if edit_translations[property] == "rgb"
+		if edit_translations[property] == 1
 			@\refresh_hsl!
-		elseif edit_translations[property] == "hsl"
+		elseif edit_translations[property] == 2
 			@\refresh_rgb!
 	to_rgba_string: =>
 		return array_to_hex_string({@R, @G, @B, @A})

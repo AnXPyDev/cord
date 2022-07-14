@@ -53,15 +53,16 @@ class Layout extends Node
 	apply_layout: () =>
 
 	apply_for_child: (child, target_pos, visible) =>
+
 		index = @\get_index(child)
 		if not index then return
 		child.data\set("visible", visible or true, true)
 		last_visibility = @child_visibility_cache[child.id]
-		current_visibility = child.data\get("visible") and not child.data\get("hidden")
+		current_visibility = child.data\get("visible")
 		@child_visibility_cache[child.id] = current_visibility
 		target_opacity = child.data\get("opacity")
-		opacity_animation = child.style\get("opacity_animation") or animation.opacity.jump
-		position_animation = child.style\get("position_animation") or animation.position.jump
+		opacity_animation = child.style\get("opacity_animation") or animation.scalar(nil, 0)
+		position_animation = child.style\get("position_animation") or animation.position(nil, 0)
 		if current_visibility and not last_visibility
 			opacity_animation = child.style\get("opacity_show_animation") or opacity_animation
 			position_animation = child.style\get("position_show_animation") or position_animation
@@ -70,8 +71,9 @@ class Layout extends Node
 			opacity_animation = child.style\get("opacity_hide_animation") or opacity_animation
 			position_animation = child.style\get("position_hide_animation") or position_animation
 			target_opacity = 0
-		opacity_animation(child, nil, target_opacity, () -> child.data\update("visible"))
-		position_animation(child, nil, target_pos, @\get_size!)
+
+		opacity_animation(child, "opacity", target_opacity, nil)
+		position_animation(child, target_pos, nil, @\get_size!)
 		
 
 return Layout

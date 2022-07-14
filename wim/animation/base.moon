@@ -6,13 +6,13 @@ class Animation extends Object
 	new: (...) =>
 		super!
 		@done = false
-		@tick_function = ( -> )
 		@callbacks = {...}
 	update: =>
 		@done = @\tick!
-		@done = @tick_function! or @done
+		if @done
+			@\emit_signal("animation_finished")
 		return @done
 	tick: =>
-		return false
+		return true
 
 return Animation

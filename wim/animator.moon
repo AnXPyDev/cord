@@ -35,6 +35,11 @@ class Animator extends Object
 		@tps = tps
 		@timer.timeout = 1 / @tps
 
+	duration: (d = 1) =>
+		if d == 0
+			return 1
+		return math.ceil(@tps * d)
+
 	update: =>
 		i = 1
 		while i <= #@queue

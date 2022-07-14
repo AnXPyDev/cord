@@ -5,48 +5,41 @@ cord = {
 	util: require "cord.util"
 }
 
-class Base extends Animation
-	@__name: "cord.wim.animation.margin"
+Base = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.margin"
 
-	new: (node, start, target, data_index = "padding", ...) =>
-		super(node, start, target, data_index, ...)
-		@speed = @node.style\get("margin_animation_speed") or 1
+		new: (node, data_index, target, start, ...) =>
+			super(node, data_index, target, start, ...)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = Margin(
+				@target.left - @start.left,
+				@target.right - @start.right,
+				@target.top - @start.top,
+				@target.bottom - @start.bottom
+			)
 
-class Lerp extends Base
-	@__name: "cord.wim.animation.margin.lerp"
+		tick: =>
+			@frame += 1
 
-	new: (node, start, target, data_index, ...) =>
-		super(node, start, target , data_index, ...)
-		@speed = @node.style\get("margin_lerp_animation_speed")
-	tick: =>
-		@current\lerp(@target, @speed)
-		@node.data\set(@data_index, @current, true)
-		@node.data\update(@data_index)
-		if @current\equal(@target)
-			@done = true
-		return @done
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				return true
 
-class Approach extends Base
-	@__name: "cord.wim.animation.margin.approach"
+			k = f(@frame / @length)
 
-	new: (node, start, target, data_index, ...) =>
-		super(node, start, target , data_index, ...)
-		@speed = @node.style\get("margin_approach_animation_speed")
-	tick: =>
-		@current\approach(@target, @speed)
-		@node.data\set(@data_index, @current, true)
-		@node.data\update(@data_index)
-		if @current\equal(@target)
-			@done = true
-		return @done
+			@current.left = @start.left + @delta.left * k
+			@current.right = @start.right + @delta.right * k
+			@current.top = @start.top + @delta.top * k
+			@current.bottom = @start.bottom + @delta.bottom * k
 
-Jump = (node, start, target, data_index, ...) ->
-	node and node.data\set(data_index, target)
-	cord.util.call(...)
+			@node.data\set(@data_index, @current)
+			
+			return false
 
-return {
+return setmetatable({
 	base: Base
-	lerp: Lerp
-	approach: Approach
-	jump: Jump
-}
+}, {
+	__call: (...) => Base(...)
+})

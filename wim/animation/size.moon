@@ -7,66 +7,38 @@ cord = {
 Animation = require "cord.wim.animation.node_data"
 Vector = require "cord.math.vector"
 
-class Size extends Animation
-	@__name: "cord.wim.animation.size"
+Size = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.position"
 
-	new: (node, start, target, ...) =>
-		super(node, start, target, "size", ...)
-	
-		if @current.metric != @target.metric
-			@done = true
-			print("Size animation attempt on different metrics")
+		new: (node, target, start, layout_size, ...) =>
+			super(node, "size", target, start, ...)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = Vector(@target.x - @start.x, @target.y - @start.x)
 
-		@speed = node.style\get("size_animation_speed") or 1
-		node.data\set("layout_size", target)
-	disconnect: =>
-		@node.data\set("layout_size", nil, true)
-		-- @node\emit_signal("geometry_changed")
+			@node.data\set("layout_size", @target)
 
-		
-Size_Jump = (node, start, target, ...) ->
-	if target then
-		node.data\set("size", target, true)
-		node.data\update("size")
-	cord.util.call(...)
+		tick: =>
+			@frame += 1
+			
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				@node.data\set("layout_size", nil, true)
+				return true
+			
+			k = f(@frame / @length)
 
-class Size_Lerp extends Size
-	@__name: "cord.wim.animation.size.lerp"
+			@current.x = @start.x + @delta.x * k
+			@current.y = @start.y + @delta.y * k
 
-	new: (node, start, target, ...) =>
-		super(node, start, target, ...)
-		@delta = @current.metric == "ratio" and 0.001 or 0.1
-		@speed = node.style\get("size_lerp_animation_speed") or @speed
-	tick: =>
-		@current.x = cord.math.lerp(@current.x, @target.x, @speed, @delta)
-		@current.y = cord.math.lerp(@current.y, @target.y, @speed, @delta)
-		@node.data\set("size", @current, true)
-		@node.data\update("size", self)
-		if @current.x == @target.x and @current.y == @target.y
-			@\disconnect!
-			@done = true
-			return true
-		return false
+			@node.data\set(@data_index, @current)
 
-class Size_Approach extends Size
-	@__name: "cord.wim.animation.size.approach"
+			return false
 
-	new: (node, start, target, ...) =>
-		super(node, start, target, ...)
-		@speed = node.style\get("position_approach_animation_speed") or @speed
-	tick: =>
-		@current.x = cord.math.approach(@current.x, @target.x, @speed, @delta)
-		@current.y = cord.math.approach(@current.y, @target.y, @speed, @delta)
-		@node.data\set("size", @current, true)
-		@node.data\update("size", self)
-		if @current.x == @target.x and @current.y == @target.y
-			@\disconnect!
-			@done = true
-			return true
-		return false
 
-return {
-	jump: Size_Jump,
-	lerp: Size_Lerp,
-	approach: Size_Approach,
-}
+return setmetatable({
+	base: Size
+}, {
+	__call: (...) => Size(...)
+})

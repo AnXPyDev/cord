@@ -6,36 +6,36 @@ Vector = require "cord.math.vector"
 Value = require "cord.math.value"
 Margin = require "cord.util.margin"
 
-value = (val = 0, context = 1, metric) ->
+value = (val = 0, context = 1, unit) ->
 	if types.match(val, "cord.math.value")
-		if val.metric == "ratio"
+		if val.unit == "ratio"
 			return val.value * value(context) + val.offset
 		else
 			return val.value + val.offset
-	elseif metric == "ratio"
+	elseif unit == "ratio"
 		return val * value(context)
 	else
 		return val
 	
 vector = (vec = Vector(), context = Vector()) ->
 	result = Vector()
-	if types.match(vec.x, "cord.math.value") and vec.x.metric == "ratio"
-		result.y = value(vec.y, context.y, vec.metric)
-		result.x = value(vec.x, result.y, vec.metric)
-	elseif types.match(vec.y, "cord.math.value") and vec.y.metric == "ratio"
-		result.x = value(vec.x, context.x, vec.metric)
-		result.y = value(vec.y, result.x, vec.metric)
+	if types.match(vec.x, "cord.math.value") and vec.x.unit == "ratio"
+		result.y = value(vec.y, context.y, vec.unit)
+		result.x = value(vec.x, result.y, vec.unit)
+	elseif types.match(vec.y, "cord.math.value") and vec.y.unit == "ratio"
+		result.x = value(vec.x, context.x, vec.unit)
+		result.y = value(vec.y, result.x, vec.unit)
 	else
-		result.x = value(vec.x, context.x, vec.metric)
-		result.y = value(vec.y, context.y, vec.metric)
+		result.x = value(vec.x, context.x, vec.unit)
+		result.y = value(vec.y, context.y, vec.unit)
 	return result
 
 margin = (mar = Margin(), context = Vector()) ->
 	return Margin(
-		value(mar.left, context.x, mar.metric),
-		value(mar.right, context.x, mar.metric),
-		value(mar.top, context.y, mar.metric),
-		value(mar.bottom, context.y, mar.metric)
+		value(mar.left, context.x, mar.unit),
+		value(mar.right, context.x, mar.unit),
+		value(mar.top, context.y, mar.unit),
+		value(mar.bottom, context.y, mar.unit)
 	)
 
 color_or_pattern = (cop, ...) ->

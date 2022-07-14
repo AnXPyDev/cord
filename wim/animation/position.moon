@@ -38,86 +38,55 @@ get_edge_start = (pos, size, layout_size, edge) ->
 		start.y = layout_size.y
 	return start
 
-class Position extends Animation
-	@__name: "cord.wim.animation.position"
+Position = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.position"
 
-	new: (node, start, target, layout_size, ...) =>
-		super(node, start, target, "pos", ...)
-		@speed = node.style\get("position_animation_speed") or 1
+		new: (node, target, start, layout_size, ...) =>
+			super(node, "pos", target, start, ...)
+			if not @start or not @target
+				return
 		
-Position_Jump = (node, start, target, layout_size, ...) ->
-	if target then
-		node.data\set("pos", target, true)
-		node.data\update("pos")
-	cord.util.call(...)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = Vector(@target.x - @start.x, @target.y - @start.y)
 
-class Position_Lerp extends Position
-	@__name: "cord.wim.animation.position.lerp"
+		tick: =>
+			@frame += 1
 
-	new: (node, start, target, layout_size, ...) =>
-		super(node, start, target, layout_size, ...)
-		@speed = node.style\get("position_lerp_animation_speed") or @speed
-	tick: =>
-		@current.x = cord.math.lerp(@current.x, @target.x, @speed, 0.1)
-		@current.y = cord.math.lerp(@current.y, @target.y, @speed, 0.1)
-		@node.data\set("pos", @current, true)
-		@node.data\update("pos")
-		if @current.x == @target.x and @current.y == @target.y
-			@done = true
-			return true
-		return false
+			
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				return true
+			
+			k = f(@frame / @length)
 
-class Position_Approach extends Position
-	@__name: "cord.wim.animation.position.approach"
+			@current.x = @start.x + @delta.x * k
+			@current.y = @start.y + @delta.y * k
 
-	new: (node, start, target, layout_size, ...) =>
-		super(node, start, target, layout_size, ...)
-		@speed = node.style\get("position_approach_animation_speed") or @speed
-	tick: =>
-		@current.x = cord.math.approach(@current.x, @target.x, @speed)
-		@current.y = cord.math.approach(@current.y, @target.y, @speed)
-		@node.data\set("pos", @current, true)
-		@node.data\update("pos")
-		if @current.x == @target.x and @current.y == @target.y
-			@done = true
-			return true
-		return false
+			@node.data\set("pos", @current)
+			
+			return false
 
 
-class Position_Lerp_From_Edge extends Position_Lerp
-	@__name: "cord.wim.animation.position.lerp_from_edge"
+Position_To_Edge = (f, d, edge, ...) ->
+	return class extends Position(f, d, ...)
+		@__name: "cord.wim.animation.position_to_edge"
 
-	new: (node, start, target, layout_size, ...) =>
-		super(node, get_edge_start(target, node\get_size("outside"), layout_size), target, layout_size, ...)
-		@speed = node.style\get("position_lerp_from_edge_animation_speed") or @speed
+		new: (node, target, start, layout_size, ...) =>
+			super(node, get_edge_start(start or node.data\get("pos"), node\get_size("outside"), layout_size, edge), start, nil, ...)
 
-class Position_Approach_From_Edge extends Position_Approach
-	@__name: "cord.wim.animation.position.approach_from_edge"
+Position_From_Edge = (f, d, edge, ...) ->
+	return class extends Position(f, d, ...)
+		@__name: "cord.wim.animation.position_from_edge"
 
-	new: (node, start, target, layout_size, ...) =>
-		super(node, get_edge_start(target, node\get_size("outside"), layout_size), target, layout_size, ...)
-		@speed = node.style\get("position_approach_from_edge_animation_speed") or @speed
+		new: (node, target, start, layout_size, ...) =>
+			super(node, target, get_edge_start(start or node.data\get("pos"), node\get_size("outside"), layout_size, edge), nil, ...)
 
-class Position_Lerp_To_Edge extends Position_Lerp
-	@__name: "cord.wim.animation.position.lerp_to_edge"
-
-	new: (node, start, target, layout_size, ...) =>
-		super(node, start, get_edge_start(target, node\get_size("outside"), layout_size), layout_size, ...)
-		@speed = node.style\get("position_lerp_to_edge_animation_speed") or @speed
-
-class Position_Approach_To_Edge extends Position_Approach
-	@__name: "cord.wim.animation.position.approach_to_edge"
-
-	new: (node, start, target, layout_size, ...) =>
-		super(node, start, get_edge_start(target, node\get_size("outside"), layout_size), layout_size, ...)
-		@speed = node.style\get("position_approach_to_edge_animation_speed") or @speed
-
-return {
-	jump: Position_Jump,
-	lerp: Position_Lerp,
-	approach: Position_Approach,
-	lerp_from_edge: Position_Lerp_From_Edge,
-	lerp_to_edge: Position_Lerp_To_Edge,
-	approach_from_edge: Position_Approach_From_Edge,
-	approach_to_edge: Position_Approach_To_Edge
-}
+return setmetatable({
+	base: Position
+	to_edge: Position_To_Edge
+	from_edge: Position_From_Edge
+}, {
+	__call: (...) => Position(...)
+})

@@ -41,8 +41,8 @@ class Fit extends Layout
 		m = directions[@data\get("direction")]
 		for i, child in ipairs @children
 			child_size = child\get_size("layout")
-			if child.data\get("hidden")
-				table.insert(results, {child, i, nil, false})
+			if not child.data\get("visible")
+				table.insert(results, {child, nil, false})
 				continue
 			if current[m[1]] + child_size[m[1]] > size[m[1]]
 				if not (max + child_size[m[2]] > size[m[2]] or child_size[m[1]] > size[m[1]])
