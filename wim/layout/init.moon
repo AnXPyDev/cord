@@ -1,4 +1,6 @@
 return {
 	base: require "cord.wim.layout.base"
-	fit: require "cord.wim.layout.fit"
+	align: require "cord.wim.layout.align"
+	-- fit: require "cord.wim.layout.fit"
+	negotiator: require "cord.wim.layout.negotiator"
 }

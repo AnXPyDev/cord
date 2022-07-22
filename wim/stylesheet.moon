@@ -1,6 +1,8 @@
 Object = require "cord.util.object"
 Style = require "cord.wim.style"
 
+cord = { table: require "cord.table" }
+
 class Stylesheet extends Object
 	@__name: "cord.wim.stylsheet"
 
@@ -33,6 +35,11 @@ class Stylesheet extends Object
 		return Style()
 
 	get_mutable_style: (identification = {}) =>
-		return Style({}, { @\get_style(identification) })
+		stl = @\get_style(identification)
+		res = Style!
+		res.values = cord.table.copy(stl.values)
+		res.parents = cord.table.copy(stl.parents)
+		res.defaults = stl.defaults
+		return res
 
 return Stylesheet

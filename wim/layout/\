@@ -2,7 +2,6 @@ Layout = require "cord.wim.layout.base"
 Negotiator = require "cord.wim.layout.negotiator"
 Vector = require "cord.math.vector"
 crush = (require "cord.table").crush
-log = require "cord.log"
 
 att = {
 	top: 1
@@ -35,21 +34,17 @@ class Align extends Layout
 		direction: "horizontal"
 	})
 
-	new: (config, ...) =>
+	new: (config, ...)
 		super(config, ...)
-		
-		@data\set("direction", @style\get("direction"))
+
 
 		init_child = (child) ->
 			if not child
 				return
-			child\request_property("layout_align")
-			child\request_property("layout_justify")
-			child\request_property("size_priority")
-			child\request_property("flexible")
-			child\request_property("min_size")
-			child\request_property("max_size")
-			child\request_property("preferred_size")
+			child\request_property("layout_align", "center")
+			child\request_property("layout_justify", "center")
+			child\request_property("size_priority", 1)
+			child\request_property("flexible", false)
 
 		for i, child in ipairs @children
 			init_child(child)
@@ -86,7 +81,7 @@ class Align extends Layout
 				table.insert(results[ix], {child})
 			
 			avl_space[cp] -= child_size[cp]
-
+			
 			table.insert(results[ix], {child, child_size})
 		
 		negotiation = Negotiator(cp, size, avl_space, flexible)
@@ -103,17 +98,16 @@ class Align extends Layout
 			))
 
 		for i, e in ipairs results[1]
-			size = e[2]
+			local size = e[2]
 
 			e[1]\mute_signal("geometry_changed::layout")
 		
-			unless size
+			if not size
 				size = negotiation[e[1]]
 				if size
 					e[1]\set_size(size)
 				else
 					e[1]\set_visible(false)
-					e[1]\unmute_signal("geometry_changed::layout")
 					continue
 			
 			e[1]\set_visible(true)
@@ -126,7 +120,7 @@ class Align extends Layout
 
 		for i = #results[3], 1, -1
 			e = results[3][i]
-			size = e[2]
+			local size = e[2]
 
 			e[1]\mute_signal("geometry_changed::layout")
 		
@@ -136,7 +130,6 @@ class Align extends Layout
 					e[1]\set_size(size)
 				else
 					e[1]\set_visible(false)
-					e[1]\unmute_signal("geometry_changed::layout")
 					continue
 			
 			e[1]\set_visible(true)
@@ -149,11 +142,10 @@ class Align extends Layout
 			e[1]\unmute_signal("geometry_changed::layout")
 
 	
-		center_sizes = {}
+		center_positions = {}
 		center_size = 0
-		
 		for i, e in ipairs results[2]
-			size = e[2]
+			local size = e[2]
 
 			e[1]\mute_signal("geometry_changed::layout")
 		
@@ -163,33 +155,13 @@ class Align extends Layout
 					e[1]\set_size(size)
 				else
 					e[1]\set_visible(false)
-					e[1]\unmute_signal("geometry_changed::layout")
 					continue
-
+			
 			e[1]\set_visible(true)
 
 			center_size += size[cp]
-			center_sizes[i] = size
-			
-
-
-		--center_start = math.min(math.max(start_bound, (context[cp] + center_size) * 0.5) + center_size, stop_bound) - center_size
-		center_start = (context[cp] - center_size) * 0.5
-
-		if stop_bound > center_start
-			center_start = (context[cp] - stop_bound) - center_size
-		elseif start_bound > center_start
-			center_start = start_bound
-
-		for i, e in ipairs results[2]
-			size = center_sizes[i]
-			
-			unless size
-				continue
-
-			place_child(e[1], size, center_start)
-			center_start += size[cp]
 			
 			e[1]\unmute_signal("geometry_changed::layout")
+
 
 

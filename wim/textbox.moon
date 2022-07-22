@@ -6,45 +6,57 @@ cord = {
 	table: require "cord.table"
 }
 
+Vector = require "cord.math.vector"
+
 Node = require "cord.wim.node"
 
 stylizers = {
-	geometry: (textbox) ->
-		size = textbox\get_size!
-		textbox.layers.constraint.forced_width = size.x
-		textbox.layers.constraint.forced_height = size.y
-		textbox.layers.constraint.width = size.x
-		textbox.layers.constraint.height = size.y
+	geometry: =>
+		size = @get_size!
+		@layers.constraint.forced_width = size.x
+		@layers.constraint.forced_height = size.y
+		@layers.constraint.width = size.x
+		@layers.constraint.height = size.y
 
-	align: (textbox) ->
-		textbox.textbox.align = textbox.data\get("halign")
-		textbox.textbox.valign = textbox.data\get("valign")
+	align: =>
+		@textbox.align = @data\get("halign")
+		@textbox.valign = @data\get("valign")
 
-	text: (textbox) ->
-		textbox.textbox.text = textbox.data\get("text")
+	text: =>
+		text = @data\get("text")
+		if text
+			@textbox.text = text
 
-	font: (textbox) ->
-		textbox.textbox.font = "#{textbox.data\get("font_name")} #{textbox.data\get("font_size")}"
+	markup: =>
+		markup = @data\get("markup")
+		if markup
+			@textbox.markup = markup
+
+	font: =>
+		@textbox.font = "#{@data\get("font_name")} #{@data\get("font_size")}"
 }
 	
 class Textbox extends Node
 	@__name: "cord.wim.textbox"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		halign: -> "center"
-		valign: -> "center"
-		font_name: -> "monospace"
-		font_size: -> 24
+		halign: "center"
+		valign: "center"
+		font_name: "monospace"
+		font_size: 24
 	})
 
-	new: (config, text) =>
+	new: (config, text, is_markup) =>
 		super(config)
 
 		@data\set("halign", @style\get("halign"))
 		@data\set("valign", @style\get("valign"))
 		@data\set("font_name", @style\get("font_name"))
 		@data\set("font_size", @style\get("font_size"))
-		@data\set("text", text or config.text or "")
+		if is_markup
+			@data\set("markup", text or config.text or config.markup or "")
+		else
+			@data\set("text", text or config.text or "")
 
 		@layers = {}
 		@layers.constraint = wibox.container.constraint!
@@ -55,13 +67,32 @@ class Textbox extends Node
 
 		cord.table.crush(@stylizers, stylizers)
 			
-		@data\connect_signal("key_changed::text", () -> @\stylize("text"))
-		@data\connect_signal("key_changed::font_size", () -> @\stylize("font"))
-		@data\connect_signal("key_changed::font_name", () -> @\stylize("font"))
-		@data\connect_signal("key_changed::halign", () -> @\stylize("align"))
-		@data\connect_signal("key_changed::valign", () -> @\stylize("align"))
+		@data\connect_signal("updated::text", () ->
+			@\stylize("text")
+			@\get_preferred_size!
+		)
+		@data\connect_signal("updated::markup", () ->
+			@\stylize("markup")
+			@\get_preferred_size!
+		)
+		@data\connect_signal("updated::font_size", () ->
+			@\stylize("font")
+			@\get_preferred_size!
+		)
+		@data\connect_signal("updated::font_name", () ->
+			@\stylize("font")
+			@\get_preferred_size!
+		)
+		@data\connect_signal("updated::halign", () -> @\stylize("align"))
+		@data\connect_signal("updated::valign", () -> @\stylize("align"))
 		@\connect_signal("geometry_changed", () -> @\stylize("geometry"))
 
 		@\stylize!
+		@\get_preferred_size!
+
+	get_preferred_size: =>
+		 w, h = @textbox\get_preferred_size!
+		 @data\set("preferred_size", Vector(w, h))
+
 
 return Textbox

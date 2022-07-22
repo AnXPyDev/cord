@@ -16,9 +16,9 @@ class Object
 	exit_code: {}
 
 	new: =>
-		@__name = {"cord.util.object"}
 		@_signals = {}
 		@_signal_callback_ids = {}
+		@_muted = {}
 
 	connect_signal: (name, callback, callback_id) =>
 		if not @_signals[name] then @_signals[name] = {}
@@ -28,8 +28,14 @@ class Object
 			if not @_signal_callback_ids[name][callback_id] then @_signal_callback_ids[name][callback_id] = {}
 			table.insert(@_signal_callback_ids[name][callback_id], callback)
 
+	mute_signal: (name) =>
+		@_muted[name] = true
+
+	unmute_signal: (name) =>
+		@_muted[name] = nil
+
 	emit_signal: (name, ...) =>
-		if not @_signals[name] then return
+		if @_muted[name] or not @_signals[name] then return
 		to_remove = {}
 		for i, fn in ipairs @_signals[name]
 			if fn(...) == @exit_code
@@ -52,5 +58,5 @@ class Object
 				if fn == callback
 					table.remove(@_signals[name], i)
 					break
-
+	
 return Object

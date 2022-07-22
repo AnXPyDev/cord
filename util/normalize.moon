@@ -1,5 +1,3 @@
-c_transparent = (require "gears.color").transparent
-
 types = require "cord.util.types"
 
 Vector = require "cord.math.vector"
@@ -45,7 +43,7 @@ color_or_pattern = (cop, ...) ->
 		return cop\to_rgba_string!
 	elseif types.match(cop, "cord.util.pattern")
 		return cop\create_pattern(...)
-	return c_transparent
+	return "#00000000"
 		
 return {
 	value: value

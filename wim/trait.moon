@@ -6,7 +6,7 @@ class Trait extends Object
 	new: (...) =>
 		super!
 
-	connect: (node = @node) => nil
-	disconnect: (node = @node) => nil
+	connect: (node) => nil
+	disconnect: (node) => nil
 
 return Trait

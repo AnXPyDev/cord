@@ -10,4 +10,5 @@ return crush({
 	normalize: require "cord.util.normalize"
 	types: require "cord.util.types"
 	callback_value: require "cord.util.callback_value"
+	data_store: require "cord.util.data_store"
 }, (require "cord.util.base"))

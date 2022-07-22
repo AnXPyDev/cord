@@ -4,6 +4,13 @@ crush = (tbl1 = {}, ...) ->
 			tbl1[k] = v
 	return tbl1
 
+gentle_crush = (tbl1 = {}, ...) ->
+	for i, tbl in ipairs {...}
+		for k, v in pairs tbl
+			if not tbl1[k]
+				tbl1[k] = v
+	return tbl1
+
 deep_crush = (tbl1 = {}, ...) ->
 	for i, tbl in ipairs {...}
 		for k, v in pairs tbl
@@ -15,9 +22,13 @@ deep_crush = (tbl1 = {}, ...) ->
 				tbl1[k] = v
 	return tbl1
 
+copy = (tbl = {}) ->
+	result = {}
+	for k, v in pairs tbl
+		result[k] = v
+	return result
+
 deep_copy = (tbl = {}) ->
-	if type(tbl) != "table"
-		return tbl
 	result = {}
 	for k, v in pairs tbl
 		if type(v) == "table"
@@ -97,7 +108,9 @@ imap = (tbl, fn) ->
 
 return {
 	crush: crush
+	gentle_crush: crush
 	deep_crush: deep_crush
+	copy: copy
 	deep_copy: deep_copy
 	deep_copy_crush: deep_copy_crush
 	set_key: set_key

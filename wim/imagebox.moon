@@ -20,13 +20,13 @@ stylizers = {
 	image: (imagebox) ->
 		image = imagebox.data\get("image")
 		imagebox.imagebox.image = image and image\get(imagebox.data\get("color"))
-}  
+}
 
 class Imagebox extends Node
 	@__name: "cord.wim.imagebox"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		resize: -> true
+		resize: true
 	})
 
 	new: (config, image) =>
@@ -42,9 +42,9 @@ class Imagebox extends Node
 
 		cord.table.crush(@stylizers, stylizers)
 			
-		@data\connect_signal("key_changed::color", () -> @\stylize("image"))
-		@data\connect_signal("key_changed::image", () -> @\stylize("image"))
-		@data\connect_signal("key_changed::resize", () -> @\stylize("resize"))
+		@data\connect_signal("updated::color", () -> @\stylize("image"))
+		@data\connect_signal("updated::image", () -> @\stylize("image"))
+		@data\connect_signal("updated::resize", () -> @\stylize("resize"))
 		@\connect_signal("geometry_changed", () -> @\stylize("geometry"))
 
 		@\stylize!

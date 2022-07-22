@@ -88,7 +88,7 @@ class Container extends Node
 	@__name: "cord.wim.container"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		pattern_template: -> {Vector(0, 0, "ratio"), Vector(1, 0, "ratio")}
+		pattern_template: {Vector(0, 0, "ratio"), Vector(1, 0, "ratio")}
 	})
 
 	new: (config, ...) =>
@@ -125,19 +125,19 @@ class Container extends Node
 		@\connect_signal("added_child", (child, index) -> @\add_to_content(child,index))
 		@\connect_signal("removed_child", (child, index) -> @\remove_from_content(child,index))
 
-		@\connect_signal("geometry_changed::inside", () ->
+		@\connect_signal("geometry_changed::local", () ->
 			@\stylize("geometry")
 		)
 
-		@data\connect_signal("key_changed::opacity", () -> @stylize("opacity"))
-		@data\connect_signal("key_changed::visible", () -> @stylize("visibility"))
-		@data\connect_signal("key_changed::background", () -> @stylize("background"))
-		@data\connect_signal("key_changed::foreground", () -> @stylize("foreground"))
-		@data\connect_signal("key_changed::shape", () -> @stylize("shape"))
-		@data\connect_signal("key_changed::border_width", () -> @stylize("border"))
-		@data\connect_signal("key_changed::border_color", () -> @stylize("border"))
-		@data\connect_signal("key_changed::margin", () -> @\emit_signal("geometry_changed::inside"))
-		@data\connect_signal("key_changed::padding", () -> @\emit_signal("geometry_changed::inside"))
+		@data\connect_signal("updated::opacity", () -> @stylize("opacity"))
+		@data\connect_signal("updated::visible", () -> @stylize("visibility"))
+		@data\connect_signal("updated::background", () -> @stylize("background"))
+		@data\connect_signal("updated::foreground", () -> @stylize("foreground"))
+		@data\connect_signal("updated::shape", () -> @stylize("shape"))
+		@data\connect_signal("updated::border_width", () -> @stylize("border"))
+		@data\connect_signal("updated::border_color", () -> @stylize("border"))
+		@data\connect_signal("updated::margin", () -> @\emit_signal("geometry_changed::local"))
+		@data\connect_signal("updated::padding", () -> @\emit_signal("geometry_changed::local"))
 
 		-- Add children to content
 		for i, child in ipairs @children
@@ -246,7 +246,7 @@ class Container extends Node
 		@content\remove(index)
 
 	get_size: (scope = "outside") =>
-		if scope == "layout" 
+		if scope == "layout"
 			return normalize.vector(@data\get("layout_size") or @data\get("size"), @parent and @parent\get_size!)
 		result = normalize.vector(@data\get("size"), @parent and @parent\get_size!)
 		if scope == "content" or scope == "inside"

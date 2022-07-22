@@ -19,8 +19,8 @@ stylizers = {
 
 class Client extends Node
 	defaults: cord.table.crush({}, Node.defaults, {
-		border_color: -> "#000000"
-		border_width: -> 0
+		border_color: "#000000"
+		border_width: 0
 	})
 
 	@__name: "cord.wim.client"
@@ -41,12 +41,12 @@ class Client extends Node
 		@data\set("border_width", config.border_width or @style\get("border_width"))
 		@data\set("border_color", config.border_color or @style\get("border_color"))
 		
-		@data\set("name", @client.name)
+		@data\set("name", @client.name or "client")
 
 		cord.table.crush(@stylizers, stylizers)
 
-		@data\connect_signal("key_changed::border_width", -> @\stylize("border"))
-		@data\connect_signal("key_changed::border_color", -> @\stylize("border"))
+		@data\connect_signal("updated::border_width", -> @\stylize("border"))
+		@data\connect_signal("updated::border_color", -> @\stylize("border"))
 
 		@client\connect_signal("property::size", -> @\emit_signal("geometry_changed"))
 		@client\connect_signal("property::position", -> @\emit_signal("position_changed"))
@@ -56,6 +56,14 @@ class Client extends Node
 
 		@client\connect_signal("property::name", ->
 			@data\set("name", @client.name)
+		)
+
+		@client\connect_signal("unmanage", ->
+			@dead = true
+			for k, v in pairs @data.values
+				if k\find("animation::")
+					v.done = true
+
 		)
 
 		@client\connect_signal("focus", -> @\emit_signal("focus"))

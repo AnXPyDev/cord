@@ -11,7 +11,7 @@ Size = (f = ((x)->x), duration) ->
 	return class extends Animation
 		@__name: "cord.wim.animation.position"
 
-		new: (node, target, start, layout_size, ...) =>
+		new: (node, target, start, ...) =>
 			super(node, "size", target, start, ...)
 			@frame = 0
 			@length = @animator\duration(duration)

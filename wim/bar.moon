@@ -33,10 +33,10 @@ class Bar extends Node
 	@__name: "cord.wim.titlebar"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		position: -> "top"
-		size: -> Vector(Value(1, 0, "ratio"), 100)
-		background: -> "#AA0000"
-		shape: -> nil
+		position: "top"
+		size: Vector(Value(1, 0, "ratio"), 100)
+		background: "#AA0000"
+		shape: nil
 	})
 
 
@@ -56,31 +56,28 @@ class Bar extends Node
 		@data\set("background", @style\get("background"))
 		@data\set("shape", @style\get("shape"))
 
-		@\connect_signal("added_child", ->
-			if not @children[1]
-				return
-
+		@\connect_signal("added_child", (child) ->
 			@wibar\setup({
 				layout: wibox.layout.fixed.horizontal
-				@children[1].widget
+				child and child.widget or @children[1] and @children[1].widget
 			})
 		)
 		
 		@\emit_signal("added_child")
 
-		@data\connect_signal("key_changed::position", -> 
+		@data\connect_signal("updated::position", -> 
 			@\stylize("position")
 		)
 
-		@data\connect_signal("key_changed::background", ->
+		@data\connect_signal("updated::background", ->
 			@\stylize("background")
 		)
 
-		@data\connect_signal("key_changed::shape", ->
+		@data\connect_signal("updated::shape", ->
 			@\stylize("shape")
 		)
 		
-		@data\connect_signal("key_changed::size", ->
+		@data\connect_signal("updated::size", ->
 			@\emit_signal("geometry_changed")
 		)
 

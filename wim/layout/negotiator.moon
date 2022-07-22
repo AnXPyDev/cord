@@ -1,0 +1,64 @@
+ctable = require "cord.table"
+
+Negotiator = (dir, context, avl, nodes) ->
+	results = {}
+
+	avl = avl\copy!
+
+	order = {}
+	order_ix = {}
+
+	for i, node in ipairs nodes
+		priority = node.data\get("size_priority")
+		if order[priority]
+			table.insert(order[priority], node)
+		else
+			order[priority] = { node }
+			table.insert(order_ix, priority)
+
+	table.sort(order_ix, (a, b) -> a > b)
+
+	for _, ix in ipairs order_ix
+		local nodes
+		nodes = order[ix]
+
+		sizes = {}
+
+		for _, node in ipairs nodes
+			min_size = node\normalize_size(node.data\get("min_size"), context)
+			prf_size = node\normalize_size(node.data\get("preferred_size"), context)
+			max_size = node\normalize_size(node.data\get("max_size"), context)
+	
+
+			if min_size.x > avl.x or min_size.y > avl.y
+				continue
+
+			prf_size.x = math.max(math.min(max_size.x, prf_size.x, avl.x), min_size.x)
+			prf_size.y = math.max(math.min(max_size.y, prf_size.y, avl.y), min_size.y)
+			
+			table.insert(sizes,
+				{
+					node: node
+					min_size: min_size
+					prf_size: prf_size
+				}
+			)
+
+		table.sort(sizes, (a, b) -> a.prf[dir] < b.prf[dir])
+
+		space = avl[dir]
+	
+		for _, e in ipairs sizes
+			equal_size = avl[dir] / #nodes
+			unless e.prf_size[dir] <= equal_size
+				if e.min_size[dir] > equal_size
+					e.prf_size = nil
+					continue
+				e.prf_size[dir] = e.min_size[dir]
+			space -= e.prf_size[dir]
+
+			results[e.node] = e.prf_size
+
+	return results
+
+return Negotiator

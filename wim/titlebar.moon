@@ -27,6 +27,10 @@ stylizers = {
 	background: =>
 		@container.bg = normalize.color_or_pattern(@data\get("background"))
 
+	foreground: =>
+		@container.fg = normalize.color_or_pattern(@data\get("foreground"))
+
+
 	shape: =>
 		@container.shape = @data\get("shape")
 
@@ -36,10 +40,11 @@ class TitleBar extends Node
 	@__name: "cord.wim.titlebar"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		position: -> "top"
-		size: -> 40
-		background: -> "#AA0000"
-		shape: -> nil
+		position: "top"
+		size: 40
+		background: "#AA0000"
+		foreground: "#FFFFFF"
+		shape: nil
 	})
 
 
@@ -51,18 +56,19 @@ class TitleBar extends Node
 		@client = client
 		@buttons = buttons or config.buttons
 
-		@container = wibox.container.background()
-
 		@data\set("position", @style\get("position"))
 		@data\set("size", @style\get("size"))
 		@data\set("background", @style\get("background"))
+		@data\set("foreground", @style\get("foreground"))
 		@data\set("shape", @style\get("shape"))
 
 		@titlebar = awful.titlebar(@client.client, {
-			bg: "#FFFFFF"
+			bg: "#000000"
 			size: @data\get("size")
 			position: @data\get("position")
 		})
+		
+		@container = wibox.container.background()
 
 		@titlebar\setup({
 			layout: wibox.layout.fixed.horizontal,
@@ -79,19 +85,23 @@ class TitleBar extends Node
 		
 		@\emit_signal("added_child")
 
-		@data\connect_signal("key_changed::position", -> 
+		@data\connect_signal("updated::position", -> 
 			@\stylize("position")
 		)
 
-		@data\connect_signal("key_changed::background", ->
+		@data\connect_signal("updated::background", ->
 			@\stylize("background")
 		)
+		
+		@data\connect_signal("updated::foreground", ->
+			@\stylize("foreground")
+		)
 
-		@data\connect_signal("key_changed::shape", ->
+		@data\connect_signal("updated::shape", ->
 			@\stylize("shape")
 		)
 		
-		@data\connect_signal("key_changed::size", ->
+		@data\connect_signal("updated::size", ->
 			@\emit_signal("geometry_changed")
 		)
 

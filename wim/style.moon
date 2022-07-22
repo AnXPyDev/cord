@@ -1,50 +1,45 @@
-Object = require "cord.util.object"
+DataStore = require"cord.util.data_store"
 
 gears = { table: require "gears.table" }
 cord = { table: require "cord.table" }
 
 types = require "cord.util.types"
 
-class Style extends Object
+class Style extends DataStore
 	@__name: "cord.wim.style"
 
-	new: (values, parents) =>
-		super!
-		@values = values or {}
+	inherit: {}
+	no_inherit: {}
+
+	new: (values, parents, defaults) =>
+		super(values)
 		@parents = parents or {}
-		@defaults = {}
+		@defaults = defaults or {}
 
-	set: (key, value, silent, ...) =>
-		if key == nil
-			return
-		@values[key] = value
-		if not silent then @\update(key, ...)
-
-	update: (key, ...) =>
-		value = @\get(key)
-		@\emit_signal("value_changed", key, value, ...)
-		@\emit_signal("key_changed::#{key}", value, ...)
-
-	get: (key, shallow = false) =>
+	get_no_default: (key, shallow = false) =>
 		ret = @values[key]
-		default = false
-		local parent_default
-		if shallow == false and ret == nil
-			for k, v in pairs @parents
-				lret, default = v\get(key)
-				if lret 
-					if not default then
-						ret = lret
-						break
-					elseif not parent_default
-						parent_default = true
-						ret = parent_default
-		if (not ret or default) and @defaults[key]
-			ret = @defaults[key]!
-			default = true
+		if ret == @no_inherit
+			return nil
+		if shallow == false and ret == nil or ret == @inherit
+			for i, v in ipairs @parents
+				ret = v\get(key)
+				if ret then break
 		if types.match(ret, "cord.util.callback_value")
 			ret = ret\get!
-		return ret, default
+		return ret
+
+	get_default: (key, shallow = false) =>
+		ret = @defaults[key]
+		if shallow == false and ret == nil or ret == @inherit
+			for i, v in ipairs @parents
+				ret = v\get_default(key)
+				if ret then break
+		if types.match(ret, "cord.util.callback_value")
+			ret = ret\get!
+		return ret
+
+	get: (key, shallow = false) =>
+		return @\get_no_default(key, shallow) or @\get_default(key, shallow)
 
 	join: (other_style) =>
 		gears.table.crush(@values, other_style.values)
@@ -52,8 +47,10 @@ class Style extends Object
 	add_parent: (style) =>
 		table.insert(@parents, style)
 
-	add_defaults: (...) =>
-		gears.table.crush(@defaults, ...)
+	set_defaults: (defaults) =>
+		@defaults = defaults
+
+
 
 
 return Style

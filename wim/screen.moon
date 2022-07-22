@@ -9,7 +9,7 @@ class Screen extends Node
 	new: (config, screen, ...) =>
 		super(config, ...)
 
-		@screen = screen
+		@screen = screen or config.screen
 
 		@data\set("pos", Callback_Value(() ->
 			return Vector(@screen.geometry.x, @screen.geometry.y)

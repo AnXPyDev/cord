@@ -22,8 +22,8 @@ class Fit extends Layout
 	@__name: "cord.wim.layout.fit"
 
 	defaults: cord.table.crush({}, Layout.defaults, {
-		corner: -> "top_left"
-		direction: -> "horizontal"
+		corner: "top_left"
+		direction: "horizontal"
 	})
 	new: (config, ...) =>
 		super(config, ...)
