@@ -1,0 +1,29 @@
+ctable = require "cord.table"
+
+export match = (obj, name) ->
+	T = type(obj)
+	if T == name
+		return true
+	if T == "table"
+		if obj.__class
+			if obj.__class.__name == name
+				return true
+			elseif obj.__class.__lineage and ctable.contains(obj.__class.__lineage, name)
+				return true
+	return false
+
+export match_class = (obj, cls) ->
+	unless type(obj) == "table"
+		return false
+	if obj.__class == cls or (obj.__class and obj.__class.__clineage and ctable.contains(obj.__class.__clineage, cls))
+		return true
+	return false
+
+export get = (obj) ->
+	if type(obj) == "table"
+		return obj.__class.__name if obj.__class
+	return type(obj)
+
+export get_class = (obj) ->
+	if type(obj) == "table"
+		return obj.__class

@@ -10,17 +10,19 @@ cord = {
 	util: require "cord.util"
 }
 
-
 stylizers = {
 	border: =>
 		@client.border_width = @data\get("border_width")
 		@client.border_color = normalize.color_or_pattern(@data\get("border_color"))
+	shape: =>
+		@client.shape = @data\get("shape")
 }
 
 class Client extends Node
 	defaults: cord.table.crush({}, Node.defaults, {
 		border_color: "#000000"
 		border_width: 0
+		shape: nil
 	})
 
 	@__name: "cord.wim.client"
@@ -40,6 +42,7 @@ class Client extends Node
 
 		@data\set("border_width", config.border_width or @style\get("border_width"))
 		@data\set("border_color", config.border_color or @style\get("border_color"))
+		@data\set("shape", config.shape or @style\get("shape"))
 		
 		@data\set("name", @client.name or "client")
 
@@ -47,10 +50,11 @@ class Client extends Node
 
 		@data\connect_signal("updated::border_width", -> @\stylize("border"))
 		@data\connect_signal("updated::border_color", -> @\stylize("border"))
+		@data\connect_signal("updated::shape", -> @\stylize("shape"))
 
 		@client\connect_signal("property::size", -> @\emit_signal("geometry_changed"))
 		@client\connect_signal("property::position", -> @\emit_signal("position_changed"))
-		@client\connect_signal("request::titlebars", -> 
+		@client\connect_signal("request::titlebars", ->
 			@\emit_signal("request_titlebars", @)
 		)
 

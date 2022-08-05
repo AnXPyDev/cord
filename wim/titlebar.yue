@@ -1,18 +1,15 @@
 awful = require "awful"
 wibox = require "wibox"
 
-cord = {
-	util: require "cord.util"
-	table: require "cord.table"
-}
+import "cord.util" as util
+import "cord.table" as ctable
+import "cord.math.vector" as Vector
+import "cord.math.value" as Value
+import "cord.wim.client" as Client
+import "cord.wim.node" as Node
 
-Node = require "cord.wim.node"
-Vector = require "cord.math.vector"
-Value = require "cord.math.value"
-
-log = require "cord.log"
-
-normalize = require "cord.util.normalize"
+normalize = util.normalize
+types = util.types
 
 stylizers = {
 	position: =>
@@ -39,7 +36,7 @@ stylizers = {
 class TitleBar extends Node
 	@__name: "cord.wim.titlebar"
 
-	defaults: cord.table.crush({}, Node.defaults, {
+	defaults: ctable.crush({}, Node.defaults, {
 		position: "top"
 		size: 40
 		background: "#AA0000"
@@ -51,7 +48,7 @@ class TitleBar extends Node
 	new: (config, client, buttons, ...) =>
 		super(config, ...)
 
-		cord.table.crush(@stylizers, stylizers)
+		ctable.crush(@stylizers, stylizers)
 	
 		@client = client
 		@buttons = buttons or config.buttons
@@ -85,7 +82,7 @@ class TitleBar extends Node
 		
 		@\emit_signal("added_child")
 
-		@data\connect_signal("updated::position", -> 
+		@data\connect_signal("updated::position", ->
 			@\stylize("position")
 		)
 
@@ -111,8 +108,7 @@ class TitleBar extends Node
 
 		@\connect_signal("parent_changed", ->
 			@\emit_signal("geometry_changed")
-			
-			if cord.util.types.match(@parent, "cord.wim.client")
+			if types.match_class(@parent, Client)
 				@parent.titlebars[@data\get("position")] = @
 		)
 

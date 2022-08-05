@@ -7,11 +7,13 @@ class Object
 
 	@__name = "cord.util.object"
 	@__lineage = {}
+	@__clineage = {}
 
 	@__inherited: (child) =>
-		child.__lineage = cord.table.deep_copy(@__lineage)
+		child.__lineage = cord.table.copy(@__lineage)
+		child.__clineage = cord.table.copy(@__clineage)
 		table.insert(child.__lineage, @__name)
-		--log(child.__lineage, child.__name)
+		table.insert(child.__clineage, @)
 
 	exit_code: {}
 
@@ -36,6 +38,7 @@ class Object
 
 	emit_signal: (name, ...) =>
 		if @_muted[name] or not @_signals[name] then return
+		--print("emit_signal", name, ...)
 		to_remove = {}
 		for i, fn in ipairs @_signals[name]
 			if fn(...) == @exit_code

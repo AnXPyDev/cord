@@ -25,10 +25,11 @@ Negotiator = (dir, context, avl, nodes) ->
 		sizes = {}
 
 		for _, node in ipairs nodes
-			min_size = node\normalize_size(node.data\get("min_size"), context)
-			prf_size = node\normalize_size(node.data\get("preferred_size"), context)
-			max_size = node\normalize_size(node.data\get("max_size"), context)
+			min_size = node\normalize_vector(node.data\get("min_size"), context)
+			prf_size = node\normalize_vector(node.data\get("preferred_size"), context)
+			max_size = node\normalize_vector(node.data\get("max_size"), context)
 	
+			print(node, node.__class.__name, prf_size.x, prf_size.y, avl.x, avl.y)
 
 			if min_size.x > avl.x or min_size.y > avl.y
 				continue

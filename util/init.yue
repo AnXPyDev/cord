@@ -11,4 +11,5 @@ return crush({
 	types: require "cord.util.types"
 	callback_value: require "cord.util.callback_value"
 	data_store: require "cord.util.data_store"
+	anim_helpers: require "cord.util.anim_helpers"
 }, (require "cord.util.base"))

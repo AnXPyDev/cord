@@ -2,6 +2,7 @@ Object = require "cord.util.object"
 Style = require "cord.wim.style"
 DataStore = require "cord.util.data_store"
 Vector = require "cord.math.vector"
+Units = require "cord.math.units"
 
 types = require "cord.util.types"
 normalize = require "cord.util.normalize"
@@ -12,7 +13,7 @@ class Node extends Object
 	@__name: "cord.wim.node"
 
 	defaults: {
-		size: Vector(1, 1, "ratio")
+		size: Vector(1, 1, Units.ratio)
 		min_size: Vector(0, 0)
 		max_size: Vector(math.huge, math.huge)
 		pos: Vector()
@@ -25,7 +26,7 @@ class Node extends Object
 		fake_parent_size: Vector(200, 200)
 	}
 
-	new: (config, ...) =>
+	new: (config = {}, ...) =>
 		super!
 	
 		@id = id_counter
@@ -36,8 +37,9 @@ class Node extends Object
 		@stylesheet = config.stylesheet or config.sheet or config[1]
 		@style = @stylesheet and @stylesheet\get_mutable_style(@identification)
 
-		if config.style
-			@style and config.style\add_parent(@style)
+		if config.style?
+			if @style?
+				config.style\add_parent(@style)
 			@style = config.style
 		if not @style
 			@style = Style()
@@ -57,14 +59,14 @@ class Node extends Object
 
 		-- Create data
 		@data\set("size", @style\get("size"))
-		@data\set("preferred_size", @style\get_no_default("preferred_size") or @data.values["size"])
-		@data\set("preferred_visible", @style\get_no_default("preferred_visible") or @data.values["visible"])
-		@data\set("preferred_opacity", @style\get_no_default("preferred_opacity") or @data.values["opacity"])
+		@data\set("preferred_size", @style\get_no_default("preferred_size") or @style\get("size"))
+		@data\set("preferred_visible", @style\get_no_default("preferred_visible") or @style\get("visible"))
+		@data\set("preferred_opacity", @style\get_no_default("preferred_opacity") or @style\get("opacity"))
 		@data\set("min_size", @style\get_no_default("min_size"))
 		@data\set("max_size", @style\get_no_default("max_size"))
-		@data\set("pos", @style\get("pos"))
-		@data\set("visible", @style\get("visible"))
-		@data\set("opacity", @style\get("opacity"))
+		@data\set("pos", @style\get("pos") or @data\get("preferred_visible"))
+		@data\set("visible", @style\get_no_default("visible") or @data\get("preferred_visible"))
+		@data\set("opacity", @style\get_no_default("opacity") or @data\get("preferred_opacity"))
 		@data\set("parent_index", 0)
 		@data\set("fake_parent_size", @style\get("fake_parent_size"))
 
@@ -85,11 +87,11 @@ class Node extends Object
 		)
 
 		@data\connect_signal("updated::visible", () ->
-			@parent and @parent\emit_signal("layout_changed")
+			@\emit_signal("geometry_changed::layout")
 		)
 		
 		@data\connect_signal("updated::preferred_visible", () ->
-			@parent and @parent\emit_signal("layout_changed")
+			@\emit_signal("geometry_changed::layout")
 		)
 		
 		@update_layout_pos = () => nil
@@ -126,7 +128,7 @@ class Node extends Object
 			child\propagate(signal_name, ...)
 
 	request_property: (name, default) =>
-		if not @data\get(name)
+		unless @data\get(name)?
 			@data\set(name, @style\get(name) or default)
 
 	stylize: (...) =>
@@ -134,15 +136,16 @@ class Node extends Object
 			for k, stylizer in pairs @stylizers
 				stylizer(self)
 		for i, name in ipairs {...}
-			@stylizers[name] and @stylizers[name](self)
-		@widget and @widget\emit_signal("widget::redraw_needed")
+			@stylizers[name]?(self)
+		@widget?\emit_signal("widget::redraw_needed")
 
 	add_child: (child, index = #@children + 1) =>
-		if types.match(child, "cord.wim.node")
-			table.insert(@children, index, child)
-			child\set_parent(self, index)
-			@\emit_signal("added_child::priority", child, index)
-			@\emit_signal("added_child", child, index)
+		unless types.match_class(child, Node)
+			return
+		table.insert(@children, index, child)
+		child\set_parent(self, index)
+		@\emit_signal("added_child::priority", child, index)
+		@\emit_signal("added_child", child, index)
 
 	remove_child: (to_remove) =>
 		for i, child in ipairs @children
@@ -156,7 +159,7 @@ class Node extends Object
 				return i
 
 	set_parent: (parent, index) =>
-		unless types.match(parent, "cord.wim.node")
+		unless types.match_class(parent, Node)
 			return
 
 		@\emit_signal("before_parent_change")
@@ -169,7 +172,7 @@ class Node extends Object
 
 		if types.match(parent, "cord.wim.layout")
 			@update_layout_pos = (pos) =>
-				@parent\update_in_content(self, nil, pos)
+				@parent\update_in_content(self, nil, @\normalize_vector(pos))
 		else
 			@update_layout_pos = () =>
 
@@ -178,13 +181,13 @@ class Node extends Object
 		@\emit_signal("parent_changed")
 		@\unmute_signal("geometry_changed::layout")
 
-	normalize_size: (size) =>
-		return normalize.vector(size, @parent and @parent\get_size! or @data\get("fake_parent_size"))
+	normalize_vector: (vector) =>
+		return normalize.vector(vector, @parent and @parent\get_size("content") or @data\get("fake_parent_size"))
 
 	get_size: (scope = nil) =>
 		if scope == "layout"
-			return @normalize_size(@data\get("layout_size"))
-		return @normalize_size(@data\get("size"))
+			return @normalize_vector(@data\get("layout_size") or @data\get("size"))
+		return @normalize_vector(@data\get("size"))
 
 	set_size: (size) =>
 		csize = @data\get("size")
@@ -217,14 +220,10 @@ class Node extends Object
 	set_visible: (visible) =>
 		if visible == @data\get("visible")
 			return
-
 		@data\set("visible", visible)
 
 		if anim = @style\get("opacity_animation")
 			anim(self, "opacity", visible and @data\get("preferred_opacity") or 0)
 			return
-		
-		@data\set("opacity", @data\get("preferred_opacity"))
-
 
 return Node

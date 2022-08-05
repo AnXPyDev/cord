@@ -1,0 +1,16 @@
+import "cord.math.units" as Units
+
+class Value
+	@__name: "cord.math.value"
+
+	new: (value = 0, offset = 0, unit = Units.undefined, master, ref) =>
+		@value = value
+		@offset = offset
+		@unit = unit
+		@master = master
+		@ref = ref
+
+	copy: =>
+		return @@(@value, @offset, @unit, @master, @ref)
+
+return Value

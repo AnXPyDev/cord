@@ -1,0 +1,71 @@
+import "cord.util.types" as types
+import "cord.math.units" as Units
+import "cord.math.vector" as Vector
+import "cord.math.value" as Value
+import "cord.util.margin" as Margin
+import "cord.util.color" as Color
+import "cord.util.pattern" as Pattern
+import "cord.log" as log
+
+export value = (val = 0, context = 1, unit) ->
+	if types.match_class(val, Value)
+		unit = val.unit or unit
+		if unit == Units.ratio
+			return val.value * context + val.offset
+		else
+			return val.value + val.offset
+	elseif unit == Units.ratio
+		return val * context
+	else
+		return val
+
+op = {
+	x: "y"
+	y: "x"
+}
+
+export vector = (vec = Vector!, context = Vector!) ->
+	result = Vector!
+	vx = types.match_class(vec.x, Value)
+	vy = types.match_class(vec.y, Value)
+
+	
+	local xcp, ycp
+
+	if not vx
+		result.x = value(vec.x, context.x, vec.unit)
+	else
+		xcp = op[vec.x.ref] or "x"
+
+	if not vy
+		result.y = value(vec.y, context.y, vec.unit)
+	else
+		ycp = op[vec.y.ref] or "y"
+
+	if vx and vec.x.master
+		result.x = value(vec.x, context[xcp], vec.unit)
+	if vy and vec.y.master
+		result.y = value(vec.y, context[ycp], vec.unit)
+	if vx and not vec.x.master
+		result.x = value(vec.x, result.y, vec.unit)
+	if vy and not vec.y.master
+		result.y = value(vec.y, result.x, vec.unit)
+
+	return result
+
+export margin = (mar = Margin(), context = Vector()) ->
+	return Margin(
+		value(mar.left, context.x, mar.unit),
+		value(mar.right, context.x, mar.unit),
+		value(mar.top, context.y, mar.unit),
+		value(mar.bottom, context.y, mar.unit)
+	)
+
+export color_or_pattern = (cop, ...) ->
+	if type(cop) == "string"
+		return cop
+	elseif types.match_class(cop, Color)
+		return cop\to_rgba_string!
+	elseif types.match_class(cop, Pattern)
+		return cop\create_pattern(...)
+	return "#"

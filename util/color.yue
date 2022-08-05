@@ -76,7 +76,7 @@ class Color
 	new: (...) =>
 		args = {...}
 		
-		if types.match(args[1], "cord.util.color")
+		if types.match_class(args[1], @@)
 			C = args[1]
 			@R, @G, @B, @A, @H, @S, @L = C.R, C.G, C.B, C.A, C.H, C.S, C.L
 			return

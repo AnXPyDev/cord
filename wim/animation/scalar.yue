@@ -1,0 +1,54 @@
+cord = {
+	math: require "cord.math"
+}
+
+import "cord.util.anim_helpers" as AnimHelpers
+import "cord.wim.animation.node_data" as Animation
+import "cord.math.value" as Value
+
+lerp_func = {
+	number: (k) =>
+		@current = @start + @delta * k
+	scalar: (k) =>
+		@current.value = @start.value + @delta.value * k
+		@current.offset = @start.offset + @delta.offset * k
+}
+
+
+Base = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.scalar"
+
+		new: (node, data_index, target, start, ...) =>
+			super(node, data_index, target, start)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = AnimHelpers.get_scalar_delta(@start, @target)
+				
+			if types.match_class(@current, Value)
+				@do_lerp = lerp_func.scalar
+			else
+				@do_lerp = lerp_func.number
+
+		verify: =>
+			return AnimHelpers.assert_scalar_types(@start, @target)
+
+		tick: =>
+			@frame += 1
+			
+			if @frame >= @length
+				@\cancel!
+				return true
+			
+			k = f(@frame / @length)
+
+			@\do_lerp(k)
+
+			@node.data\set(@data_index, @current)
+			return false
+
+return setmetatable({
+	base: Base
+}, {
+	__call: (...) => Base(...)
+})

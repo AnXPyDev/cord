@@ -1,0 +1,26 @@
+import "cord.util.types" as types
+import "cord.math.vector" as Vector
+import "cord.math.value" as Value
+
+export assert_scalar_types = (a, b) ->
+	unless type(a) == type(b)
+		return true
+	unless type(a) == "number"
+		unless types.match_class(a, Value) and types.match_class(b, Value)
+			return true
+		unless a.unit == b.unit
+			return true
+
+export assert_vector_types = (a, b) ->
+	unless types.match_class(a, Vector) and types.match_class(b, Vector)
+		return true
+	unless a.unit == b.unit
+		return true
+	if assert_scalar_types(a.x, b.x) or assert_scalar_type(a.y, b.y)
+		return true
+
+export get_scalar_delta = (a, b) ->
+	if types.match_class(a, Value)
+		return Value(b.value - a.value, b.offset - a.offset, a.unit)
+	return b - a
+

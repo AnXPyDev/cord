@@ -1,0 +1,29 @@
+types = require "cord.util.types"
+Value = require "cord.math.value"
+import "cord.math.units" as Units
+
+class Vector
+	@__name: "cord.math.vector"
+
+	new: (x = 0, y = x, unit = Units.undefined) =>
+		@x = x
+		@y = y
+		@unit = unit
+	to_primitive: =>
+		return {
+			x: @x,
+			y: @y
+		}
+	copy: =>
+		x = @x
+		y = @y
+
+		if types.match_class(@x, Value)
+			x = @x\copy!
+		if types.match_class(@y, Value)
+			y = @y\copy!
+
+		return Vector(x, y, @unit)
+
+
+return Vector

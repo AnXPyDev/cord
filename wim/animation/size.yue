@@ -1,0 +1,76 @@
+cord = {
+	math: require "cord.math"
+	util: require "cord.util"
+	log: require "cord.log"
+}
+
+import "cord.wim.animation.node_data" as Animation
+import "cord.math.vector" as Vector
+import "cord.math.value" as Value
+import "cord.util.anim_helpers" as AnimHelpers
+import "cord.util.types" as types
+
+lerp_func = {
+	x_number: (k) =>
+		@current.x = @start.x + @delta.x * k
+	x_scalar: (k) =>
+		@current.x.value = @start.x.value + @delta.x.value * k
+		@current.x.offset = @start.x.offset + @delta.x.offset * k
+	y_number: (k) =>
+		@current.y = @start.y + @delta.y * k
+	y_scalar: (k) =>
+		@current.y.value = @start.y.value + @delta.y.value * k
+		@current.y.offset = @start.y.offset + @delta.y.offset * k
+}
+
+Size = (f = ((x)->x), duration) ->
+	return class extends Animation
+		@__name: "cord.wim.animation.position"
+
+		new: (node, target, start, ...) =>
+			super(node, "size", target, start, ...)
+			@frame = 0
+			@length = @animator\duration(duration)
+			@delta = Vector(
+				AnimHelpers.get_scalar_delta(@start.x, @target.x),
+				AnimHelpers.get_scalar_delta(@start.y, @target.y)
+			)
+			
+			if types.match_class(@start.x, Value)
+				@do_lerp_x = lerp_func.x_scalar
+			else
+				@do_lerp_x = lerp_func.x_number
+
+			if types.match_class(@start.y, Value)
+				@do_lerp_y = lerp_func.y_scalar
+			else
+				@do_lerp_y = lerp_func.y_number
+
+			@node.data\set("layout_size", @target)
+		
+		verify: =>
+			return AnimHelpers.assert_vector_types(@start, @target)
+
+		tick: =>
+			@frame += 1
+			
+			if @frame >= @length
+				@node.data\set(@data_index, @target)
+				@node.data\set("layout_size", nil, true)
+				return true
+			
+			k = f(@frame / @length)
+
+			@\do_lerp_x(k)
+			@\do_lerp_y(k)
+
+			@node.data\set(@data_index, @current)
+
+			return false
+
+
+return setmetatable({
+	base: Size
+}, {
+	__call: (...) => Size(...)
+})

@@ -14,5 +14,7 @@ class Animation extends Object
 		return @done
 	tick: =>
 		return true
+	cancel: =>
+		@done = true
 
 return Animation

@@ -10,6 +10,8 @@ Node = require "cord.wim.node"
 Vector = require "cord.math.vector"
 Value = require "cord.math.value"
 
+import "cord.math.units" as Units
+
 log = require "cord.log"
 
 stylizers = {
@@ -34,8 +36,8 @@ class Bar extends Node
 
 	defaults: cord.table.crush({}, Node.defaults, {
 		position: "top"
-		size: Vector(Value(1, 0, "ratio"), 100)
-		background: "#AA0000"
+		size: Vector(1, Value(40), Units.ratio)
+		background: "#AAAAAA"
 		shape: nil
 	})
 

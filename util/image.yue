@@ -1,12 +1,9 @@
-gears = require "gears"
+import "gears" as gears
+import "cord.util.object" as Object
+import "cord.util.base" as util
+import "cord.util.types" as types
+import "cord.util.color" as Color
 
-Object = require "cord.util.object"
-
-cord = {
-	util: require "cord.util.base"
-}
-
-types = require "cord.util.types"
 
 class Image extends Object
 	@__name: "cord.util.image"
@@ -19,7 +16,7 @@ class Image extends Object
 		local string_color
 		if not color
 			return @base_surface
-		elseif types.match(color, "cord.util.color")
+		elseif types.match_class(color, Color)
 			string_color = color\to_rgba_string!
 		elseif type(color) == "string"
 			string_color = color

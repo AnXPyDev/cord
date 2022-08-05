@@ -37,12 +37,13 @@ class Align extends Layout
 
 	new: (config, ...) =>
 		super(config, ...)
-		
+
 		@data\set("direction", @style\get("direction"))
 
 		init_child = (child) ->
 			if not child
 				return
+			child\mute_signal("geometry_changed::layout")
 			child\request_property("layout_align")
 			child\request_property("layout_justify")
 			child\request_property("size_priority")
@@ -50,11 +51,15 @@ class Align extends Layout
 			child\request_property("min_size")
 			child\request_property("max_size")
 			child\request_property("preferred_size")
+			child\unmute_signal("geometry_changed::layout")
 
 		for i, child in ipairs @children
 			init_child(child)
 
-		@connect_signal("added_child", request_child_properties)
+		@connect_signal("added_child", init_child)
+	
+	init_child: (child) ->
+
 
 	apply_layout: =>
 		context = @\get_size!
@@ -64,6 +69,8 @@ class Align extends Layout
 		cs = opposite_c(cp)
 
 		avl_space = context\copy!
+
+		print("avl space", avl_space.x, avl_space.y)
 
 		results = {{}, {} ,{}}
 		flexible = {}
@@ -84,6 +91,7 @@ class Align extends Layout
 
 			if child_size.x > avl_space.x or child_size.y > avl_space.y
 				table.insert(results[ix], {child})
+				continue
 			
 			avl_space[cp] -= child_size[cp]
 
@@ -95,12 +103,14 @@ class Align extends Layout
 		stop_bound = 0
 
 		place_child = (child, size, corner) ->
+
 			j = att[child.data\get("layout_justify")] - 1
 
-			child\set_pos(Vector(
-				corner,
-				(context[cs] - size[cs]) * 0.5 * j
-			))
+			pos = Vector!
+			pos[cp] = corner
+			pos[cs] = (context[cs] - size[cs]) * 0.5 * j
+
+			child\set_pos(pos)
 
 		for i, e in ipairs results[1]
 			size = e[2]
@@ -144,7 +154,7 @@ class Align extends Layout
 			
 			stop_bound += size[cp]
 			
-			place_child(e[1], size, stop_bound)
+			place_child(e[1], size, context[cp] - stop_bound)
 
 			e[1]\unmute_signal("geometry_changed::layout")
 
@@ -157,7 +167,7 @@ class Align extends Layout
 
 			e[1]\mute_signal("geometry_changed::layout")
 		
-			if not size
+			unless size
 				size = negotiation[e[1]]
 				if size
 					e[1]\set_size(size)
@@ -192,4 +202,4 @@ class Align extends Layout
 			
 			e[1]\unmute_signal("geometry_changed::layout")
 
-
+return Align

@@ -28,9 +28,9 @@ class Stylesheet extends Object
 	get_style: (identification = {}) =>
 		category = identification[1]
 		label = identification[2]
-		if label and label != "__empty_label__" and @by_label[label]
+		if label? and @by_label[label]?
 			return @by_label[label]
-		elseif category and category != "__empty_category__" and @by_category[category]
+		elseif category? and @by_category[category]?
 			return @by_category[category]
 		return Style()
 

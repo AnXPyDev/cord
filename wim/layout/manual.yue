@@ -1,0 +1,6 @@
+Layout = require "cord.wim.layout.base"
+
+class Manual extends Layout
+	
+
+return Manual

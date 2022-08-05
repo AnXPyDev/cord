@@ -4,6 +4,9 @@ rectangle = (radius = 0) ->
 	return ((cr, w, h) ->
 		return gears.shape.rounded_rect(cr, w, h, radius))
 
+circle = gears.shape.circle
+
 return {
 	rectangle: rectangle
+	circle: circle
 }

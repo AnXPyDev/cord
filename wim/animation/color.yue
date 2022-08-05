@@ -1,12 +1,10 @@
-Animation = require "cord.wim.animation.node_data"
-Color = require "cord.util.color"
+import "cord.wim.animation.node_data" as Animation
+import "cord.util.color" as Color
 
-cord = {
-	util: require "cord.util",
-	table: require "cord.table"
-}
+import "cord.util" as util
+import "cord.table" as ctable
+types = util.types
 
-types = require "cord.util.types"
 
 Base = (f = ((x)->x), duration) ->
 	return class extends Animation
@@ -20,9 +18,9 @@ Base = (f = ((x)->x), duration) ->
 			@frame = 0
 			@length = @animator\duration(duration)
 
-			if types.match(@start, "string") then @start = Color(@start)
-			if types.match(@target, "string") then @target = Color(@target)
-			if types.match(@current, "string") then @current = Color(@current)
+			if type(@start) == "string" then @start = Color(@start)
+			if type(@target) == "string" then @target = Color(@target)
+			if type(@current) == "string" then @current = Color(@current)
 
 			@delta = Color(@target.R - @start.R, @target.G - @start.G, @target.B - @start.B, @target.A - @start.A, "rgba")
 

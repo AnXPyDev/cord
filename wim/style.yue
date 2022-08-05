@@ -1,9 +1,9 @@
-DataStore = require"cord.util.data_store"
-
 gears = { table: require "gears.table" }
-cord = { table: require "cord.table" }
 
-types = require "cord.util.types"
+import "cord.util.data_store" as DataStore
+import "cord.util.types" as types
+import "cord.table" as ctable
+import "cord.util.callback_value" as CallbackValue
 
 class Style extends DataStore
 	@__name: "cord.wim.style"
@@ -24,7 +24,7 @@ class Style extends DataStore
 			for i, v in ipairs @parents
 				ret = v\get(key)
 				if ret then break
-		if types.match(ret, "cord.util.callback_value")
+		if types.match_class(ret, CallbackValue)
 			ret = ret\get!
 		return ret
 
@@ -34,7 +34,7 @@ class Style extends DataStore
 			for i, v in ipairs @parents
 				ret = v\get_default(key)
 				if ret then break
-		if types.match(ret, "cord.util.callback_value")
+		if types.match_class(ret, CallbackValue)
 			ret = ret\get!
 		return ret
 

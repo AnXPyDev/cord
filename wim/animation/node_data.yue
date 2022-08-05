@@ -23,8 +23,19 @@ class Node_Data extends Animation
 		last_anim = @node.data\get("active_animation::#{@data_index}")
 		if last_anim
 			last_anim.done = true
+		if @\verify!
+			@\cancel!
+			return
 		@current = cord.util.copy(@start)
 		@node.data\set("active_animation::#{@data_index}", self)
 		@animator\add(self)
+
+	verify: =>
+		return nil
+
+	cancel: =>
+		@node.data\set("active_animation::#{@data_index}", nil)
+		@node.data\set(@data_index, @target)
+		super\cancel!
 
 return Node_Data

@@ -14,6 +14,8 @@ cord = {
 Margin = require "cord.util.margin"
 Vector = require "cord.math.vector"
 
+import "cord.math.units" as Units
+
 stylizers = {
 	geometry: =>
 		if @layers.padding
@@ -88,7 +90,7 @@ class Container extends Node
 	@__name: "cord.wim.container"
 
 	defaults: cord.table.crush({}, Node.defaults, {
-		pattern_template: {Vector(0, 0, "ratio"), Vector(1, 0, "ratio")}
+		pattern_template: {Vector(0, 0, Units.ratio), Vector(1, 0, Units.ratio)}
 	})
 
 	new: (config, ...) =>
@@ -247,8 +249,8 @@ class Container extends Node
 
 	get_size: (scope = "outside") =>
 		if scope == "layout"
-			return normalize.vector(@data\get("layout_size") or @data\get("size"), @parent and @parent\get_size!)
-		result = normalize.vector(@data\get("size"), @parent and @parent\get_size!)
+			return @\normalize_vector(@data\get("layout_size") or @data\get("size"))
+		result = @\normalize_vector(@data\get("size"))
 		if scope == "content" or scope == "inside"
 			padding = @data\get("padding")
 			if padding
@@ -256,7 +258,7 @@ class Container extends Node
 				result.x -= padding.left + padding.right
 				result.y -= padding.top + padding.bottom
 			if scope == "content"
-				margin = @data\get("margin") 
+				margin = @data\get("margin")
 				if margin
 					margin = normalize.margin(margin, result)
 					result.x -= margin.left + margin.right

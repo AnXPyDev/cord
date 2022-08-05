@@ -1,13 +1,11 @@
 wibox = require "wibox"
 gears = require "gears"
 
-normalize = require "cord.util.normalize"
-cord = {
-	table: require "cord.table"
-}
-types = require "cord.util.types"
-	
-Node = require "cord.wim.node"
+import "cord.wim.screen" as Screen
+import "cord.wim.node" as Node
+import "cord.util.types" as types
+import "cord.util.normalize" as normalize
+import "cord.table" as ctable
 
 stylizers = {
 	geometry: =>
@@ -26,7 +24,7 @@ stylizers = {
 class Nodebox extends Node
 	@__name: "cord.wim.nodebox"
 
-	defaults: cord.table.crush({}, Node.defaults, {
+	defaults: ctable.crush({}, Node.defaults, {
 		shape: gears.shape.rectangle
 	})
 
@@ -40,7 +38,7 @@ class Nodebox extends Node
 
 		@data\connect_signal("updated::pos", (pos) ->
 			tpos = pos\copy!
-			if @parent and @parent.parent and types.match(@parent.parent, "cord.wim.screen")
+			if @parent and @parent.parent and types.match_class(@parent.parent, Screen)
 				ppos = @parent.parent.data\get("pos")
 				tpos.x += ppos.x
 				tpos.y += ppos.y
@@ -51,6 +49,6 @@ class Nodebox extends Node
 		@data\connect_signal("updated::shape", () -> @\stylize("shape"))
 		@data\connect_signal("updated::visible", () -> @stylize("visibility"))
 
-		cord.table.crush(@stylizers, stylizers)
+		ctable.crush(@stylizers, stylizers)
 
 		@stylize!

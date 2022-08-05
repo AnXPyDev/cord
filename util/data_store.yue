@@ -1,4 +1,5 @@
 Object = require "cord.util.object"
+import "cord.util.callback_value" as CallbackValue
 types = require "cord.util.types"
 
 class DataStore extends Object
@@ -19,7 +20,7 @@ class DataStore extends Object
 
 	get: (key) =>
 		ret = @values[key]
-		if types.match(ret, "cord.util.callback_value")
+		if types.match_class(ret, CallbackValue)
 			ret = ret\get!
 		return ret
 		

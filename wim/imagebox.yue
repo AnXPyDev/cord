@@ -9,17 +9,17 @@ cord = {
 Node = require "cord.wim.node"
 
 stylizers = {
-	geometry: (imagebox) ->
-		size = imagebox\get_size!
-		imagebox.imagebox.forced_width = size.x
-		imagebox.imagebox.forced_height = size.y
+	geometry: =>
+		size = @\get_size!
+		@imagebox.forced_width = size.x
+		@imagebox.forced_height = size.y
 
-	resize: (imagebox) ->
-		imagebox.imagebox.resize = imagebox.data\get("resize")
+	resize: =>
+		@imagebox.resize = @data\get("resize")
 
-	image: (imagebox) ->
-		image = imagebox.data\get("image")
-		imagebox.imagebox.image = image and image\get(imagebox.data\get("color"))
+	image: =>
+		image = @data\get("image")
+		@imagebox.image = image and image\get(@data\get("color"))
 }
 
 class Imagebox extends Node
