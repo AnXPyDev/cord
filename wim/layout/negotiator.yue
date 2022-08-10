@@ -29,8 +29,6 @@ Negotiator = (dir, context, avl, nodes) ->
 			prf_size = node\normalize_vector(node.data\get("preferred_size"), context)
 			max_size = node\normalize_vector(node.data\get("max_size"), context)
 	
-			print(node, node.__class.__name, prf_size.x, prf_size.y, avl.x, avl.y)
-
 			if min_size.x > avl.x or min_size.y > avl.y
 				continue
 
@@ -45,17 +43,20 @@ Negotiator = (dir, context, avl, nodes) ->
 				}
 			)
 
-		table.sort(sizes, (a, b) -> a.prf[dir] < b.prf[dir])
+		table.sort(sizes, (a, b) -> a.prf_size[dir] < b.prf_size[dir])
 
 		space = avl[dir]
-	
+		
+		count = #nodes
+
 		for _, e in ipairs sizes
-			equal_size = avl[dir] / #nodes
+			equal_size = space / count
+			count -= 1
 			unless e.prf_size[dir] <= equal_size
 				if e.min_size[dir] > equal_size
 					e.prf_size = nil
 					continue
-				e.prf_size[dir] = e.min_size[dir]
+				e.prf_size[dir] = equal_size
 			space -= e.prf_size[dir]
 
 			results[e.node] = e.prf_size

@@ -42,7 +42,7 @@ class Textbox extends Node
 	defaults: cord.table.crush({}, Node.defaults, {
 		halign: "center"
 		valign: "center"
-		font_name: "monospace"
+		font_name: "SamsungOne"
 		font_size: 24
 	})
 
@@ -70,18 +70,22 @@ class Textbox extends Node
 		@data\connect_signal("updated::text", () ->
 			@\stylize("text")
 			@\get_preferred_size!
+			@\emit_signal("geometry_updated::layout")
 		)
 		@data\connect_signal("updated::markup", () ->
 			@\stylize("markup")
 			@\get_preferred_size!
+			@\emit_signal("geometry_updated::layout")
 		)
 		@data\connect_signal("updated::font_size", () ->
 			@\stylize("font")
 			@\get_preferred_size!
+			@\emit_signal("geometry_updated::layout")
 		)
 		@data\connect_signal("updated::font_name", () ->
 			@\stylize("font")
 			@\get_preferred_size!
+			@\emit_signal("geometry_updated::layout")
 		)
 		@data\connect_signal("updated::halign", () -> @\stylize("align"))
 		@data\connect_signal("updated::valign", () -> @\stylize("align"))

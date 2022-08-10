@@ -1,0 +1,58 @@
+export make_dump = (object) ->
+	T = type(object)
+	if T == "number" or T == "boolean"
+		return "#{object}"
+	if T == "string"
+		return "\"#{object}\""
+	unless T == "table"
+		return "nil"
+
+	result = {"{"}
+
+	for key, value in pairs object
+		K = type(key)
+		unless K == "number" or K == "boolean" or K == "string"
+			continue
+		line = "[ #{make_dump(key)} ] = "
+		dumped = make_dump(value)
+		if type(dumped) == "string"
+			result[] = "	#{line}#{dumped};"
+			continue
+		else
+			if #dumped < 3
+				result[] = "	#{line}{};"
+				continue
+			result[] = "	#{line}#{dumped[1]}"
+			for i = 2, #dumped
+				result[] = "	#{dumped[i]}"
+
+	result[] = "}"
+
+	return result
+
+export print_dump = (object) ->
+	dumped = make_dump(object)
+	if type(dumped) == "string"
+		print(dumped)
+		return
+	for _, ln in ipairs dumped
+		print(ln)
+
+export dump_to_file = (object, path) ->
+	file = io.open(path, "w")
+	dumped = make_dump(object)
+	file\write("return ")
+	if type(dumped) == "string"
+		file\write(dumped)
+		file\write("\n")
+		file\close()
+		return
+
+	for _, ln in ipairs dumped
+		file\write(ln)
+		file\write("\n")
+	
+	file\close()
+
+export load_dump = (path) ->
+	return dofile(path)

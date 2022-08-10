@@ -29,6 +29,7 @@ class Object
 			if not @_signal_callback_ids[name] then @_signal_callback_ids[name] = {}
 			if not @_signal_callback_ids[name][callback_id] then @_signal_callback_ids[name][callback_id] = {}
 			table.insert(@_signal_callback_ids[name][callback_id], callback)
+		return callback_id or callback
 
 	mute_signal: (name) =>
 		@_muted[name] = true

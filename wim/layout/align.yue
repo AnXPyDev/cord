@@ -70,8 +70,6 @@ class Align extends Layout
 
 		avl_space = context\copy!
 
-		print("avl space", avl_space.x, avl_space.y)
-
 		results = {{}, {} ,{}}
 		flexible = {}
 

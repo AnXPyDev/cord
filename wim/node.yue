@@ -130,6 +130,7 @@ class Node extends Object
 	request_property: (name, default) =>
 		unless @data\get(name)?
 			@data\set(name, @style\get(name) or default)
+		return @data\get(name)
 
 	stylize: (...) =>
 		if #{...} == 0
